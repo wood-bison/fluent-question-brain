@@ -597,7 +597,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 				coalesce(similarity(ql.prompt, $1), 0)::double precision as trigram_score,
 				coalesce(semantic.semantic_score, 0)::double precision as semantic_score
 			from content.workspace w
-			join content.question q on q.workspace_id = w.id and q.status <> 'archived'
+			join content.question q on q.workspace_id = w.id and q.status = 'published'
 			join content.question_revision qr on qr.id = q.current_revision_id
 			join lateral (
 				select ql.*
@@ -687,7 +687,7 @@ func (p *Postgres) GetQuestion(ctx context.Context, stableKey, workspaceKey, loc
 			qr.content_hash, ql.locale, ql.prompt, ql.short_answer,
 			ql.explanation, ql.body
 		from content.workspace w
-		join content.question q on q.workspace_id = w.id and q.stable_key = $1
+		join content.question q on q.workspace_id = w.id and q.stable_key = $1 and q.status = 'published'
 		join content.question_revision qr on qr.id = q.current_revision_id
 		join lateral (
 			select ql.*
