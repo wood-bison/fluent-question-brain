@@ -105,6 +105,7 @@ type CatalogResponse struct {
 	Limit            int           `json:"limit"`
 	IncludeFixtures  bool          `json:"include_fixtures"`
 	ExcludedFixtures int           `json:"excluded_fixtures"`
+	ExcludedNonProd  int           `json:"excluded_non_production"`
 	Questions        []CatalogItem `json:"questions"`
 	Provenance       struct {
 		Explainable bool     `json:"explainable"`
@@ -155,6 +156,7 @@ type ReleaseResponse struct {
 	Total            int           `json:"total"`
 	IncludeFixtures  bool          `json:"include_fixtures"`
 	ExcludedFixtures int           `json:"excluded_fixtures"`
+	ExcludedNonProd  int           `json:"excluded_non_production"`
 	Checks           ReleaseChecks `json:"checks"`
 	Items            []ReleaseItem `json:"items"`
 	Provenance       struct {

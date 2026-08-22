@@ -804,8 +804,18 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 	`, workspaceKey).Scan(&excludedFixtures); err != nil {
 		return search.CatalogResponse{}, fmt.Errorf("count excluded catalog fixtures: %w", err)
 	}
+	var excludedNonProduction int
+	if err := p.pool.QueryRow(ctx, `
+		select count(*)
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		where w.stable_key = $1 and q.content_kind <> 'production'
+	`, workspaceKey).Scan(&excludedNonProduction); err != nil {
+		return search.CatalogResponse{}, fmt.Errorf("count excluded non-production catalog records: %w", err)
+	}
 	if includeFixtures {
 		excludedFixtures = 0
+		excludedNonProduction = 0
 	}
 
 	releaseSeed := ""
@@ -926,6 +936,7 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 		Limit:            limit,
 		IncludeFixtures:  includeFixtures,
 		ExcludedFixtures: excludedFixtures,
+		ExcludedNonProd:  excludedNonProduction,
 		Questions:        questions,
 	}
 	response.Provenance.Explainable = true
@@ -970,8 +981,18 @@ func (p *Postgres) Release(ctx context.Context, request search.ReleaseRequest) (
 	`, workspaceKey).Scan(&excludedFixtures); err != nil {
 		return search.ReleaseResponse{}, fmt.Errorf("count excluded question release fixtures: %w", err)
 	}
+	var excludedNonProduction int
+	if err := p.pool.QueryRow(ctx, `
+		select count(*)
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		where w.stable_key = $1 and q.content_kind <> 'production'
+	`, workspaceKey).Scan(&excludedNonProduction); err != nil {
+		return search.ReleaseResponse{}, fmt.Errorf("count excluded non-production question release records: %w", err)
+	}
 	if includeFixtures {
 		excludedFixtures = 0
+		excludedNonProduction = 0
 	}
 
 	rows, err := p.pool.Query(ctx, `
@@ -1072,6 +1093,7 @@ func (p *Postgres) Release(ctx context.Context, request search.ReleaseRequest) (
 		Total:            len(items),
 		IncludeFixtures:  includeFixtures,
 		ExcludedFixtures: excludedFixtures,
+		ExcludedNonProd:  excludedNonProduction,
 		Items:            items,
 		Checks:           checks,
 	}

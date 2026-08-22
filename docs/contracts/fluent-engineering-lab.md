@@ -28,10 +28,11 @@ topic.
 
 The catalog defaults to the learner-safe production release. Development
 records are classified explicitly with `content_kind=fixture` and are excluded
-from the default response. The response reports `include_fixtures=false` and
-`excluded_fixtures` so an operator can see that the boundary was applied. A
-diagnostic request may opt in with `include_fixtures=true`; the Lab never sends
-that flag and must not use the resulting release for learner projections.
+from the default response. The response reports `include_fixtures=false`,
+`excluded_fixtures`, and `excluded_non_production` so an operator can see that
+the boundary was applied. A diagnostic request may opt in with
+`include_fixtures=true`; the Lab never sends that flag and must not use the
+resulting release for learner projections.
 
 `GET /v1/release` is the complete machine-readable `QuestionRelease` manifest
 (`question-brain.release.v1`). It pins every stable key to its current
