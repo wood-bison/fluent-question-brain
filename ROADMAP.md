@@ -25,12 +25,12 @@ previous gate has an open blocker.
 
 ## G2 — ingestion and reconciliation
 
-- [ ] Build a streaming vault importer with dry-run, idempotency, and a
+- [x] Build a streaming vault importer with dry-run, idempotency, and a
       machine-readable report.
-- [ ] Handle new, changed, deleted, duplicate, and ambiguous cards without
+- [x] Handle new, changed, deleted, duplicate, and ambiguous cards without
       destructive writes.
-- [ ] Make the importer bilingual and locale-aware.
-- [ ] Import the full snapshot only after G1 is green.
+- [x] Make the importer bilingual and locale-aware.
+- [x] Import the full snapshot only after G1 is green.
 
 ## G3 — retrieval and indexing
 

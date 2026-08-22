@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,9 +17,12 @@ type Postgres struct {
 }
 
 type StoredRevision struct {
-	RevisionID string
-	Hash       string
-	Payload    []byte
+	QuestionID      string
+	RevisionID      string
+	Hash            string
+	Payload         []byte
+	Action          string
+	RevisionCreated bool
 }
 
 type DuplicateDecision struct {
@@ -28,6 +33,16 @@ type DuplicateDecision struct {
 	SemanticScore  float64
 	Decision       string
 	Actor          string
+}
+
+type ImportItem struct {
+	RunID       string
+	SourceRef   string
+	StableKey   string
+	ContentHash string
+	Action      string
+	QuestionID  string
+	Error       string
 }
 
 func Open(ctx context.Context, databaseURL string) (*Postgres, error) {
@@ -68,6 +83,19 @@ func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspac
 	`, workspaceKey, workspaceName).Scan(&workspaceID)
 	if err != nil {
 		return StoredRevision{}, fmt.Errorf("upsert workspace: %w", err)
+	}
+	var existingHash string
+	questionExists := true
+	err = tx.QueryRow(ctx, `
+		select qr.content_hash
+		from content.question q
+		left join content.question_revision qr on qr.id = q.current_revision_id
+		where q.workspace_id = $1::uuid and q.stable_key = $2
+	`, workspaceID, card.StableKey).Scan(&existingHash)
+	if err == pgx.ErrNoRows {
+		questionExists = false
+	} else if err != nil {
+		return StoredRevision{}, fmt.Errorf("read existing question: %w", err)
 	}
 
 	var questionID string
@@ -115,17 +143,33 @@ func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspac
 	if err != nil {
 		return StoredRevision{}, fmt.Errorf("encode card body: %w", err)
 	}
-	_, err = tx.Exec(ctx, `
-		insert into content.question_locale (revision_id, locale, prompt, short_answer, explanation, body)
-		values ($1::uuid, 'en', $2, $3, $4, $5::jsonb)
-		on conflict (revision_id, locale) do update set
-		  prompt = excluded.prompt,
-		  short_answer = excluded.short_answer,
-		  explanation = excluded.explanation,
-		  body = excluded.body
-	`, revisionID, prompt, shortAnswer, explanation, body)
-	if err != nil {
-		return StoredRevision{}, fmt.Errorf("upsert english locale: %w", err)
+	locales := []struct {
+		locale, prompt, shortAnswer, explanation string
+	}{
+		{locale: "en", prompt: prompt, shortAnswer: shortAnswer, explanation: explanation},
+	}
+	ruPrompt, ruShortAnswer, ruExplanation := normalize.RussianFields(card)
+	if ruPrompt != "" || ruShortAnswer != "" || ruExplanation != "" {
+		if ruPrompt == "" {
+			ruPrompt = prompt
+		}
+		locales = append(locales, struct {
+			locale, prompt, shortAnswer, explanation string
+		}{locale: "ru", prompt: ruPrompt, shortAnswer: ruShortAnswer, explanation: ruExplanation})
+	}
+	for _, locale := range locales {
+		_, err = tx.Exec(ctx, `
+			insert into content.question_locale (revision_id, locale, prompt, short_answer, explanation, body)
+			values ($1::uuid, $2, $3, $4, $5, $6::jsonb)
+			on conflict (revision_id, locale) do update set
+			  prompt = excluded.prompt,
+			  short_answer = excluded.short_answer,
+			  explanation = excluded.explanation,
+			  body = excluded.body
+		`, revisionID, locale.locale, locale.prompt, locale.shortAnswer, locale.explanation, body)
+		if err != nil {
+			return StoredRevision{}, fmt.Errorf("upsert %s locale: %w", locale.locale, err)
+		}
 	}
 
 	if _, err = tx.Exec(ctx, `
@@ -175,7 +219,20 @@ func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspac
 	if err := tx.Commit(ctx); err != nil {
 		return StoredRevision{}, fmt.Errorf("commit card transaction: %w", err)
 	}
-	return p.ExportRevision(ctx, revisionID)
+	stored, err := p.ExportRevision(ctx, revisionID)
+	if err != nil {
+		return StoredRevision{}, err
+	}
+	stored.QuestionID = questionID
+	stored.RevisionCreated = revisionCreated
+	if !questionExists {
+		stored.Action = "created"
+	} else if revisionCreated && existingHash != card.Hash {
+		stored.Action = "updated"
+	} else {
+		stored.Action = "unchanged"
+	}
+	return stored, nil
 }
 
 func (p *Postgres) ExportRevision(ctx context.Context, revisionID string) (StoredRevision, error) {
@@ -191,6 +248,82 @@ func (p *Postgres) ExportRevision(ctx context.Context, revisionID string) (Store
 	}
 	stored.Payload = []byte(payload)
 	return stored, nil
+}
+
+func (p *Postgres) StartImportRun(ctx context.Context, workspaceKey, workspaceName, sourceSystem, sourceRoot, mode string) (string, error) {
+	var runID string
+	err := p.pool.QueryRow(ctx, `
+		with workspace as (
+			insert into content.workspace (stable_key, display_name)
+			values ($1, $2)
+			on conflict (stable_key) do update set display_name = excluded.display_name
+			returning id
+		)
+		insert into content.import_run (workspace_id, source_system, source_root, mode)
+		select id, $3, $4, $5 from workspace
+		returning id::text
+	`, workspaceKey, workspaceName, sourceSystem, sourceRoot, mode).Scan(&runID)
+	if err != nil {
+		return "", fmt.Errorf("start import run: %w", err)
+	}
+	return runID, nil
+}
+
+func (p *Postgres) RecordImportItem(ctx context.Context, item ImportItem) error {
+	_, err := p.pool.Exec(ctx, `
+		insert into content.import_item (run_id, source_ref, stable_key, content_hash, action, question_id, error)
+		values ($1::uuid, $2, nullif($3, ''), nullif($4, ''), $5, nullif($6, '')::uuid, nullif($7, ''))
+		on conflict (run_id, source_ref) do update set
+		  stable_key = excluded.stable_key,
+		  content_hash = excluded.content_hash,
+		  action = excluded.action,
+		  question_id = excluded.question_id,
+		  error = excluded.error
+	`, item.RunID, item.SourceRef, item.StableKey, item.ContentHash, item.Action, item.QuestionID, item.Error)
+	if err != nil {
+		return fmt.Errorf("record import item: %w", err)
+	}
+	return nil
+}
+
+func (p *Postgres) ArchiveMissingSourceQuestions(ctx context.Context, workspaceKey, sourceSystem, sourceRoot, runID string) (int64, error) {
+	prefix := strings.TrimRight(sourceRoot, string(filepath.Separator)) + string(filepath.Separator) + "%"
+	result, err := p.pool.Exec(ctx, `
+		update content.question q
+		set status = 'archived', updated_at = now()
+		where q.workspace_id = (select id from content.workspace where stable_key = $1)
+		  and q.current_revision_id in (
+			select qr.id
+			from content.question_revision qr
+			where qr.source_system = $2 and qr.source_ref like $3
+		  )
+		  and not exists (
+			select 1
+			from content.import_item item
+			join content.question_revision qr on qr.source_ref = item.source_ref
+			where item.run_id = $4::uuid and qr.id = q.current_revision_id
+		  )
+	`, workspaceKey, sourceSystem, prefix, runID)
+	if err != nil {
+		return 0, fmt.Errorf("archive missing source questions: %w", err)
+	}
+	return result.RowsAffected(), nil
+}
+
+func (p *Postgres) FinishImportRun(ctx context.Context, runID, status string, totals any) error {
+	encoded, err := json.Marshal(totals)
+	if err != nil {
+		return fmt.Errorf("encode import totals: %w", err)
+	}
+	_, err = p.pool.Exec(ctx, `
+		update content.import_run
+		set status = $2, totals = $3::jsonb, completed_at = now()
+		where id = $1::uuid
+	`, runID, status, encoded)
+	if err != nil {
+		return fmt.Errorf("finish import run: %w", err)
+	}
+	return nil
 }
 
 // RecordDuplicateDecision makes the duplicate review explicit and auditable.

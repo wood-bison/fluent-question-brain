@@ -16,6 +16,7 @@ services:
       # Mounting /var/lib/postgresql keeps upgrades and pg_upgrade safe.
       - question-brain-postgres:/var/lib/postgresql
       - ../../db/migrations/0001_question_brain.sql:/docker-entrypoint-initdb.d/001_question_brain.sql:ro
+      - ../../db/migrations/0002_ingestion_runs.sql:/docker-entrypoint-initdb.d/002_ingestion_runs.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U question_brain -d question_brain"]
       interval: 5s

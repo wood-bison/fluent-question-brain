@@ -231,7 +231,27 @@ func SectionsForBody(card Card) []Section {
 }
 
 func EnglishFields(card Card) (prompt, shortAnswer, explanation string) {
-	return card.Question, sectionBody(card, "Core Idea"), ""
+	prompt = firstNonEmpty(card.Question, sectionBody(card, "Question"))
+	shortAnswer = firstNonEmpty(sectionBody(card, "Core Idea"), sectionBody(card, "Answer"))
+	explanation = firstNonEmpty(
+		sectionBody(card, "English Explanation"),
+		sectionBody(card, "Explanation"),
+		sectionBody(card, "Go Deeper"),
+	)
+	return prompt, shortAnswer, explanation
+}
+
+// RussianFields extracts the Russian understanding layer as a first-class
+// locale. Cards without Russian sections keep an explicit English fallback at
+// read time instead of duplicating source text during import.
+func RussianFields(card Card) (prompt, shortAnswer, explanation string) {
+	prompt = firstNonEmpty(sectionBody(card, "Question (RU)"), sectionBody(card, "Core Idea (RU)"))
+	shortAnswer = firstNonEmpty(sectionBody(card, "Core Idea (RU)"), sectionBody(card, "Russian Answer"))
+	explanation = firstNonEmpty(
+		sectionBody(card, "Russian Explanation"),
+		sectionBody(card, "Explanation (RU)"),
+	)
+	return prompt, shortAnswer, explanation
 }
 
 func TopicStableKey(topic string) string {
