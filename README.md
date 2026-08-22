@@ -24,12 +24,13 @@ allowing two writers to silently diverge.
 
 ## Current milestone
 
-G0–G3 are closed and G4 is now running end to end locally: the full bilingual
-vault is reconciled, exact/FTS/trigram/semantic retrieval is explainable, and
-Payload drafts publish through a token-protected Go API boundary into the
-canonical `content` schema. Fluent Engineering Lab remains the learner product;
-its read switch is deliberately opt-in until parity evidence is committed in
-that repository.
+G0–G4 are closed and G5 hardening is verified locally: the full bilingual vault
+is reconciled, exact/FTS/trigram/semantic retrieval is explainable, Payload
+drafts publish through a token-protected Go API boundary, and metrics/logs,
+backup restore, failure recovery, and immutable revision rollback are covered
+by repeatable smoke scripts. Fluent Engineering Lab remains the learner
+product; its read switch is deliberately opt-in until parity evidence is
+committed in that repository.
 
 See:
 
@@ -57,6 +58,7 @@ local Jaeger UI on `localhost:56686`.
 ```sh
 curl -i http://localhost:48127/health/live
 curl -i http://localhost:48127/health/ready
+curl -i http://localhost:48127/metrics
 # Search with explainable provenance
 curl -sS -X POST http://localhost:48127/v1/search \
   -H 'content-type: application/json' \
@@ -75,6 +77,8 @@ service-to-service ports inside Compose stay on their standard values.
 
 ```sh
 make check
+# Full local hardening drill: migration, load, backup/restore, outage, rollback
+make g5-smoke
 ```
 
 `make check` validates the SQL/Compose contract and runs Go tests when a Go

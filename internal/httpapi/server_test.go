@@ -24,7 +24,7 @@ func TestPreviewRoot(t *testing.T) {
 	if got := recorder.Header().Get("Content-Type"); got != "text/html; charset=utf-8" {
 		t.Fatalf("content type = %q", got)
 	}
-	if !strings.Contains(recorder.Body.String(), "G3 in progress") {
+	if !strings.Contains(recorder.Body.String(), "G5 hardened") {
 		t.Fatal("preview does not expose current gate")
 	}
 	if !strings.Contains(recorder.Body.String(), "Jaeger") {

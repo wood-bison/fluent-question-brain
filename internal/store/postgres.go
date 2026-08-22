@@ -297,6 +297,91 @@ func (p *Postgres) ExportRevision(ctx context.Context, revisionID string) (Store
 	return stored, nil
 }
 
+// RollbackQuestion moves the published pointer to an existing immutable
+// revision. It is deliberately a pointer update, never a content rewrite:
+// the previous state remains available for audit, replay, and another
+// rollback. The audit event and indexer outbox entry commit atomically with
+// the pointer so a successful API response is always observable.
+func (p *Postgres) RollbackQuestion(ctx context.Context, workspaceKey, stableKey, revisionID, actor string) (StoredRevision, error) {
+	if strings.TrimSpace(actor) == "" {
+		actor = "question-brain-operator"
+	}
+	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return StoredRevision{}, fmt.Errorf("begin rollback transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var workspaceID, questionID, previousRevisionID, targetHash, payload string
+	err = tx.QueryRow(ctx, `
+		select w.id::text, q.id::text, q.current_revision_id::text,
+			qr.content_hash, qr.normalized_payload::text
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.stable_key = $2
+		join content.question_revision qr on qr.question_id = q.id and qr.id = $3::uuid
+		where w.stable_key = $1
+		for update of q
+	`, workspaceKey, stableKey, revisionID).Scan(&workspaceID, &questionID, &previousRevisionID, &targetHash, &payload)
+	if err != nil {
+		return StoredRevision{}, fmt.Errorf("resolve rollback revision: %w", err)
+	}
+	if _, err = tx.Exec(ctx, `
+		update content.question
+		set current_revision_id = $1::uuid, status = 'published', updated_at = now()
+		where id = $2::uuid
+	`, revisionID, questionID); err != nil {
+		return StoredRevision{}, fmt.Errorf("set rollback revision: %w", err)
+	}
+
+	metadata, err := json.Marshal(map[string]string{
+		"actor":                actor,
+		"stable_key":           stableKey,
+		"previous_revision_id": previousRevisionID,
+		"revision_id":          revisionID,
+	})
+	if err != nil {
+		return StoredRevision{}, fmt.Errorf("encode rollback metadata: %w", err)
+	}
+	var auditID string
+	if err = tx.QueryRow(ctx, `
+		insert into content.audit_event
+		  (workspace_id, aggregate_type, aggregate_id, event_type, actor, metadata)
+		values ($1::uuid, 'question', $2::uuid, 'question.revision.rolled_back', $3, $4::jsonb)
+		returning id::text
+	`, workspaceID, questionID, actor, metadata).Scan(&auditID); err != nil {
+		return StoredRevision{}, fmt.Errorf("write rollback audit event: %w", err)
+	}
+	outboxPayload, err := json.Marshal(map[string]string{
+		"reason":               "rollback",
+		"previous_revision_id": previousRevisionID,
+		"revision_id":          revisionID,
+	})
+	if err != nil {
+		return StoredRevision{}, fmt.Errorf("encode rollback outbox payload: %w", err)
+	}
+	_, err = tx.Exec(ctx, `
+		insert into content.outbox_event
+		  (aggregate_type, aggregate_id, event_type, idempotency_key, payload)
+		values ('question_revision', $1::uuid, 'question.revision.rolled_back', $2, $3::jsonb)
+		on conflict (idempotency_key) do nothing
+	`, revisionID, fmt.Sprintf("question-rollback:%s:%s:%s", questionID, previousRevisionID, revisionID), outboxPayload)
+	if err != nil {
+		return StoredRevision{}, fmt.Errorf("write rollback outbox event: %w", err)
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return StoredRevision{}, fmt.Errorf("commit rollback transaction: %w", err)
+	}
+
+	return StoredRevision{
+		QuestionID:      questionID,
+		RevisionID:      revisionID,
+		Hash:            targetHash,
+		Payload:         []byte(payload),
+		Action:          map[bool]string{true: "unchanged", false: "rolled_back"}[previousRevisionID == revisionID],
+		RevisionCreated: false,
+	}, nil
+}
+
 func (p *Postgres) StartImportRun(ctx context.Context, workspaceKey, workspaceName, sourceSystem, sourceRoot, mode string) (string, error) {
 	var runID string
 	err := p.pool.QueryRow(ctx, `

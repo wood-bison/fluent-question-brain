@@ -20,6 +20,7 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	slog.SetDefault(logger)
 	cfg, err := config.FromEnv()
 	if err != nil {
 		logger.Error("configuration rejected", "error", err)
@@ -49,9 +50,14 @@ func main() {
 	}
 	defer database.Close()
 
+	apiHandler := httpapi.New(cfg.DatabaseURL, database).Handler()
+	rootHandler := http.NewServeMux()
+	rootHandler.Handle("/", apiHandler)
+	rootHandler.Handle("GET /metrics", telemetry.MetricsHandler())
+
 	server := &http.Server{
 		Addr:              cfg.HTTPAddr,
-		Handler:           telemetry.HTTP(httpapi.New(cfg.DatabaseURL, database).Handler()),
+		Handler:           telemetry.HTTP(rootHandler),
 		ReadHeaderTimeout: 2 * time.Second,
 		ReadTimeout:       5 * time.Second,
 		WriteTimeout:      10 * time.Second,
@@ -69,7 +75,7 @@ func main() {
 		}
 	}()
 
-	logger.Info("question brain api starting", "addr", cfg.HTTPAddr, "embedding_profile", cfg.EmbeddingProfile, "otel_endpoint", cfg.OTELEndpoint, "stage", "G1")
+	logger.Info("question brain api starting", "addr", cfg.HTTPAddr, "embedding_profile", cfg.EmbeddingProfile, "otel_endpoint", cfg.OTELEndpoint, "metrics_path", "/metrics", "stage", "G5")
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("server stopped", "error", err)
 		os.Exit(1)

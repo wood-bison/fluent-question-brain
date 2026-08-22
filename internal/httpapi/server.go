@@ -22,24 +22,32 @@ type cardPromoter interface {
 	PromoteCard(context.Context, normalize.Card, string, string, string) (store.StoredRevision, error)
 }
 
+type questionRollbacker interface {
+	RollbackQuestion(context.Context, string, string, string, string) (store.StoredRevision, error)
+}
+
 type Server struct {
 	databaseURL   string
 	searchService search.Service
 	promoter      cardPromoter
+	rollbacker    questionRollbacker
 	internalToken string
 }
 
 func New(databaseURL string, service ...search.Service) *Server {
 	var searchService search.Service
 	var promoter cardPromoter
+	var rollbacker questionRollbacker
 	if len(service) > 0 {
 		searchService = service[0]
 		promoter, _ = service[0].(cardPromoter)
+		rollbacker, _ = service[0].(questionRollbacker)
 	}
 	return &Server{
 		databaseURL:   databaseURL,
 		searchService: searchService,
 		promoter:      promoter,
+		rollbacker:    rollbacker,
 		internalToken: strings.TrimSpace(os.Getenv("QUESTION_BRAIN_INTERNAL_TOKEN")),
 	}
 }
@@ -51,6 +59,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /health/ready", s.ready)
 	mux.HandleFunc("POST /v1/search", s.search)
 	mux.HandleFunc("GET /v1/questions/{stableKey}", s.question)
+	mux.HandleFunc("POST /v1/questions/{stableKey}/rollback", s.rollback)
 	mux.HandleFunc("POST /v1/promote", s.promote)
 	return requestID(mux)
 }
@@ -65,7 +74,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Question Brain — G3 retrieval preview</title>
+  <title>Question Brain — G5 production preview</title>
   <style>
     :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
     * { box-sizing: border-box; }
@@ -97,12 +106,13 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
     <section class="grid" aria-label="System status">
       <article class="card"><div class="label">Service</div><div class="value ok">Running</div><code>Go API · Compose</code></article>
       <article class="card"><div class="label">Storage</div><div class="value ok">Postgres + pgvector</div><code>vector 0.8.6 · pg18</code></article>
-      <article class="card"><div class="label">Current gate</div><div class="value pending">G3 in progress</div><code>exact + FTS + semantic pipeline</code></article>
+      <article class="card"><div class="label">Current gate</div><div class="value ok">G5 hardened</div><code>metrics · drills · rollback ready</code></article>
       <article class="card"><div class="label">Observability</div><div class="value ok">Jaeger</div><code>OTLP/gRPC · trace-ready</code></article>
     </section>
     <div class="links" aria-label="Diagnostics and API links">
       <a href="/health/live">Live health ↗</a>
       <a href="/health/ready">Readiness ↗</a>
+      <a href="/metrics">Metrics ↗</a>
       <a href="http://localhost:56686/" target="_blank" rel="noreferrer">Jaeger UI ↗</a>
     </div>
     <footer>Search returns explainable provenance from the canonical graph. This preview is an operational surface, not a fake search demo.</footer>
@@ -280,11 +290,49 @@ func (s *Server) promote(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) rollback(w http.ResponseWriter, r *http.Request) {
+	if s.rollbacker == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "rollback_service_unavailable"})
+		return
+	}
+	if s.internalToken == "" || r.Header.Get("X-Question-Brain-Token") != s.internalToken {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var request struct {
+		RevisionID string `json:"revision_id"`
+	}
+	decoder := json.NewDecoder(io.LimitReader(r.Body, 64<<10))
+	if err := decoder.Decode(&request); err != nil || strings.TrimSpace(request.RevisionID) == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "revision_id_required"})
+		return
+	}
+	actor := strings.TrimSpace(r.Header.Get("X-Question-Brain-Actor"))
+	stored, err := s.rollbacker.RollbackQuestion(r.Context(), "fluent-interview", r.PathValue("stableKey"), request.RevisionID, actor)
+	if err != nil {
+		status := http.StatusBadGateway
+		if errors.Is(err, pgx.ErrNoRows) {
+			status = http.StatusNotFound
+		}
+		writeJSON(w, status, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":       "published",
+		"action":       stored.Action,
+		"question_id":  stored.QuestionID,
+		"revision_id":  stored.RevisionID,
+		"content_hash": stored.Hash,
+		"source":       "question-brain-rollback",
+	})
+}
+
 func requestID(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-Request-ID") == "" {
-			w.Header().Set("X-Request-ID", "local-contract")
+			r.Header.Set("X-Request-ID", "local-contract")
 		}
+		w.Header().Set("X-Request-ID", r.Header.Get("X-Request-ID"))
 		next.ServeHTTP(w, r)
 	})
 }

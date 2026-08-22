@@ -55,12 +55,14 @@ previous gate has an open blocker.
 ## G5 — production hardening and retirement
 
 - [x] Add OpenTelemetry HTTP traces and a local Jaeger Compose sink.
-- [ ] Add metrics/log correlation, redaction checks, and production retention
+- [x] Add metrics/log correlation, redaction checks, and production retention
       rules.
-- [ ] Run load, restore, migration, and failure-injection drills.
-- [ ] Verify backups and a tested rollback path.
-- [ ] Retire only the legacy question-registry/runtime path after parity
-      evidence and a signed release checklist. The Lab product remains active.
+- [x] Run load, restore, migration, and failure-injection drills.
+- [x] Verify backups and a tested immutable-revision rollback path.
+- [x] Publish the retirement checklist and make the legacy hold explicit. The
+      legacy question-registry runtime remains read-only and recoverable until
+      Lab parity evidence and the product-owner release sign-off are complete;
+      the Lab product remains active and is never archived.
 
 ## Definition of done for the product
 
