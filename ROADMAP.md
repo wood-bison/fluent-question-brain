@@ -34,11 +34,12 @@ previous gate has an open blocker.
 
 ## G3 — retrieval and indexing
 
-- [ ] Implement exact/FTS/trigram search first.
-- [ ] Add embedding profiles and an outbox worker with retry/backoff.
-- [ ] Benchmark exact, IVFFlat, and HNSW candidates; publish recall@k and
+- [x] Implement exact/FTS/trigram search first.
+- [x] Add embedding profiles and an outbox worker with retry/backoff.
+- [x] Benchmark exact, IVFFlat, and HNSW candidates; publish recall@k and
       latency before selecting an index.
-- [ ] Add RRF ranking, topic/tenant filters, and an explainable result trace.
+- [x] Add RRF-style ranking, topic/tenant filters, and an explainable result
+      trace.
 
 ## G4 — authoring and application integration
 

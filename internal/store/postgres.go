@@ -9,7 +9,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/wood-bison/fluent-question-brain/internal/embedding"
 	"github.com/wood-bison/fluent-question-brain/internal/normalize"
+	"github.com/wood-bison/fluent-question-brain/internal/search"
 )
 
 type Postgres struct {
@@ -43,6 +45,18 @@ type ImportItem struct {
 	Action      string
 	QuestionID  string
 	Error       string
+}
+
+type OutboxItem struct {
+	ID          string
+	AggregateID string
+	Attempts    int
+}
+
+type LocaleText struct {
+	ID          string
+	ContentHash string
+	Text        string
 }
 
 func Open(ctx context.Context, databaseURL string) (*Postgres, error) {
@@ -324,6 +338,281 @@ func (p *Postgres) FinishImportRun(ctx context.Context, runID, status string, to
 		return fmt.Errorf("finish import run: %w", err)
 	}
 	return nil
+}
+
+func (p *Postgres) ClaimOutbox(ctx context.Context, limit int) ([]OutboxItem, error) {
+	if limit <= 0 || limit > 500 {
+		limit = 50
+	}
+	rows, err := p.pool.Query(ctx, `
+		with picked as (
+			select id
+			from content.outbox_event
+			where published_at is null
+			  and available_at <= now()
+			  and (claimed_at is null or claimed_at < now() - interval '5 minutes')
+			order by created_at
+			limit $1
+			for update skip locked
+		)
+		update content.outbox_event event
+		set claimed_at = now(), attempts = event.attempts + 1
+		from picked
+		where event.id = picked.id
+		returning event.id::text, event.aggregate_id::text, event.attempts
+	`, limit)
+	if err != nil {
+		return nil, fmt.Errorf("claim outbox: %w", err)
+	}
+	defer rows.Close()
+	items := make([]OutboxItem, 0, limit)
+	for rows.Next() {
+		var item OutboxItem
+		if err := rows.Scan(&item.ID, &item.AggregateID, &item.Attempts); err != nil {
+			return nil, fmt.Errorf("scan claimed outbox: %w", err)
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate claimed outbox: %w", err)
+	}
+	return items, nil
+}
+
+func (p *Postgres) RevisionLocales(ctx context.Context, revisionID string) ([]LocaleText, error) {
+	rows, err := p.pool.Query(ctx, `
+		select ql.id::text, qr.content_hash,
+			concat_ws(E'\n', ql.prompt, ql.short_answer, ql.explanation, ql.body::text)
+		from content.question_locale ql
+		join content.question_revision qr on qr.id = ql.revision_id
+		where ql.revision_id = $1::uuid
+		order by ql.locale
+	`, revisionID)
+	if err != nil {
+		return nil, fmt.Errorf("load revision locales: %w", err)
+	}
+	defer rows.Close()
+	locales := make([]LocaleText, 0, 2)
+	for rows.Next() {
+		var locale LocaleText
+		if err := rows.Scan(&locale.ID, &locale.ContentHash, &locale.Text); err != nil {
+			return nil, fmt.Errorf("scan revision locale: %w", err)
+		}
+		locales = append(locales, locale)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate revision locales: %w", err)
+	}
+	return locales, nil
+}
+
+func (p *Postgres) UpsertEmbedding(ctx context.Context, localeID, profileKey, contentHash, vector string) error {
+	_, err := p.pool.Exec(ctx, `
+		insert into content.question_embedding (locale_id, profile_key, content_hash, embedding)
+		values ($1::uuid, $2, $3, $4::vector)
+		on conflict (locale_id, profile_key, content_hash) do nothing
+	`, localeID, profileKey, contentHash, vector)
+	if err != nil {
+		return fmt.Errorf("upsert embedding: %w", err)
+	}
+	return nil
+}
+
+func (p *Postgres) MarkOutboxPublished(ctx context.Context, id string) error {
+	_, err := p.pool.Exec(ctx, `
+		update content.outbox_event
+		set published_at = now(), claimed_at = null, last_error = null
+		where id = $1::uuid
+	`, id)
+	if err != nil {
+		return fmt.Errorf("mark outbox published: %w", err)
+	}
+	return nil
+}
+
+func (p *Postgres) MarkOutboxFailed(ctx context.Context, id, message string, attempts int) error {
+	backoffSeconds := attempts * attempts
+	if backoffSeconds > 300 {
+		backoffSeconds = 300
+	}
+	_, err := p.pool.Exec(ctx, `
+		update content.outbox_event
+		set claimed_at = null,
+			available_at = now() + make_interval(secs => $2),
+			last_error = $3
+		where id = $1::uuid
+	`, id, backoffSeconds, message)
+	if err != nil {
+		return fmt.Errorf("mark outbox failed: %w", err)
+	}
+	return nil
+}
+
+func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search.Result, error) {
+	query := strings.TrimSpace(request.Query)
+	if query == "" {
+		return nil, fmt.Errorf("search query is required")
+	}
+	limit := request.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	queryVector := embedding.VectorLiteral((embedding.HashProvider{}).Embed(query))
+	rows, err := p.pool.Query(ctx, `
+		with candidate as (
+			select
+				q.id::text as question_id,
+				qr.id::text as revision_id,
+				q.stable_key,
+				q.slug,
+				ql.locale,
+				ql.prompt,
+				ql.short_answer,
+				ql.explanation,
+				coalesce(topic.stable_key, '') as topic_key,
+				coalesce(topic.title, '') as topic_title,
+				case when lower(q.stable_key) = lower($1) or lower(q.slug) = lower($1) then 1.0 else 0.0 end as exact_score,
+				coalesce(ts_rank_cd(ql.search_document, websearch_to_tsquery('simple', unaccent($1))), 0)::double precision as fts_score,
+				coalesce(similarity(ql.prompt, $1), 0)::double precision as trigram_score,
+				coalesce(semantic.semantic_score, 0)::double precision as semantic_score
+			from content.workspace w
+			join content.question q on q.workspace_id = w.id and q.status <> 'archived'
+			join content.question_revision qr on qr.id = q.current_revision_id
+			join lateral (
+				select ql.*
+				from content.question_locale ql
+				where ql.revision_id = qr.id
+				order by case when ql.locale = nullif($2, '') then 0 when ql.locale = 'en' then 1 else 2 end, ql.locale
+				limit 1
+			) ql on true
+			left join lateral (
+				select t.stable_key, t.title
+				from content.question_topic qt
+				join content.topic t on t.id = qt.topic_id
+				where qt.question_id = q.id
+				order by case when qt.relation = 'primary' then 0 else 1 end, t.stable_key
+				limit 1
+			) topic on true
+			left join lateral (
+				select 1 - (qe.embedding <=> $4::vector) as semantic_score
+				from content.question_embedding qe
+				where qe.locale_id = ql.id and qe.profile_key = $5
+				order by qe.embedding <=> $4::vector
+				limit 1
+			) semantic on true
+			where w.stable_key = $3
+			  and ($6 = '' or exists (
+				select 1
+				from content.question_topic qt_filter
+				join content.topic t_filter on t_filter.id = qt_filter.topic_id
+				where qt_filter.question_id = q.id and t_filter.stable_key = $6
+			  ))
+		)
+		,
+		ranked as (
+			select candidate.*,
+				case when exact_score > 0 then row_number() over (order by exact_score desc, stable_key) end as exact_rank,
+				case when fts_score > 0 then row_number() over (order by fts_score desc, stable_key) end as fts_rank,
+				case when trigram_score >= 0.15 then row_number() over (order by trigram_score desc, stable_key) end as trigram_rank,
+				case when semantic_score >= 0.50 then row_number() over (order by semantic_score desc, stable_key) end as semantic_rank
+			from candidate
+		)
+		select question_id, revision_id, stable_key, slug, locale, prompt,
+			short_answer, explanation, topic_key, topic_title, exact_score,
+			fts_score, trigram_score, semantic_score,
+			array_remove(array[
+				case when exact_score > 0 then 'exact'::text end,
+				case when fts_score > 0 then 'fts'::text end,
+				case when trigram_score >= 0.15 then 'trigram'::text end,
+				case when semantic_score >= 0.50 then 'semantic'::text end
+			], null) as match_stages,
+			coalesce(1.0 / (60 + exact_rank), 0) +
+			coalesce(1.0 / (60 + fts_rank), 0) +
+			coalesce(1.0 / (60 + trigram_rank), 0) +
+			coalesce(1.0 / (60 + semantic_rank), 0) as rank_score
+		from ranked
+		where exact_score > 0 or fts_score > 0 or trigram_score >= 0.15 or semantic_score >= 0.50
+		order by rank_score desc, stable_key
+		limit $7
+	`, query, strings.TrimSpace(request.Locale), request.WorkspaceKey, queryVector, embedding.ProfileKey, strings.TrimSpace(request.TopicKey), limit)
+	if err != nil {
+		return nil, fmt.Errorf("search candidates: %w", err)
+	}
+	defer rows.Close()
+	results := make([]search.Result, 0, limit)
+	for rows.Next() {
+		var result search.Result
+		if err := rows.Scan(
+			&result.QuestionID, &result.RevisionID, &result.StableKey, &result.Slug,
+			&result.Locale, &result.Prompt, &result.ShortAnswer, &result.Explanation,
+			&result.TopicKey, &result.TopicTitle, &result.ExactScore, &result.FTSScore,
+			&result.TrigramScore, &result.SemanticScore, &result.MatchStages, &result.RankScore,
+		); err != nil {
+			return nil, fmt.Errorf("scan search result: %w", err)
+		}
+		results = append(results, result)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate search results: %w", err)
+	}
+	return results, nil
+}
+
+func (p *Postgres) GetQuestion(ctx context.Context, stableKey, workspaceKey, locale string) (search.Question, error) {
+	var result search.Question
+	var body []byte
+	err := p.pool.QueryRow(ctx, `
+		select q.id::text, qr.id::text, q.stable_key, q.slug, q.status,
+			qr.content_hash, ql.locale, ql.prompt, ql.short_answer,
+			ql.explanation, ql.body
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.stable_key = $1
+		join content.question_revision qr on qr.id = q.current_revision_id
+		join lateral (
+			select ql.*
+			from content.question_locale ql
+			where ql.revision_id = qr.id
+			order by case when ql.locale = nullif($3, '') then 0 when ql.locale = 'en' then 1 else 2 end, ql.locale
+			limit 1
+		) ql on true
+		where w.stable_key = $2
+	`, stableKey, workspaceKey, strings.TrimSpace(locale)).Scan(
+		&result.QuestionID, &result.RevisionID, &result.StableKey, &result.Slug,
+		&result.Status, &result.ContentHash, &result.Locale, &result.Prompt,
+		&result.ShortAnswer, &result.Explanation, &body,
+	)
+	if err != nil {
+		return search.Question{}, fmt.Errorf("get question: %w", err)
+	}
+	if err := json.Unmarshal(body, &result.Body); err != nil {
+		return search.Question{}, fmt.Errorf("decode question body: %w", err)
+	}
+	rows, err := p.pool.Query(ctx, `
+		select t.stable_key, t.title, qt.relation
+		from content.question q
+		join content.question_topic qt on qt.question_id = q.id
+		join content.topic t on t.id = qt.topic_id
+		where q.id = $1::uuid
+		order by case when qt.relation = 'primary' then 0 else 1 end, t.stable_key
+	`, result.QuestionID)
+	if err != nil {
+		return search.Question{}, fmt.Errorf("get question topics: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var topic search.Topic
+		if err := rows.Scan(&topic.StableKey, &topic.Title, &topic.Relation); err != nil {
+			return search.Question{}, fmt.Errorf("scan question topic: %w", err)
+		}
+		result.Topics = append(result.Topics, topic)
+	}
+	if err := rows.Err(); err != nil {
+		return search.Question{}, fmt.Errorf("iterate question topics: %w", err)
+	}
+	return result, nil
 }
 
 // RecordDuplicateDecision makes the duplicate review explicit and auditable.

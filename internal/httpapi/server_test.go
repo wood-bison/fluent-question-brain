@@ -24,7 +24,7 @@ func TestPreviewRoot(t *testing.T) {
 	if got := recorder.Header().Get("Content-Type"); got != "text/html; charset=utf-8" {
 		t.Fatalf("content type = %q", got)
 	}
-	if !strings.Contains(recorder.Body.String(), "G1 in progress") {
+	if !strings.Contains(recorder.Body.String(), "G3 in progress") {
 		t.Fatal("preview does not expose current gate")
 	}
 	if !strings.Contains(recorder.Body.String(), "Jaeger") {
@@ -32,10 +32,10 @@ func TestPreviewRoot(t *testing.T) {
 	}
 }
 
-func TestSearchIsExplicitlyGated(t *testing.T) {
+func TestSearchRequiresService(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	New("postgres://user:pass@localhost:5432/db").Handler().ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/v1/search", nil))
-	if recorder.Code != http.StatusNotImplemented {
-		t.Fatalf("status = %d, want 501", recorder.Code)
+	if recorder.Code != http.StatusServiceUnavailable {
+		t.Fatalf("status = %d, want 503", recorder.Code)
 	}
 }

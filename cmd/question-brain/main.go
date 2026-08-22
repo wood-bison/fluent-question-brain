@@ -14,6 +14,7 @@ import (
 
 	"github.com/wood-bison/fluent-question-brain/internal/config"
 	"github.com/wood-bison/fluent-question-brain/internal/httpapi"
+	"github.com/wood-bison/fluent-question-brain/internal/store"
 	"github.com/wood-bison/fluent-question-brain/internal/telemetry"
 )
 
@@ -41,10 +42,16 @@ func main() {
 			logger.Error("telemetry shutdown failed", "error", err)
 		}
 	}()
+	database, err := store.Open(context.Background(), cfg.DatabaseURL)
+	if err != nil {
+		logger.Error("database initialization failed", "error", err)
+		os.Exit(2)
+	}
+	defer database.Close()
 
 	server := &http.Server{
 		Addr:              cfg.HTTPAddr,
-		Handler:           telemetry.HTTP(httpapi.New(cfg.DatabaseURL).Handler()),
+		Handler:           telemetry.HTTP(httpapi.New(cfg.DatabaseURL, database).Handler()),
 		ReadHeaderTimeout: 2 * time.Second,
 		ReadTimeout:       5 * time.Second,
 		WriteTimeout:      10 * time.Second,

@@ -17,6 +17,8 @@ services:
       - question-brain-postgres:/var/lib/postgresql
       - ../../db/migrations/0001_question_brain.sql:/docker-entrypoint-initdb.d/001_question_brain.sql:ro
       - ../../db/migrations/0002_ingestion_runs.sql:/docker-entrypoint-initdb.d/002_ingestion_runs.sql:ro
+      - ../../db/migrations/0003_retrieval_profile.sql:/docker-entrypoint-initdb.d/003_retrieval_profile.sql:ro
+      - ../../db/migrations/0004_retrieval_indexes.sql:/docker-entrypoint-initdb.d/004_retrieval_indexes.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U question_brain -d question_brain"]
       interval: 5s

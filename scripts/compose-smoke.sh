@@ -21,6 +21,10 @@ done
 "${compose[@]}" exec -T api /question-brain --healthcheck
 curl -fsS "http://127.0.0.1:${api_port}/health/live" >/dev/null
 curl -fsSL "http://127.0.0.1:${jaeger_ui_port}/" >/dev/null
+curl -fsS -X POST "http://127.0.0.1:${api_port}/v1/search" \
+  -H 'content-type: application/json' \
+  -d '{"query":"contract smoke","locale":"en","limit":1}' \
+  | grep -q '"explainable":true'
 
 # A request creates a server span; Jaeger v2 exports the service catalog over
 # its compatibility API after the OTLP batch flushes.

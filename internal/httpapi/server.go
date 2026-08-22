@@ -3,18 +3,28 @@ package httpapi
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/wood-bison/fluent-question-brain/internal/search"
 )
 
 type Server struct {
-	databaseURL string
+	databaseURL   string
+	searchService search.Service
 }
 
-func New(databaseURL string) *Server {
-	return &Server{databaseURL: databaseURL}
+func New(databaseURL string, service ...search.Service) *Server {
+	var searchService search.Service
+	if len(service) > 0 {
+		searchService = service[0]
+	}
+	return &Server{databaseURL: databaseURL, searchService: searchService}
 }
 
 func (s *Server) Handler() http.Handler {
@@ -22,7 +32,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /", s.index)
 	mux.HandleFunc("GET /health/live", s.live)
 	mux.HandleFunc("GET /health/ready", s.ready)
-	mux.HandleFunc("POST /v1/search", s.searchNotReady)
+	mux.HandleFunc("POST /v1/search", s.search)
+	mux.HandleFunc("GET /v1/questions/{stableKey}", s.question)
 	return requestID(mux)
 }
 
@@ -36,7 +47,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Question Brain — G1 preview</title>
+  <title>Question Brain — G3 retrieval preview</title>
   <style>
     :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
     * { box-sizing: border-box; }
@@ -68,7 +79,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
     <section class="grid" aria-label="System status">
       <article class="card"><div class="label">Service</div><div class="value ok">Running</div><code>Go API · Compose</code></article>
       <article class="card"><div class="label">Storage</div><div class="value ok">Postgres + pgvector</div><code>vector 0.8.6 · pg18</code></article>
-      <article class="card"><div class="label">Current gate</div><div class="value pending">G1 in progress</div><code>one-card round-trip proven</code></article>
+      <article class="card"><div class="label">Current gate</div><div class="value pending">G3 in progress</div><code>exact + FTS + semantic pipeline</code></article>
       <article class="card"><div class="label">Observability</div><div class="value ok">Jaeger</div><code>OTLP/gRPC · trace-ready</code></article>
     </section>
     <div class="links" aria-label="Diagnostics and API links">
@@ -76,7 +87,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
       <a href="/health/ready">Readiness ↗</a>
       <a href="http://localhost:56686/" target="_blank" rel="noreferrer">Jaeger UI ↗</a>
     </div>
-    <footer>Search stays explicitly gated until duplicate evidence is recorded. This preview is an operational surface, not a fake search demo.</footer>
+    <footer>Search returns explainable provenance from the canonical graph. This preview is an operational surface, not a fake search demo.</footer>
   </main>
 </body>
 </html>`)
@@ -107,12 +118,63 @@ func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ready", "database": "reachable", "migration": "compose-init"})
 }
 
-func (s *Server) searchNotReady(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusNotImplemented, map[string]string{
-		"error":   "search_contract_not_implemented",
-		"stage":   "G1",
-		"message": "Close the one-card round-trip before exposing search as a production dependency.",
+func (s *Server) search(w http.ResponseWriter, r *http.Request) {
+	if s.searchService == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{
+			"error":   "search_service_unavailable",
+			"message": "The API was started without a canonical search service.",
+		})
+		return
+	}
+	var request struct {
+		Query    string `json:"query"`
+		Locale   string `json:"locale"`
+		TopicKey string `json:"topic_key"`
+		Limit    int    `json:"limit"`
+	}
+	decoder := json.NewDecoder(io.LimitReader(r.Body, 1<<20))
+	if err := decoder.Decode(&request); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_search_request"})
+		return
+	}
+	results, err := s.searchService.Search(r.Context(), search.Request{
+		WorkspaceKey: "fluent-interview",
+		Query:        request.Query,
+		Locale:       request.Locale,
+		TopicKey:     request.TopicKey,
+		Limit:        request.Limit,
 	})
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"query":     request.Query,
+		"locale":    request.Locale,
+		"topic_key": request.TopicKey,
+		"results":   results,
+		"provenance": map[string]any{
+			"pipeline":    []string{"exact", "fts", "trigram", "semantic-dev-hash-v1"},
+			"explainable": true,
+		},
+	})
+}
+
+func (s *Server) question(w http.ResponseWriter, r *http.Request) {
+	if s.searchService == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "question_service_unavailable"})
+		return
+	}
+	question, err := s.searchService.GetQuestion(r.Context(), r.PathValue("stableKey"), "fluent-interview", r.URL.Query().Get("locale"))
+	if err != nil {
+		status := http.StatusInternalServerError
+		if errors.Is(err, pgx.ErrNoRows) {
+			status = http.StatusNotFound
+		}
+		writeJSON(w, status, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, question)
 }
 
 func requestID(next http.Handler) http.Handler {
