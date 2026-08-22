@@ -45,7 +45,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
     .eyebrow { color: #8da5ff; letter-spacing: .18em; text-transform: uppercase; font-size: 12px; font-weight: 700; }
     h1 { margin: 14px 0 16px; font-size: clamp(42px, 8vw, 84px); line-height: .95; letter-spacing: -.06em; max-width: 760px; }
     .lede { color: #aeb9cf; font-size: 20px; line-height: 1.5; max-width: 720px; }
-    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 44px; }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 44px; }
     .card { padding: 22px; border: 1px solid #25304b; border-radius: 18px; background: linear-gradient(145deg, #141b31, #10162a); box-shadow: 0 18px 60px #0003; }
     .label { color: #8f9bb7; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
     .value { margin-top: 10px; font-size: 25px; font-weight: 700; }
@@ -56,6 +56,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
     a:hover, a:focus-visible { background: #1a2855; outline: 2px solid #8da5ff; outline-offset: 2px; }
     code { color: #cbd6f7; font: 500 13px ui-monospace, SFMono-Regular, Menlo, monospace; }
     footer { margin-top: 54px; color: #7683a0; font-size: 13px; }
+    @media (max-width: 980px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 760px) { main { width: min(100% - 32px, 640px); padding-top: 40px; } .grid { grid-template-columns: 1fr; } .lede { font-size: 17px; } }
   </style>
 </head>
@@ -65,13 +66,15 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
     <h1>Content graph, built to be trusted.</h1>
     <p class="lede">A performance-first Go service for canonical question revisions, graph placement, exact search, and measured semantic retrieval.</p>
     <section class="grid" aria-label="System status">
-      <article class="card"><div class="label">Service</div><div class="value ok">Running</div><code>Go · :8080</code></article>
+      <article class="card"><div class="label">Service</div><div class="value ok">Running</div><code>Go API · Compose</code></article>
       <article class="card"><div class="label">Storage</div><div class="value ok">Postgres + pgvector</div><code>vector 0.8.6 · pg18</code></article>
       <article class="card"><div class="label">Current gate</div><div class="value pending">G1 in progress</div><code>one-card round-trip proven</code></article>
+      <article class="card"><div class="label">Observability</div><div class="value ok">Jaeger</div><code>OTLP/gRPC · trace-ready</code></article>
     </section>
     <div class="links" aria-label="Diagnostics and API links">
       <a href="/health/live">Live health ↗</a>
       <a href="/health/ready">Readiness ↗</a>
+      <a href="http://localhost:56686/" target="_blank" rel="noreferrer">Jaeger UI ↗</a>
     </div>
     <footer>Search stays explicitly gated until duplicate evidence is recorded. This preview is an operational surface, not a fake search demo.</footer>
   </main>

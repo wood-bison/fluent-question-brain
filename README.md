@@ -48,16 +48,23 @@ cp .env.example .env
 docker compose -f deploy/compose/compose.yaml up --build
 ```
 
-The database is exposed on `localhost:55432` and the Go API on
-`localhost:8080`. The API currently exposes lifecycle endpoints and a clear
+The database is exposed on `localhost:55437`, the Go API on
+`localhost:48127`, and the local Jaeger UI on `localhost:56686`. The API
+currently exposes lifecycle endpoints and a clear
 `501 Not Implemented` response for search until the G1 round-trip is closed;
 that is intentional and prevents a demo endpoint from becoming a hidden
 production dependency.
 
 ```sh
-curl -i http://localhost:8080/health/live
-curl -i http://localhost:8080/health/ready
+curl -i http://localhost:48127/health/live
+curl -i http://localhost:48127/health/ready
+# Trace UI (local Jaeger all-in-one)
+open http://localhost:56686
 ```
+
+All host bindings are loopback-only and reserved for this stack. Override the
+`QB_*_PORT` variables in `.env` only as a complete, collision-free set; the
+service-to-service ports inside Compose stay on their standard values.
 
 ## Local checks
 
@@ -68,4 +75,3 @@ make check
 `make check` validates the SQL/Compose contract and runs Go tests when a Go
 toolchain is available. CI will pin a current supported Go toolchain and run
 the same checks on every change.
-

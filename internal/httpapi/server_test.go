@@ -27,6 +27,9 @@ func TestPreviewRoot(t *testing.T) {
 	if !strings.Contains(recorder.Body.String(), "G1 in progress") {
 		t.Fatal("preview does not expose current gate")
 	}
+	if !strings.Contains(recorder.Body.String(), "Jaeger") {
+		t.Fatal("preview does not expose observability sink")
+	}
 }
 
 func TestSearchIsExplicitlyGated(t *testing.T) {

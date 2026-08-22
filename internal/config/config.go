@@ -10,6 +10,7 @@ type Config struct {
 	HTTPAddr         string
 	DatabaseURL      string
 	EmbeddingProfile string
+	OTELEndpoint     string
 }
 
 func FromEnv() (Config, error) {
@@ -17,6 +18,7 @@ func FromEnv() (Config, error) {
 		HTTPAddr:         valueOr("HTTP_ADDR", ":8080"),
 		DatabaseURL:      os.Getenv("DATABASE_URL"),
 		EmbeddingProfile: valueOr("EMBEDDING_PROFILE", "semantic-v1"),
+		OTELEndpoint:     os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"),
 	}
 	if c.DatabaseURL == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")

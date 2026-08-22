@@ -51,7 +51,9 @@ previous gate has an open blocker.
 
 ## G5 — production hardening and retirement
 
-- [ ] Add OpenTelemetry traces/metrics/log correlation and retention rules.
+- [x] Add OpenTelemetry HTTP traces and a local Jaeger Compose sink.
+- [ ] Add metrics/log correlation, redaction checks, and production retention
+      rules.
 - [ ] Run load, restore, migration, and failure-injection drills.
 - [ ] Verify backups and a tested rollback path.
 - [ ] Retire only the legacy question-registry/runtime path after parity

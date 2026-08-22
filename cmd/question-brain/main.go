@@ -14,6 +14,7 @@ import (
 
 	"github.com/wood-bison/fluent-question-brain/internal/config"
 	"github.com/wood-bison/fluent-question-brain/internal/httpapi"
+	"github.com/wood-bison/fluent-question-brain/internal/telemetry"
 )
 
 func main() {
@@ -30,10 +31,20 @@ func main() {
 		}
 		return
 	}
+	shutdownTelemetry, err := telemetry.Init(context.Background(), "question-brain-api", cfg.OTELEndpoint)
+	if err != nil {
+		logger.Error("telemetry initialization failed", "error", err, "endpoint", cfg.OTELEndpoint)
+		os.Exit(2)
+	}
+	defer func() {
+		if err := telemetry.Shutdown(context.Background(), shutdownTelemetry); err != nil {
+			logger.Error("telemetry shutdown failed", "error", err)
+		}
+	}()
 
 	server := &http.Server{
 		Addr:              cfg.HTTPAddr,
-		Handler:           httpapi.New(cfg.DatabaseURL).Handler(),
+		Handler:           telemetry.HTTP(httpapi.New(cfg.DatabaseURL).Handler()),
 		ReadHeaderTimeout: 2 * time.Second,
 		ReadTimeout:       5 * time.Second,
 		WriteTimeout:      10 * time.Second,
@@ -51,7 +62,7 @@ func main() {
 		}
 	}()
 
-	logger.Info("question brain api starting", "addr", cfg.HTTPAddr, "embedding_profile", cfg.EmbeddingProfile, "stage", "G1")
+	logger.Info("question brain api starting", "addr", cfg.HTTPAddr, "embedding_profile", cfg.EmbeddingProfile, "otel_endpoint", cfg.OTELEndpoint, "stage", "G1")
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("server stopped", "error", err)
 		os.Exit(1)

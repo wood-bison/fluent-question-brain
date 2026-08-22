@@ -6,12 +6,25 @@ obvious in Docker Desktop and gives operators a predictable stop/start path:
 ```sh
 docker compose -p fluent-question-brain -f deploy/compose/compose.yaml up -d --build
 docker compose -p fluent-question-brain -f deploy/compose/compose.yaml ps
-docker compose -p fluent-question-brain -f deploy/compose/compose.yaml logs -f api
+docker compose -p fluent-question-brain -f deploy/compose/compose.yaml logs -f api jaeger
 docker compose -p fluent-question-brain -f deploy/compose/compose.yaml down
 ```
+
+## Reserved local ports
+
+| Surface | Host port | Container port |
+| --- | ---: | ---: |
+| Go API | `48127` | `8080` |
+| Postgres + pgvector | `55437` | `5432` |
+| Jaeger UI | `56686` | `16686` |
+| Jaeger OTLP/gRPC | `54317` | `4317` |
+| Jaeger OTLP/HTTP | `54318` | `4318` |
+
+The host bindings are loopback-only. The API exports OTLP/gRPC to
+`jaeger:4317` inside the Compose network; open `http://localhost:56686` to
+inspect local traces.
 
 The only persistent volume in G1 is the named Postgres volume. Backups and a
 restore drill are mandatory before the legacy runtime is retired. Payload is
 added as a separate `cms` service in G4, after its package lock and ownership
 boundary are reviewed.
-

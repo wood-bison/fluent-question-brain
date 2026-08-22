@@ -99,6 +99,12 @@ correlation id, workspace id, revision id, and outbox event id. Prompt/content
 payloads are not logged by default; hashes and redacted metadata are enough to
 replay a problem safely. OpenTelemetry is the common instrumentation contract.
 
+For local verification, the API exports OTLP/gRPC to Jaeger all-in-one at
+`jaeger:4317` inside the Compose network. Jaeger is an observability sink, not
+another content store: it does not own questions, revisions, graph edges, or
+embeddings. The local image uses transient storage; a production deployment
+must choose retention, access control, and a persistent trace backend.
+
 The production stack has one Compose project name, explicit health checks,
 bounded resource settings, and a documented stop/start path. Backups and
 restore drills are required before the legacy runtime is retired.
