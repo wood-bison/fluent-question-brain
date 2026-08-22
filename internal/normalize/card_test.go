@@ -31,3 +31,14 @@ func TestCanonicalJSONSortsObjectKeys(t *testing.T) {
 		t.Fatalf("canonical = %s", canonical)
 	}
 }
+
+func TestParseMarkdownPrefersExplicitMetadataID(t *testing.T) {
+	input := []byte("# B011 — copied heading\nID: B012\nQuestion: Tell me about a time you learned quickly.\n\n## Situation\n\nThe heading carried a stale id, but the metadata identifies this card.\n")
+	card, err := ParseMarkdown("Behavioral Cards/B012.md", input)
+	if err != nil {
+		t.Fatalf("ParseMarkdown() error = %v", err)
+	}
+	if card.StableKey != "legacy.b012" || card.Slug != "b012" {
+		t.Fatalf("identity = %q/%q, want legacy.b012/b012", card.StableKey, card.Slug)
+	}
+}

@@ -82,7 +82,7 @@ func (p *Postgres) Close() {
 }
 
 func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspaceKey, workspaceName string) (StoredRevision, error) {
-	return p.upsertCard(ctx, card, workspaceKey, workspaceName, "fluent-question-vault", "vault-importer")
+	return p.upsertCard(ctx, card, workspaceKey, workspaceName, "fluent-question-vault", "vault-importer", false)
 }
 
 // PromoteCard is the only write path exposed to an authoring surface. Payload
@@ -92,13 +92,27 @@ func (p *Postgres) PromoteCard(ctx context.Context, card normalize.Card, workspa
 	if strings.TrimSpace(actor) == "" {
 		actor = "payload-cms"
 	}
-	return p.upsertCard(ctx, card, workspaceKey, workspaceName, "payload-cms", actor)
+	return p.upsertCard(ctx, card, workspaceKey, workspaceName, "payload-cms", actor, true)
 }
 
-func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspaceKey, workspaceName, sourceSystem, actor string) (StoredRevision, error) {
+// PublishImportedCard promotes an already imported vault revision into the
+// learner-visible published projection through the same transactional writer
+// used by Payload. It is intentionally a separate method so a regular vault
+// reconcile can never publish content by accident.
+func (p *Postgres) PublishImportedCard(ctx context.Context, card normalize.Card, workspaceKey, workspaceName, actor string) (StoredRevision, error) {
+	if strings.TrimSpace(actor) == "" {
+		actor = "vault-release"
+	}
+	return p.upsertCard(ctx, card, workspaceKey, workspaceName, "fluent-question-vault", actor, true)
+}
+
+func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspaceKey, workspaceName, sourceSystem, actor string, publish bool) (StoredRevision, error) {
 	eventType := "question.imported"
 	if sourceSystem == "payload-cms" {
 		eventType = "question.promoted"
+	}
+	if publish && sourceSystem != "payload-cms" {
+		eventType = "question.published"
 	}
 	auditMetadata, err := json.Marshal(map[string]string{"source": sourceSystem, "actor": actor})
 	if err != nil {
@@ -109,7 +123,7 @@ func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspac
 		return StoredRevision{}, fmt.Errorf("encode outbox payload: %w", err)
 	}
 	status := "draft"
-	if sourceSystem == "payload-cms" {
+	if publish {
 		status = "published"
 	}
 	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -128,14 +142,14 @@ func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspac
 	if err != nil {
 		return StoredRevision{}, fmt.Errorf("upsert workspace: %w", err)
 	}
-	var existingHash string
+	var existingHash, existingStatus string
 	questionExists := true
 	err = tx.QueryRow(ctx, `
-		select qr.content_hash
+		select qr.content_hash, q.status
 		from content.question q
 		left join content.question_revision qr on qr.id = q.current_revision_id
 		where q.workspace_id = $1::uuid and q.stable_key = $2
-	`, workspaceID, card.StableKey).Scan(&existingHash)
+	`, workspaceID, card.StableKey).Scan(&existingHash, &existingStatus)
 	if err == pgx.ErrNoRows {
 		questionExists = false
 	} else if err != nil {
@@ -247,7 +261,8 @@ func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspac
 		}
 	}
 
-	if revisionCreated {
+	publicationChanged := publish && existingStatus != "published"
+	if revisionCreated || publicationChanged {
 		if _, err = tx.Exec(ctx, `
 			insert into content.audit_event (workspace_id, aggregate_type, aggregate_id, event_type, actor, metadata)
 			values ($1::uuid, 'question_revision', $2::uuid, $3, $4, $5::jsonb)
@@ -258,7 +273,7 @@ func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspac
 			insert into content.outbox_event (aggregate_type, aggregate_id, event_type, idempotency_key, payload)
 			values ('question_revision', $1::uuid, $3, $2, $4::jsonb)
 			on conflict (idempotency_key) do nothing
-		`, revisionID, "question-revision:"+revisionID, "question.revision.published", outboxPayload); err != nil {
+		`, revisionID, fmt.Sprintf("question-publication:%s", revisionID), "question.revision.published", outboxPayload); err != nil {
 			return StoredRevision{}, fmt.Errorf("write outbox event: %w", err)
 		}
 	}
@@ -276,6 +291,8 @@ func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspac
 		stored.Action = "created"
 	} else if revisionCreated && existingHash != card.Hash {
 		stored.Action = "updated"
+	} else if publicationChanged {
+		stored.Action = "published"
 	} else {
 		stored.Action = "unchanged"
 	}

@@ -12,7 +12,7 @@ previous gate has an open blocker.
 - [x] Add a migration with extensions, revisions, locales, graph edges,
       embeddings, decisions, and outbox records.
 
-## G1 — canonical schema and one-card round-trip (current gate)
+## G1 — canonical schema and one-card round-trip (closed)
 
 - [x] Define the canonical JSON contract and normalization rules.
 - [x] Import exactly one representative question from
@@ -23,7 +23,7 @@ previous gate has an open blocker.
       evidence.
 - [x] Add a migration test against the Compose Postgres image.
 
-## G2 — ingestion and reconciliation
+## G2 — ingestion and reconciliation (closed)
 
 - [x] Build a streaming vault importer with dry-run, idempotency, and a
       machine-readable report.
@@ -32,7 +32,7 @@ previous gate has an open blocker.
 - [x] Make the importer bilingual and locale-aware.
 - [x] Import the full snapshot only after G1 is green.
 
-## G3 — retrieval and indexing
+## G3 — retrieval and indexing (closed)
 
 - [x] Implement exact/FTS/trigram search first.
 - [x] Add embedding profiles and an outbox worker with retry/backoff.
@@ -41,7 +41,7 @@ previous gate has an open blocker.
 - [x] Add RRF-style ranking, topic/tenant filters, and an explainable result
       trace.
 
-## G4 — authoring and application integration
+## G4 — authoring and application integration (closed)
 
 - [x] Build Payload as the editorial UI against the isolated `cms` schema.
 - [x] Implement promote/review commands into the Go API; never dual-write
@@ -52,17 +52,18 @@ previous gate has an open blocker.
 - [x] Verify Russian/English content fallbacks end to end through Payload → Go
       API, including a published two-locale smoke card.
 
-## G5 — production hardening and retirement
+## G5 — production hardening and source-vault cutover (closed)
 
 - [x] Add OpenTelemetry HTTP traces and a local Jaeger Compose sink.
 - [x] Add metrics/log correlation, redaction checks, and production retention
       rules.
 - [x] Run load, restore, migration, and failure-injection drills.
 - [x] Verify backups and a tested immutable-revision rollback path.
-- [x] Publish the retirement checklist and make the legacy hold explicit. The
-      legacy question-registry runtime remains read-only and recoverable until
-      Lab parity evidence and the product-owner release sign-off are complete;
-      the Lab product remains active and is never archived.
+- [x] Publish the retirement checklist, release the approved source-vault
+      snapshot, and record full Lab parity. The legacy Lab archive remains a
+      read-only recovery projection; its old Studio compatibility endpoints are
+      not a canonical writer and are not used for learner content. The Lab
+      product remains active and is never archived.
 
 ## Definition of done for the product
 

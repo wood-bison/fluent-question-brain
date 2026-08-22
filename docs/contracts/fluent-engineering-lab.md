@@ -20,12 +20,12 @@ match stages, and a stable `revision_id`/`content_hash`. The Lab can safely
 cache a response by `(workspace, locale, query, topic_key, revision_id)` and
 invalidate it when the graph release changes.
 
-## Opt-in feature flag
+## Runtime read switch
 
-The first Lab adapter should be disabled by default while parity is measured:
+The production-shaped Lab adapter is enabled after the published parity gate:
 
 ```text
-QUESTION_BRAIN_READS=0
+QUESTION_BRAIN_READS=1
 QUESTION_BRAIN_BASE_URL=http://127.0.0.1:48127
 QUESTION_BRAIN_WORKSPACE=fluent-interview
 QUESTION_BRAIN_TIMEOUT_MS=1200
@@ -61,5 +61,10 @@ are therefore switched independently without duplicating source records.
    is required.
 
 This is deliberately a contract and adapter seam, not a second copy of the
-question registry. The Lab integration is the final G4 consumer change and is
-closed only after the parity evidence is committed in the Lab repository.
+question registry. The full cutover report is
+`fluent-engineering-lab/docs/verification/g4-lab-parity-2026-08-22.json`:
+`1146/1146` archive questions match published Question Brain content across
+the complete stable-key/locale slice, with zero missing, prompt, content, or
+transport mismatches. The Lab archive is retained only as a read-only recovery
+projection; source-vault publication is owned by the approved `qb-release`
+command or Payload → Go promote boundary.

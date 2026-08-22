@@ -10,16 +10,23 @@ archiving or deleting Lab.
 - [x] Question Brain G0–G5 smoke evidence is committed.
 - [x] Backups and restore are repeatable (`docs/verification/g5-hardening-2026-08-22.md`).
 - [x] Rollback is token-protected, immutable, audited, and outbox-backed.
-- [ ] Fluent Engineering Lab parity report covers the agreed stable-key slice,
-      both locales, body/section semantics, graph placement, and content hashes.
-- [ ] Lab can run with `QUESTION_BRAIN_READS=1` for a disposable profile with
-      zero projection errors.
-- [ ] Product owner signs the release that removes the old registry/runtime
-      writer.
+- [x] Fluent Engineering Lab parity report covers the complete stable-key
+      slice, both locales, body/section semantics, graph placement, and content
+      hashes (`docs/verification/g4-lab-parity-2026-08-22.json` in Lab).
+- [x] Lab runs with `QUESTION_BRAIN_READS=1` and shadow parity enabled with
+      zero projection errors (`1146/1146` matches, zero fallback-causing
+      mismatches).
+- [x] Product-owner release sign-off recorded on 2026-08-22: the approved
+      source-vault snapshot is canonical; Lab stays active and keeps its
+      immutable archive as recovery. The old Lab Studio registry endpoints are
+      compatibility-only and cannot publish source-vault content.
 
 ## Current decision
 
-**HOLD legacy removal.** The old registry remains read-only and recoverable;
-Fluent Engineering Lab remains an active supported product. Once the Lab
-parity items above are signed in the Lab repository, remove only the legacy
-writer, keep the archive mirror, and retain the Question Brain rollback path.
+**Source-vault cutover complete.** Question Brain owns the published source
+of truth and the `qb-release` command is the only approved vault publication
+boundary. Fluent Engineering Lab remains an active supported product. Its
+immutable archive stays available for outage recovery, and any legacy Studio
+registry endpoints are compatibility-only diagnostics rather than a second
+canonical writer. The Question Brain rollback path remains token-protected,
+immutable, audited, and outbox-backed.

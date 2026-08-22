@@ -98,6 +98,12 @@ func ParseMarkdown(sourceRef string, input []byte) (Card, error) {
 	if id == "" {
 		id = slugify(title)
 	}
+	// The explicit metadata ID is the source-of-truth identity. A few legacy
+	// cards have a copied or stale H1 prefix; preferring `ID:` prevents two
+	// distinct cards from collapsing into one stable key during import.
+	if metadataID := strings.TrimSpace(meta["id"]); metadataID != "" {
+		id = metadataID
+	}
 	question := firstNonEmpty(meta["question"], title)
 	stableKey := "legacy." + strings.ToLower(strings.TrimSpace(id))
 	card := Card{

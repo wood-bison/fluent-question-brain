@@ -24,13 +24,15 @@ allowing two writers to silently diverge.
 
 ## Current milestone
 
-G0–G4 are closed and G5 hardening is verified locally: the full bilingual vault
-is reconciled, exact/FTS/trigram/semantic retrieval is explainable, Payload
-drafts publish through a token-protected Go API boundary, and metrics/logs,
-backup restore, failure recovery, and immutable revision rollback are covered
-by repeatable smoke scripts. Fluent Engineering Lab remains the learner
-product; its read switch is deliberately opt-in until parity evidence is
-committed in that repository.
+G0–G5 are closed locally. The full bilingual vault is reconciled and released
+as one approved immutable snapshot (`1368/1368` cards, zero duplicate stable
+keys/content hashes), exact/FTS/trigram/semantic retrieval is explainable,
+Payload drafts publish through a token-protected Go API boundary, and
+metrics/logs, backup restore, failure recovery, and immutable revision rollback
+are covered by repeatable smoke scripts. Fluent Engineering Lab is still the
+learner product; its published-only Question Brain read path is enabled with an
+immutable archive fallback. The full Lab parity report is committed in that
+repository, so the source-vault cutover is complete without archiving Lab.
 
 See:
 
@@ -41,6 +43,8 @@ See:
   canonical content contract
 - [docs/ARCHIVE-BOUNDARY.md](docs/ARCHIVE-BOUNDARY.md) — how the old question
   registry remains recoverable while the new system is built
+- [docs/verification/g5-vault-release-2026-08-22.json](docs/verification/g5-vault-release-2026-08-22.json)
+  — approved source-vault release report
 
 ## Run the contract stack
 
