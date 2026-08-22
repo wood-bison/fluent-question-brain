@@ -13,6 +13,7 @@ The Lab talks to the versioned HTTP API only:
 POST /v1/search
 GET  /v1/questions/{stable_key}?locale=en|ru
 GET  /v1/catalog?workspace=fluent-interview&locale=en&offset=0&limit=2000
+GET  /v1/release?workspace=fluent-interview
 ```
 
 `GET /v1/catalog` is the release-aware index used by the Lab's `Explore
@@ -31,6 +32,15 @@ from the default response. The response reports `include_fixtures=false` and
 `excluded_fixtures` so an operator can see that the boundary was applied. A
 diagnostic request may opt in with `include_fixtures=true`; the Lab never sends
 that flag and must not use the resulting release for learner projections.
+
+`GET /v1/release` is the complete machine-readable `QuestionRelease` manifest
+(`question-brain.release.v1`). It pins every stable key to its current
+revision/content hash, available locales, source reference, quality state, and
+graph state (`released`, `accepted-pending`, `proposed`, or `unplaced`). Its
+`checks` block makes missing locales and graph blockers measurable without
+opening answer bodies. `source_snapshot_id` is the deterministic content
+fingerprint used by the release; a graph publication remains a separate,
+explicit release boundary.
 
 Every search response carries `provenance.explainable=true`, the active
 pipeline (`exact`, `fts`, `trigram`, and the semantic profile), per-result

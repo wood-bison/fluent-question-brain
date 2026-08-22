@@ -804,6 +804,9 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 	`, workspaceKey).Scan(&excludedFixtures); err != nil {
 		return search.CatalogResponse{}, fmt.Errorf("count excluded catalog fixtures: %w", err)
 	}
+	if includeFixtures {
+		excludedFixtures = 0
+	}
 
 	releaseSeed := ""
 	if err := p.pool.QueryRow(ctx, `
@@ -929,6 +932,167 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 	response.Provenance.Source = "content.question.current_revision"
 	response.Provenance.Pipeline = []string{"published-current-revision", "locale-fallback", "topic-relations"}
 	return response, nil
+}
+
+// Release returns the complete identity manifest for a pinned content release.
+// It intentionally contains no answer bodies: clients use the revision id and
+// stable key to reason about provenance, then follow the normal question read
+// boundary when a learner selects a card.
+func (p *Postgres) Release(ctx context.Context, request search.ReleaseRequest) (search.ReleaseResponse, error) {
+	workspaceKey := strings.TrimSpace(request.WorkspaceKey)
+	if workspaceKey == "" {
+		return search.ReleaseResponse{}, fmt.Errorf("workspace key is required")
+	}
+	includeFixtures := request.IncludeFixtures
+
+	var releaseSeed string
+	if err := p.pool.QueryRow(ctx, `
+		select coalesce(string_agg(
+			q.stable_key || ':' || qr.content_hash,
+			'|' order by q.stable_key
+		), '')
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		join content.question_revision qr on qr.id = q.current_revision_id
+		where w.stable_key = $1
+		  and ($2 or q.content_kind = 'production')
+	`, workspaceKey, includeFixtures).Scan(&releaseSeed); err != nil {
+		return search.ReleaseResponse{}, fmt.Errorf("fingerprint question release: %w", err)
+	}
+	releaseHash := sha256.Sum256([]byte(releaseSeed))
+	releaseID := fmt.Sprintf("question-release-%x", releaseHash[:8])
+	var excludedFixtures int
+	if err := p.pool.QueryRow(ctx, `
+		select count(*)
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		where w.stable_key = $1 and q.content_kind = 'fixture'
+	`, workspaceKey).Scan(&excludedFixtures); err != nil {
+		return search.ReleaseResponse{}, fmt.Errorf("count excluded question release fixtures: %w", err)
+	}
+	if includeFixtures {
+		excludedFixtures = 0
+	}
+
+	rows, err := p.pool.Query(ctx, `
+		select
+			q.id::text,
+			qr.id::text,
+			q.stable_key,
+			qr.content_hash,
+			q.status,
+			q.content_kind,
+			coalesce(array_agg(distinct ql.locale order by ql.locale)
+				filter (where ql.locale is not null), '{}'::text[]),
+			qr.source_system,
+			coalesce(qr.source_ref, ''),
+			case
+				when exists (
+					select 1 from content.question_topic qt
+					where qt.question_id = q.id
+				) then 'released'
+				when exists (
+					select 1 from content.placement_decision pd
+					where pd.revision_id = qr.id and pd.decision = 'accepted'
+				) then 'accepted-pending'
+				when exists (
+					select 1 from content.placement_decision pd
+					where pd.revision_id = qr.id and pd.decision = 'proposed'
+				) then 'proposed'
+				else 'unplaced'
+			end
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		join content.question_revision qr on qr.id = q.current_revision_id
+		left join content.question_locale ql on ql.revision_id = qr.id
+		where w.stable_key = $1
+		  and ($2 or q.content_kind = 'production')
+		group by q.id, qr.id, q.stable_key, qr.content_hash, q.status,
+			q.content_kind, qr.source_system, qr.source_ref
+		order by q.stable_key
+	`, workspaceKey, includeFixtures)
+	if err != nil {
+		return search.ReleaseResponse{}, fmt.Errorf("query question release: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]search.ReleaseItem, 0)
+	checks := search.ReleaseChecks{}
+	for rows.Next() {
+		var item search.ReleaseItem
+		if err := rows.Scan(
+			&item.QuestionID,
+			&item.RevisionID,
+			&item.StableKey,
+			&item.ContentHash,
+			&item.Status,
+			&item.ContentKind,
+			&item.AvailableLocales,
+			&item.SourceSystem,
+			&item.SourceRef,
+			&item.GraphState,
+		); err != nil {
+			return search.ReleaseResponse{}, fmt.Errorf("scan question release: %w", err)
+		}
+		if item.ContentKind == "fixture" {
+			item.QualityState = "fixture"
+			checks.Fixtures++
+		} else {
+			item.QualityState = "published"
+			checks.Published++
+		}
+		switch item.GraphState {
+		case "released":
+			checks.GraphReleased++
+		case "accepted-pending":
+			checks.GraphAcceptedPending++
+		case "proposed":
+			checks.GraphProposed++
+		default:
+			checks.GraphUnplaced++
+		}
+		if !containsLocale(item.AvailableLocales, "en") {
+			checks.MissingEnglish++
+		}
+		if !containsLocale(item.AvailableLocales, "ru") {
+			checks.MissingRussian++
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return search.ReleaseResponse{}, fmt.Errorf("iterate question release: %w", err)
+	}
+
+	response := search.ReleaseResponse{
+		ContractVersion:  "question-brain.release.v1",
+		WorkspaceKey:     workspaceKey,
+		ReleaseID:        releaseID,
+		SourceSnapshotID: releaseID,
+		GeneratedAt:      time.Now().UTC(),
+		Total:            len(items),
+		IncludeFixtures:  includeFixtures,
+		ExcludedFixtures: excludedFixtures,
+		Items:            items,
+		Checks:           checks,
+	}
+	response.Provenance.Explainable = true
+	response.Provenance.Source = "content.question.current_revision"
+	response.Provenance.Pipeline = []string{
+		"published-current-revision",
+		"locale-availability",
+		"graph-placement-state",
+		"fixture-boundary",
+	}
+	return response, nil
+}
+
+func containsLocale(locales []string, wanted string) bool {
+	for _, locale := range locales {
+		if locale == wanted {
+			return true
+		}
+	}
+	return false
 }
 
 func catalogMetadata(payload map[string]any) search.CatalogMetadata {

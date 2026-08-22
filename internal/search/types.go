@@ -113,6 +113,57 @@ type CatalogResponse struct {
 	} `json:"provenance"`
 }
 
+// ReleaseRequest asks for the complete, learner-safe identity manifest. It is
+// intentionally separate from CatalogRequest: a catalog may be paged, while a
+// release manifest is the auditable pinned set used by operators and clients.
+type ReleaseRequest struct {
+	WorkspaceKey    string
+	IncludeFixtures bool
+}
+
+type ReleaseItem struct {
+	QuestionID       string   `json:"question_id"`
+	RevisionID       string   `json:"revision_id"`
+	StableKey        string   `json:"stable_key"`
+	ContentHash      string   `json:"content_hash"`
+	Status           string   `json:"status"`
+	ContentKind      string   `json:"content_kind"`
+	AvailableLocales []string `json:"available_locales"`
+	SourceSystem     string   `json:"source_system"`
+	SourceRef        string   `json:"source_ref,omitempty"`
+	QualityState     string   `json:"quality_state"`
+	GraphState       string   `json:"graph_state"`
+}
+
+type ReleaseChecks struct {
+	Published            int `json:"published"`
+	Fixtures             int `json:"fixtures"`
+	GraphReleased        int `json:"graph_released"`
+	GraphAcceptedPending int `json:"graph_accepted_pending"`
+	GraphProposed        int `json:"graph_proposed"`
+	GraphUnplaced        int `json:"graph_unplaced"`
+	MissingEnglish       int `json:"missing_english"`
+	MissingRussian       int `json:"missing_russian"`
+}
+
+type ReleaseResponse struct {
+	ContractVersion  string        `json:"contract_version"`
+	WorkspaceKey     string        `json:"workspace_key"`
+	ReleaseID        string        `json:"release_id"`
+	SourceSnapshotID string        `json:"source_snapshot_id"`
+	GeneratedAt      time.Time     `json:"generated_at"`
+	Total            int           `json:"total"`
+	IncludeFixtures  bool          `json:"include_fixtures"`
+	ExcludedFixtures int           `json:"excluded_fixtures"`
+	Checks           ReleaseChecks `json:"checks"`
+	Items            []ReleaseItem `json:"items"`
+	Provenance       struct {
+		Explainable bool     `json:"explainable"`
+		Source      string   `json:"source"`
+		Pipeline    []string `json:"pipeline"`
+	} `json:"provenance"`
+}
+
 type Topic struct {
 	StableKey string `json:"stable_key"`
 	Title     string `json:"title"`

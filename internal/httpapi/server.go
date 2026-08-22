@@ -27,6 +27,10 @@ type questionRollbacker interface {
 	RollbackQuestion(context.Context, string, string, string, string) (store.StoredRevision, error)
 }
 
+type releaseReader interface {
+	Release(context.Context, search.ReleaseRequest) (search.ReleaseResponse, error)
+}
+
 type Server struct {
 	databaseURL   string
 	searchService search.Service
@@ -60,6 +64,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /health/ready", s.ready)
 	mux.HandleFunc("POST /v1/search", s.search)
 	mux.HandleFunc("GET /v1/catalog", s.catalog)
+	mux.HandleFunc("GET /v1/release", s.release)
 	mux.HandleFunc("GET /v1/questions/{stableKey}", s.question)
 	mux.HandleFunc("POST /v1/questions/{stableKey}/rollback", s.rollback)
 	mux.HandleFunc("POST /v1/promote", s.promote)
@@ -114,6 +119,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
     <div class="links" aria-label="Diagnostics and API links">
       <a href="/health/live">Live health ↗</a>
       <a href="/health/ready">Readiness ↗</a>
+      <a href="/v1/release?workspace=fluent-interview">Question release ↗</a>
       <a href="/metrics">Metrics ↗</a>
       <a href="http://localhost:56686/" target="_blank" rel="noreferrer">Jaeger UI ↗</a>
     </div>
@@ -216,6 +222,29 @@ func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
 		request.WorkspaceKey = "fluent-interview"
 	}
 	response, err := s.searchService.Catalog(r.Context(), request)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s *Server) release(w http.ResponseWriter, r *http.Request) {
+	reader, ok := s.searchService.(releaseReader)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{
+			"error": "release_service_unavailable",
+		})
+		return
+	}
+	workspaceKey := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspaceKey == "" {
+		workspaceKey = "fluent-interview"
+	}
+	response, err := reader.Release(r.Context(), search.ReleaseRequest{
+		WorkspaceKey:    workspaceKey,
+		IncludeFixtures: parseBool(r.URL.Query().Get("include_fixtures")),
+	})
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return

@@ -47,3 +47,11 @@ func TestCatalogRequiresService(t *testing.T) {
 		t.Fatalf("status = %d, want 503", recorder.Code)
 	}
 }
+
+func TestReleaseRequiresService(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	New("postgres://user:pass@localhost:5432/db").Handler().ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/v1/release", nil))
+	if recorder.Code != http.StatusServiceUnavailable {
+		t.Fatalf("status = %d, want 503", recorder.Code)
+	}
+}
