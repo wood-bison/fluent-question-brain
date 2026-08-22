@@ -12,7 +12,18 @@ The Lab talks to the versioned HTTP API only:
 ```text
 POST /v1/search
 GET  /v1/questions/{stable_key}?locale=en|ru
+GET  /v1/catalog?workspace=fluent-interview&locale=en&offset=0&limit=2000
 ```
+
+`GET /v1/catalog` is the release-aware index used by the Lab's `Explore
+freely` mode. It returns only the current published revision for each card,
+typed placement metadata, topic relations, locale availability, and a
+deterministic `release_id`. It intentionally does not return answer bodies;
+the Lab follows a selected `stable_key` with `GET /v1/questions/{stable_key}`.
+The response contract is `question-brain.catalog.v1`, and `total`/`offset`/
+`limit` make the index safe to page or cache without guessing whether a card
+exists. A `topic_key` query parameter narrows the same release index to one
+topic.
 
 Every search response carries `provenance.explainable=true`, the active
 pipeline (`exact`, `fts`, `trigram`, and the semantic profile), per-result
@@ -38,9 +49,11 @@ its learner UI to this repository's Go implementation details.
 
 When the flag is `1`, only the read projection changes. The existing learner
 contract remains the response shape; missing graph metadata is treated as a
-closed, reviewable projection error rather than guessed in the browser. Write
-and authoring operations stay in Payload → Go API and are never proxied from
-the learner UI.
+closed, reviewable projection error rather than guessed in the browser. The
+catalog is the bounded exception for profile-scoped `Explore freely`: it
+allows the Lab to render every published card while marking placement and
+mastery as provisional. Write and authoring operations stay in Payload → Go
+API and are never proxied from the learner UI.
 
 ## Locale contract
 

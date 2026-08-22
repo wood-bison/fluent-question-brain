@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -58,6 +59,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /health/live", s.live)
 	mux.HandleFunc("GET /health/ready", s.ready)
 	mux.HandleFunc("POST /v1/search", s.search)
+	mux.HandleFunc("GET /v1/catalog", s.catalog)
 	mux.HandleFunc("GET /v1/questions/{stableKey}", s.question)
 	mux.HandleFunc("POST /v1/questions/{stableKey}/rollback", s.rollback)
 	mux.HandleFunc("POST /v1/promote", s.promote)
@@ -186,6 +188,38 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 			"explainable": true,
 		},
 	})
+}
+
+func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
+	if s.searchService == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{
+			"error": "catalog_service_unavailable",
+		})
+		return
+	}
+	parseInt := func(key string, fallback int) int {
+		value, err := strconv.Atoi(strings.TrimSpace(r.URL.Query().Get(key)))
+		if err != nil {
+			return fallback
+		}
+		return value
+	}
+	request := search.CatalogRequest{
+		WorkspaceKey: r.URL.Query().Get("workspace"),
+		Locale:       r.URL.Query().Get("locale"),
+		TopicKey:     r.URL.Query().Get("topic_key"),
+		Offset:       parseInt("offset", 0),
+		Limit:        parseInt("limit", 100),
+	}
+	if strings.TrimSpace(request.WorkspaceKey) == "" {
+		request.WorkspaceKey = "fluent-interview"
+	}
+	response, err := s.searchService.Catalog(r.Context(), request)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (s *Server) question(w http.ResponseWriter, r *http.Request) {

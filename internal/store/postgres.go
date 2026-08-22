@@ -2,10 +2,12 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -748,6 +750,197 @@ func (p *Postgres) GetQuestion(ctx context.Context, stableKey, workspaceKey, loc
 		return search.Question{}, fmt.Errorf("iterate question topics: %w", err)
 	}
 	return result, nil
+}
+
+// Catalog returns the current published index for one workspace. It is a
+// bounded learner read: answer bodies stay behind GetQuestion, while stable
+// identity, locale coverage, normalized coordinates, and topic relations are
+// available for a release-aware projection.
+func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (search.CatalogResponse, error) {
+	workspaceKey := strings.TrimSpace(request.WorkspaceKey)
+	if workspaceKey == "" {
+		return search.CatalogResponse{}, fmt.Errorf("workspace key is required")
+	}
+	locale := strings.TrimSpace(request.Locale)
+	if locale == "" {
+		locale = "en"
+	}
+	offset := request.Offset
+	if offset < 0 {
+		offset = 0
+	}
+	limit := request.Limit
+	if limit <= 0 {
+		limit = 100
+	}
+	if limit > 2_000 {
+		limit = 2_000
+	}
+	topicKey := strings.TrimSpace(request.TopicKey)
+
+	var total int
+	if err := p.pool.QueryRow(ctx, `
+		select count(*)
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		where w.stable_key = $1
+		  and ($2 = '' or exists (
+			select 1
+			from content.question_topic qt
+			join content.topic t on t.id = qt.topic_id
+			where qt.question_id = q.id and t.stable_key = $2
+		  ))
+	`, workspaceKey, topicKey).Scan(&total); err != nil {
+		return search.CatalogResponse{}, fmt.Errorf("count catalog questions: %w", err)
+	}
+
+	releaseSeed := ""
+	if err := p.pool.QueryRow(ctx, `
+		select coalesce(string_agg(q.stable_key || ':' || qr.content_hash, '|' order by q.stable_key), '')
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		join content.question_revision qr on qr.id = q.current_revision_id
+		where w.stable_key = $1
+	`, workspaceKey).Scan(&releaseSeed); err != nil {
+		return search.CatalogResponse{}, fmt.Errorf("fingerprint catalog release: %w", err)
+	}
+	releaseHash := sha256.Sum256([]byte(releaseSeed))
+	releaseID := fmt.Sprintf("question-release-%x", releaseHash[:8])
+
+	rows, err := p.pool.Query(ctx, `
+		with current as (
+			select
+				q.id::text as question_id,
+				qr.id::text as revision_id,
+				q.stable_key,
+				q.slug,
+				q.status,
+				qr.content_hash,
+				ql.locale,
+				ql.prompt,
+				ql.short_answer,
+				ql.explanation,
+				qr.normalized_payload,
+				coalesce((
+					select array_agg(available.locale order by available.locale)
+					from content.question_locale available
+					where available.revision_id = qr.id
+				), array[]::text[]) as available_locales
+			from content.workspace w
+			join content.question q on q.workspace_id = w.id and q.status = 'published'
+			join content.question_revision qr on qr.id = q.current_revision_id
+			join lateral (
+				select ql.*
+				from content.question_locale ql
+				where ql.revision_id = qr.id
+				order by case when ql.locale = $2 then 0 when ql.locale = 'en' then 1 else 2 end, ql.locale
+				limit 1
+			) ql on true
+			where w.stable_key = $1
+			  and ($3 = '' or exists (
+				select 1
+				from content.question_topic qt_filter
+				join content.topic t_filter on t_filter.id = qt_filter.topic_id
+				where qt_filter.question_id = q.id and t_filter.stable_key = $3
+			  ))
+		)
+		select
+			current.question_id,
+			current.revision_id,
+			current.stable_key,
+			current.slug,
+			current.status,
+			current.content_hash,
+			current.locale,
+			current.available_locales,
+			current.prompt,
+			current.short_answer,
+			current.explanation,
+			current.normalized_payload,
+			coalesce(jsonb_agg(
+				jsonb_build_object('stable_key', topic.stable_key, 'title', topic.title, 'relation', qt.relation)
+				order by case when qt.relation = 'primary' then 0 else 1 end, topic.stable_key
+			) filter (where topic.stable_key is not null), '[]'::jsonb) as topics
+		from current
+		left join content.question_topic qt on qt.question_id = current.question_id::uuid
+		left join content.topic topic on topic.id = qt.topic_id
+		group by current.question_id, current.revision_id, current.stable_key, current.slug,
+			current.status, current.content_hash, current.locale, current.available_locales,
+			current.prompt, current.short_answer, current.explanation, current.normalized_payload
+		order by current.stable_key
+		offset $4 limit $5
+	`, workspaceKey, locale, topicKey, offset, limit)
+	if err != nil {
+		return search.CatalogResponse{}, fmt.Errorf("query catalog questions: %w", err)
+	}
+	defer rows.Close()
+	questions := make([]search.CatalogItem, 0, limit)
+	for rows.Next() {
+		var item search.CatalogItem
+		var payload []byte
+		var topicsJSON []byte
+		if err := rows.Scan(
+			&item.QuestionID, &item.RevisionID, &item.StableKey, &item.Slug,
+			&item.Status, &item.ContentHash, &item.Locale, &item.AvailableLocales,
+			&item.Prompt, &item.ShortAnswer, &item.Explanation, &payload, &topicsJSON,
+		); err != nil {
+			return search.CatalogResponse{}, fmt.Errorf("scan catalog question: %w", err)
+		}
+		var normalized map[string]any
+		if err := json.Unmarshal(payload, &normalized); err != nil {
+			return search.CatalogResponse{}, fmt.Errorf("decode catalog metadata: %w", err)
+		}
+		item.Metadata = catalogMetadata(normalized)
+		if err := json.Unmarshal(topicsJSON, &item.Topics); err != nil {
+			return search.CatalogResponse{}, fmt.Errorf("decode catalog topics: %w", err)
+		}
+		questions = append(questions, item)
+	}
+	if err := rows.Err(); err != nil {
+		return search.CatalogResponse{}, fmt.Errorf("iterate catalog questions: %w", err)
+	}
+	response := search.CatalogResponse{
+		ContractVersion: "question-brain.catalog.v1",
+		WorkspaceKey:    workspaceKey,
+		Locale:          locale,
+		ReleaseID:       releaseID,
+		GeneratedAt:     time.Now().UTC(),
+		Total:           total,
+		Offset:          offset,
+		Limit:           limit,
+		Questions:       questions,
+	}
+	response.Provenance.Explainable = true
+	response.Provenance.Source = "content.question.current_revision"
+	response.Provenance.Pipeline = []string{"published-current-revision", "locale-fallback", "topic-relations"}
+	return response, nil
+}
+
+func catalogMetadata(payload map[string]any) search.CatalogMetadata {
+	metadata := search.CatalogMetadata{
+		Group:         stringField(payload, "group"),
+		Level:         stringField(payload, "level"),
+		Scope:         stringField(payload, "scope"),
+		Title:         stringField(payload, "title"),
+		Topic:         stringField(payload, "topic"),
+		Track:         stringField(payload, "track"),
+		Priority:      stringField(payload, "priority"),
+		Lang:          stringField(payload, "lang"),
+		Runtime:       stringField(payload, "runtime"),
+		ExecutionMode: stringField(payload, "execution_mode"),
+		OrderKey:      stringField(payload, "order_key"),
+		StageKey:      stringField(payload, "stage_key"),
+		CapabilityKey: stringField(payload, "capability_key"),
+	}
+	if value, ok := payload["depth"].(float64); ok {
+		metadata.Depth = int(value)
+	}
+	return metadata
+}
+
+func stringField(payload map[string]any, key string) string {
+	value, _ := payload[key].(string)
+	return strings.TrimSpace(value)
 }
 
 // RecordDuplicateDecision makes the duplicate review explicit and auditable.
