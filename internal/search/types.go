@@ -131,7 +131,6 @@ type ReleaseItem struct {
 	ContentKind      string   `json:"content_kind"`
 	AvailableLocales []string `json:"available_locales"`
 	SourceSystem     string   `json:"source_system"`
-	SourceRef        string   `json:"source_ref,omitempty"`
 	QualityState     string   `json:"quality_state"`
 	GraphState       string   `json:"graph_state"`
 }

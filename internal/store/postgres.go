@@ -1006,7 +1006,6 @@ func (p *Postgres) Release(ctx context.Context, request search.ReleaseRequest) (
 			coalesce(array_agg(distinct ql.locale order by ql.locale)
 				filter (where ql.locale is not null), '{}'::text[]),
 			qr.source_system,
-			coalesce(qr.source_ref, ''),
 			case
 				when exists (
 					select 1 from content.question_topic qt
@@ -1029,7 +1028,7 @@ func (p *Postgres) Release(ctx context.Context, request search.ReleaseRequest) (
 		where w.stable_key = $1
 		  and ($2 or q.content_kind = 'production')
 		group by q.id, qr.id, q.stable_key, qr.content_hash, q.status,
-			q.content_kind, qr.source_system, qr.source_ref
+			q.content_kind, qr.source_system
 		order by q.stable_key
 	`, workspaceKey, includeFixtures)
 	if err != nil {
@@ -1050,7 +1049,6 @@ func (p *Postgres) Release(ctx context.Context, request search.ReleaseRequest) (
 			&item.ContentKind,
 			&item.AvailableLocales,
 			&item.SourceSystem,
-			&item.SourceRef,
 			&item.GraphState,
 		); err != nil {
 			return search.ReleaseResponse{}, fmt.Errorf("scan question release: %w", err)

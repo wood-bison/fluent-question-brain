@@ -36,7 +36,7 @@ resulting release for learner projections.
 
 `GET /v1/release` is the complete machine-readable `QuestionRelease` manifest
 (`question-brain.release.v1`). It pins every stable key to its current
-revision/content hash, available locales, source reference, quality state, and
+revision/content hash, available locales, source system, quality state, and
 graph state (`released`, `accepted-pending`, `proposed`, or `unplaced`). Its
 `checks` block makes missing locales and graph blockers measurable without
 opening answer bodies. `source_snapshot_id` is the deterministic content
