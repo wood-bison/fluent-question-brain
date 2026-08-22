@@ -18,8 +18,6 @@ import (
 	"github.com/wood-bison/fluent-question-brain/internal/store"
 )
 
-const defaultModel = "qwen3.8:27b-mlx"
-
 type translationInput struct {
 	Question string              `json:"question"`
 	Sections []normalize.Section `json:"sections"`
@@ -30,11 +28,6 @@ type translationOutput struct {
 	ShortAnswer string              `json:"short_answer"`
 	Explanation string              `json:"explanation"`
 	Sections    []normalize.Section `json:"sections"`
-}
-
-type ollamaResponse struct {
-	Response string `json:"response"`
-	Error    string `json:"error"`
 }
 
 type reportItem struct {
@@ -63,9 +56,7 @@ type translationReport struct {
 func main() {
 	databaseURL := flag.String("database-url", os.Getenv("DATABASE_URL"), "Postgres connection URL")
 	workspaceKey := flag.String("workspace", "fluent-interview", "stable workspace key")
-	ollamaURL := flag.String("ollama-url", "http://127.0.0.1:11434", "Ollama API base URL")
-	model := flag.String("model", defaultModel, "Ollama completion model")
-	provider := flag.String("provider", "google", "translation provider: google or ollama (ollama is legacy and opt-in)")
+	provider := flag.String("provider", "google", "translation provider; only the non-LLM Google text endpoint is supported")
 	actor := flag.String("actor", "translation-editorial-2026-08-22", "audit actor")
 	workers := flag.Int("workers", 2, "concurrent translation requests")
 	limit := flag.Int("limit", 0, "translate at most N cards; zero means all")
@@ -101,8 +92,8 @@ func main() {
 	report := translationReport{
 		ContractVersion: "question-brain.translation-run.v1",
 		WorkspaceKey:    *workspaceKey,
-		Model:           translationModelLabel(*provider, *model),
-		Provider:        translationProviderLabel(*provider, *model),
+		Model:           "google-translate",
+		Provider:        "google-translate:text-endpoint",
 		Approved:        *approve,
 		StartedAt:       time.Now().UTC(),
 		SourceCount:     len(sources),
@@ -110,10 +101,10 @@ func main() {
 		ExistingBefore:  existingBefore,
 		Items:           make([]reportItem, 0, len(sources)),
 	}
-	if *provider != "google" && *provider != "ollama" {
-		fatal("provider must be google or ollama")
+	if *provider != "google" {
+		fatal("LLM translation providers are disabled; provider must be google")
 	}
-	items := translateAll(ctx, db, sources, *ollamaURL, *model, *provider, *actor, *workers, *approve)
+	items := translateAll(ctx, db, sources, *actor, *workers, *approve)
 	report.Items = items
 	for _, item := range items {
 		if item.Status == "translated" || item.Status == "stored" {
@@ -142,21 +133,7 @@ func main() {
 	}
 }
 
-func translationProviderLabel(provider, model string) string {
-	if provider == "ollama" {
-		return "ollama:" + model
-	}
-	return "google-translate:text-endpoint"
-}
-
-func translationModelLabel(provider, model string) string {
-	if provider == "ollama" {
-		return model
-	}
-	return "google-translate"
-}
-
-func translateAll(ctx context.Context, db *store.Postgres, sources []store.TranslationSource, ollamaURL, model, provider, actor string, workers int, approve bool) []reportItem {
+func translateAll(ctx context.Context, db *store.Postgres, sources []store.TranslationSource, actor string, workers int, approve bool) []reportItem {
 	type result struct {
 		index int
 		item  reportItem
@@ -171,14 +148,14 @@ func translateAll(ctx context.Context, db *store.Postgres, sources []store.Trans
 			for index := range jobs {
 				source := sources[index]
 				item := reportItem{StableKey: source.StableKey}
-				translated, err := translateSource(ctx, source, ollamaURL, model, provider)
+				translated, err := translateSource(ctx, source)
 				if err != nil {
 					item.Status, item.Error = "failed", err.Error()
 					results <- result{index: index, item: item}
 					continue
 				}
 				if approve {
-					err = db.StoreRussianTranslation(ctx, source, translated.Question, translated.ShortAnswer, translated.Explanation, translated.Sections, actor, translationProviderLabel(provider, model))
+					err = db.StoreRussianTranslation(ctx, source, translated.Question, translated.ShortAnswer, translated.Explanation, translated.Sections, actor, "google-translate:text-endpoint")
 					if err != nil {
 						item.Status, item.Error = "failed", err.Error()
 						results <- result{index: index, item: item}
@@ -207,7 +184,7 @@ func translateAll(ctx context.Context, db *store.Postgres, sources []store.Trans
 	return ordered
 }
 
-func translateSource(ctx context.Context, source store.TranslationSource, ollamaURL, model, provider string) (translationOutput, error) {
+func translateSource(ctx context.Context, source store.TranslationSource) (translationOutput, error) {
 	var input translationInput
 	if err := json.Unmarshal(source.Payload, &input); err != nil {
 		return translationOutput{}, fmt.Errorf("decode canonical payload: %w", err)
@@ -215,53 +192,7 @@ func translateSource(ctx context.Context, source store.TranslationSource, ollama
 	if strings.TrimSpace(input.Question) == "" {
 		return translationOutput{}, errors.New("canonical payload has no question")
 	}
-	if provider == "google" {
-		return translateWithGoogle(ctx, input)
-	}
-	return translateWithOllama(ctx, input, ollamaURL, model)
-}
-
-func translateWithOllama(ctx context.Context, input translationInput, ollamaURL, model string) (translationOutput, error) {
-	requestBody := map[string]any{
-		"model":  model,
-		"stream": false,
-		"think":  false,
-		"format": "json",
-		"options": map[string]any{
-			"temperature": 0.1,
-		},
-		"prompt": translationPrompt(input),
-	}
-	body, err := json.Marshal(requestBody)
-	if err != nil {
-		return translationOutput{}, fmt.Errorf("encode Ollama request: %w", err)
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(ollamaURL, "/")+"/api/generate", strings.NewReader(string(body)))
-	if err != nil {
-		return translationOutput{}, fmt.Errorf("create Ollama request: %w", err)
-	}
-	req.Header.Set("content-type", "application/json")
-	client := &http.Client{Timeout: 10 * time.Minute}
-	resp, err := client.Do(req)
-	if err != nil {
-		return translationOutput{}, fmt.Errorf("call Ollama: %w", err)
-	}
-	defer resp.Body.Close()
-	var envelope ollamaResponse
-	if err := json.NewDecoder(resp.Body).Decode(&envelope); err != nil {
-		return translationOutput{}, fmt.Errorf("decode Ollama response: %w", err)
-	}
-	if resp.StatusCode >= http.StatusBadRequest || envelope.Error != "" {
-		return translationOutput{}, fmt.Errorf("Ollama error: %s", firstNonEmpty(envelope.Error, resp.Status))
-	}
-	var output translationOutput
-	if err := json.Unmarshal([]byte(envelope.Response), &output); err != nil {
-		return translationOutput{}, fmt.Errorf("decode translated JSON: %w", err)
-	}
-	if err := validateTranslation(input, output); err != nil {
-		return translationOutput{}, err
-	}
-	return output, nil
+	return translateWithGoogle(ctx, input)
 }
 
 // translateWithGoogle is the fast, non-LLM editorial pass. It uses the
@@ -388,17 +319,6 @@ func translateGoogleFields(ctx context.Context, input translationInput) (transla
 	return output, nil
 }
 
-func translationPrompt(input translationInput) string {
-	encoded, _ := json.Marshal(input)
-	return `Translate this technical learning card from English to natural, concise Russian.
-Return ONLY valid JSON with exactly these keys: question, short_answer, explanation, sections.
-The sections array must contain the same number of objects as the input, each with title and body.
-Preserve code, identifiers, API names, numbers, markdown bullets, and inline English technical terms.
-Do not invent facts, examples, or sections. Translate section titles as well.
-If a field is empty in the input, keep it empty. Input JSON:
-` + string(encoded)
-}
-
 func validateTranslation(input translationInput, output translationOutput) error {
 	if strings.TrimSpace(output.Question) == "" || !hasCyrillic(output.Question) {
 		return errors.New("translated question is empty or not Russian")
@@ -427,15 +347,6 @@ func hasCyrillic(value string) bool {
 		}
 	}
 	return false
-}
-
-func firstNonEmpty(values ...string) string {
-	for _, value := range values {
-		if strings.TrimSpace(value) != "" {
-			return value
-		}
-	}
-	return ""
 }
 
 func fatal(format string, args ...any) {

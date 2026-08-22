@@ -25,14 +25,14 @@ go run ./cmd/qb-translate-ru \
   --report translation-run.json
 ```
 
-The default translation pass is a fast, non-LLM Google Translate text-endpoint
+The production translation pass is a fast, non-LLM Google Translate text-endpoint
 adapter. It is deliberately explicit in the report and keeps field markers so
-the same number and order of sections is reconstructed. The legacy local
-Ollama adapter remains available only with `--provider ollama`; it is not used
-by the production backfill. Every provider must return a Russian question,
-non-empty section bodies, and the same section count before anything is
-written. Locale inserts are idempotent and append a `question.locale.translated`
-audit event plus an outbox event for downstream search/embedding workers.
+the same number and order of sections is reconstructed. LLM providers are
+disabled in the command and cannot be selected accidentally. The adapter must
+return a Russian question, non-empty section bodies, and the same section count
+before anything is written. Locale inserts are idempotent and append a
+`question.locale.translated` audit event plus an outbox event for downstream
+search/embedding workers.
 
 The output is `question-brain.translation-run.v1`. Generated text remains
 traceable to the source revision hash and provider; a future human editorial
