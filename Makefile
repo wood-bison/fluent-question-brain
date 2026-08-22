@@ -1,6 +1,9 @@
-.PHONY: check test contract compose-up compose-down
+.PHONY: check test contract smoke compose-up compose-down
 
 check: contract test
+
+smoke:
+	bash scripts/compose-smoke.sh
 
 contract:
 	bash scripts/check-contract.sh
@@ -13,4 +16,3 @@ compose-up:
 
 compose-down:
 	docker compose -p fluent-question-brain -f deploy/compose/compose.yaml down
-

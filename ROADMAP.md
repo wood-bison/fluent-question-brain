@@ -14,11 +14,11 @@ previous gate has an open blocker.
 
 ## G1 — canonical schema and one-card round-trip (current gate)
 
-- [ ] Define the canonical JSON contract and normalization rules.
-- [ ] Import exactly one representative question from
+- [x] Define the canonical JSON contract and normalization rules.
+- [x] Import exactly one representative question from
       `fluent-question-vault`.
-- [ ] Persist a revision and its `content_hash` transactionally.
-- [ ] Export the same card and prove a byte-stable normalized round-trip.
+- [x] Persist a revision and its `content_hash` transactionally.
+- [x] Export the same card and prove a byte-stable normalized round-trip.
 - [ ] Record one duplicate candidate and one placement decision with audit
       evidence.
 - [ ] Add a migration test against the Compose Postgres image.
@@ -63,4 +63,3 @@ The system is ready for other projects when a new workspace can import,
 review, publish, search, localize, connect, and export questions without
 editing application code; every result has explainable provenance; and a
 failed worker or migration can be retried or rolled back without data loss.
-
