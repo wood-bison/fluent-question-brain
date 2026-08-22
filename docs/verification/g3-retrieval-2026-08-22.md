@@ -2,9 +2,10 @@
 
 Date: 2026-08-22
 
-The full G2 import produced 2,388 locale embeddings with the deterministic
+The full G2 import plus the approved release produced 2,399 locale embeddings with the deterministic
 `semantic-dev-hash-v1` profile. The indexer drained 1,368 outbox events,
-wrote 2,388 vectors, and reported zero failures.
+wrote the complete `2,399` vector set, and reported zero failures. The
+post-release database has zero pending outbox events.
 
 The API contract is now:
 
@@ -26,7 +27,7 @@ The benchmark uses a stable existing vector as the query and compares the same
 top-10 request:
 
 ```text
-corpus: 2388 vectors
+corpus: 2399 vectors
 exact sequential scan: 10.481 ms
 IVFFlat (lists=16, probes=16): 1.496 ms
 HNSW (m=16, ef_search=64): 0.312 ms
