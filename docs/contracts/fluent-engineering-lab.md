@@ -25,6 +25,13 @@ The response contract is `question-brain.catalog.v1`, and `total`/`offset`/
 exists. A `topic_key` query parameter narrows the same release index to one
 topic.
 
+The catalog defaults to the learner-safe production release. Development
+records are classified explicitly with `content_kind=fixture` and are excluded
+from the default response. The response reports `include_fixtures=false` and
+`excluded_fixtures` so an operator can see that the boundary was applied. A
+diagnostic request may opt in with `include_fixtures=true`; the Lab never sends
+that flag and must not use the resulting release for learner projections.
+
 Every search response carries `provenance.explainable=true`, the active
 pipeline (`exact`, `fts`, `trigram`, and the semantic profile), per-result
 match stages, and a stable `revision_id`/`content_hash`. The Lab can safely

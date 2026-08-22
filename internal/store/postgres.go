@@ -777,6 +777,7 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 		limit = 2_000
 	}
 	topicKey := strings.TrimSpace(request.TopicKey)
+	includeFixtures := request.IncludeFixtures
 
 	var total int
 	if err := p.pool.QueryRow(ctx, `
@@ -784,14 +785,24 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 		from content.workspace w
 		join content.question q on q.workspace_id = w.id and q.status = 'published'
 		where w.stable_key = $1
+		  and ($3 or q.content_kind = 'production')
 		  and ($2 = '' or exists (
 			select 1
 			from content.question_topic qt
 			join content.topic t on t.id = qt.topic_id
 			where qt.question_id = q.id and t.stable_key = $2
 		  ))
-	`, workspaceKey, topicKey).Scan(&total); err != nil {
+	`, workspaceKey, topicKey, includeFixtures).Scan(&total); err != nil {
 		return search.CatalogResponse{}, fmt.Errorf("count catalog questions: %w", err)
+	}
+	var excludedFixtures int
+	if err := p.pool.QueryRow(ctx, `
+		select count(*)
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		where w.stable_key = $1 and q.content_kind = 'fixture'
+	`, workspaceKey).Scan(&excludedFixtures); err != nil {
+		return search.CatalogResponse{}, fmt.Errorf("count excluded catalog fixtures: %w", err)
 	}
 
 	releaseSeed := ""
@@ -801,7 +812,8 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 		join content.question q on q.workspace_id = w.id and q.status = 'published'
 		join content.question_revision qr on qr.id = q.current_revision_id
 		where w.stable_key = $1
-	`, workspaceKey).Scan(&releaseSeed); err != nil {
+		  and ($2 or q.content_kind = 'production')
+	`, workspaceKey, includeFixtures).Scan(&releaseSeed); err != nil {
 		return search.CatalogResponse{}, fmt.Errorf("fingerprint catalog release: %w", err)
 	}
 	releaseHash := sha256.Sum256([]byte(releaseSeed))
@@ -837,6 +849,7 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 				limit 1
 			) ql on true
 			where w.stable_key = $1
+			  and ($4 or q.content_kind = 'production')
 			  and ($3 = '' or exists (
 				select 1
 				from content.question_topic qt_filter
@@ -868,8 +881,8 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 			current.status, current.content_hash, current.locale, current.available_locales,
 			current.prompt, current.short_answer, current.explanation, current.normalized_payload
 		order by current.stable_key
-		offset $4 limit $5
-	`, workspaceKey, locale, topicKey, offset, limit)
+		offset $5 limit $6
+	`, workspaceKey, locale, topicKey, includeFixtures, offset, limit)
 	if err != nil {
 		return search.CatalogResponse{}, fmt.Errorf("query catalog questions: %w", err)
 	}
@@ -900,15 +913,17 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 		return search.CatalogResponse{}, fmt.Errorf("iterate catalog questions: %w", err)
 	}
 	response := search.CatalogResponse{
-		ContractVersion: "question-brain.catalog.v1",
-		WorkspaceKey:    workspaceKey,
-		Locale:          locale,
-		ReleaseID:       releaseID,
-		GeneratedAt:     time.Now().UTC(),
-		Total:           total,
-		Offset:          offset,
-		Limit:           limit,
-		Questions:       questions,
+		ContractVersion:  "question-brain.catalog.v1",
+		WorkspaceKey:     workspaceKey,
+		Locale:           locale,
+		ReleaseID:        releaseID,
+		GeneratedAt:      time.Now().UTC(),
+		Total:            total,
+		Offset:           offset,
+		Limit:            limit,
+		IncludeFixtures:  includeFixtures,
+		ExcludedFixtures: excludedFixtures,
+		Questions:        questions,
 	}
 	response.Provenance.Explainable = true
 	response.Provenance.Source = "content.question.current_revision"

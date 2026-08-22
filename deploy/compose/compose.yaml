@@ -20,6 +20,7 @@ services:
       - ../../db/migrations/0003_retrieval_profile.sql:/docker-entrypoint-initdb.d/003_retrieval_profile.sql:ro
       - ../../db/migrations/0004_retrieval_indexes.sql:/docker-entrypoint-initdb.d/004_retrieval_indexes.sql:ro
       - ../../db/migrations/0005_cms_schema.sql:/docker-entrypoint-initdb.d/005_cms_schema.sql:ro
+      - ../../db/migrations/0006_content_kind.sql:/docker-entrypoint-initdb.d/006_content_kind.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U question_brain -d question_brain"]
       interval: 5s

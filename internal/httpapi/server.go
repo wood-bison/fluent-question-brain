@@ -205,11 +205,12 @@ func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
 		return value
 	}
 	request := search.CatalogRequest{
-		WorkspaceKey: r.URL.Query().Get("workspace"),
-		Locale:       r.URL.Query().Get("locale"),
-		TopicKey:     r.URL.Query().Get("topic_key"),
-		Offset:       parseInt("offset", 0),
-		Limit:        parseInt("limit", 100),
+		WorkspaceKey:    r.URL.Query().Get("workspace"),
+		Locale:          r.URL.Query().Get("locale"),
+		TopicKey:        r.URL.Query().Get("topic_key"),
+		Offset:          parseInt("offset", 0),
+		Limit:           parseInt("limit", 100),
+		IncludeFixtures: parseBool(r.URL.Query().Get("include_fixtures")),
 	}
 	if strings.TrimSpace(request.WorkspaceKey) == "" {
 		request.WorkspaceKey = "fluent-interview"
@@ -220,6 +221,15 @@ func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, response)
+}
+
+func parseBool(value string) bool {
+	switch strings.TrimSpace(strings.ToLower(value)) {
+	case "1", "true", "yes", "on":
+		return true
+	default:
+		return false
+	}
 }
 
 func (s *Server) question(w http.ResponseWriter, r *http.Request) {

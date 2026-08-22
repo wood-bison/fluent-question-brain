@@ -50,11 +50,12 @@ type Question struct {
 // CatalogRequest is the bounded read contract used by learner projections.
 // It exposes the current published revision index, never authoring payloads.
 type CatalogRequest struct {
-	WorkspaceKey string
-	Locale       string
-	TopicKey     string
-	Offset       int
-	Limit        int
+	WorkspaceKey    string
+	Locale          string
+	TopicKey        string
+	Offset          int
+	Limit           int
+	IncludeFixtures bool
 }
 
 type CatalogItem struct {
@@ -94,16 +95,18 @@ type CatalogMetadata struct {
 }
 
 type CatalogResponse struct {
-	ContractVersion string        `json:"contract_version"`
-	WorkspaceKey    string        `json:"workspace_key"`
-	Locale          string        `json:"locale"`
-	ReleaseID       string        `json:"release_id"`
-	GeneratedAt     time.Time     `json:"generated_at"`
-	Total           int           `json:"total"`
-	Offset          int           `json:"offset"`
-	Limit           int           `json:"limit"`
-	Questions       []CatalogItem `json:"questions"`
-	Provenance      struct {
+	ContractVersion  string        `json:"contract_version"`
+	WorkspaceKey     string        `json:"workspace_key"`
+	Locale           string        `json:"locale"`
+	ReleaseID        string        `json:"release_id"`
+	GeneratedAt      time.Time     `json:"generated_at"`
+	Total            int           `json:"total"`
+	Offset           int           `json:"offset"`
+	Limit            int           `json:"limit"`
+	IncludeFixtures  bool          `json:"include_fixtures"`
+	ExcludedFixtures int           `json:"excluded_fixtures"`
+	Questions        []CatalogItem `json:"questions"`
+	Provenance       struct {
 		Explainable bool     `json:"explainable"`
 		Source      string   `json:"source"`
 		Pipeline    []string `json:"pipeline"`
