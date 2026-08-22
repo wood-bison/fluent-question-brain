@@ -19,6 +19,7 @@ services:
       - ../../db/migrations/0002_ingestion_runs.sql:/docker-entrypoint-initdb.d/002_ingestion_runs.sql:ro
       - ../../db/migrations/0003_retrieval_profile.sql:/docker-entrypoint-initdb.d/003_retrieval_profile.sql:ro
       - ../../db/migrations/0004_retrieval_indexes.sql:/docker-entrypoint-initdb.d/004_retrieval_indexes.sql:ro
+      - ../../db/migrations/0005_cms_schema.sql:/docker-entrypoint-initdb.d/005_cms_schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U question_brain -d question_brain"]
       interval: 5s
@@ -36,6 +37,7 @@ services:
       DATABASE_URL: postgres://question_brain:question_brain@postgres:5432/question_brain?sslmode=disable
       EMBEDDING_PROFILE: ${EMBEDDING_PROFILE:-semantic-v1}
       OTEL_EXPORTER_OTLP_ENDPOINT: jaeger:4317
+      QUESTION_BRAIN_INTERNAL_TOKEN: ${QUESTION_BRAIN_INTERNAL_TOKEN:-local-promote-token}
     ports:
       - "127.0.0.1:${QB_HTTP_PORT:-48127}:8080"
     depends_on:
@@ -48,6 +50,32 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+    restart: unless-stopped
+
+  cms:
+    build:
+      context: ../../apps/cms
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:-local-only-change-me}
+      PAYLOAD_DATABASE_URL: postgres://question_brain:question_brain@postgres:5432/question_brain?sslmode=disable
+      QUESTION_BRAIN_PROMOTE_URL: http://api:8080/v1/promote
+      QUESTION_BRAIN_INTERNAL_TOKEN: ${QUESTION_BRAIN_INTERNAL_TOKEN:-local-promote-token}
+    ports:
+      - "127.0.0.1:${QB_CMS_PORT:-48128}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/admin').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
 
   jaeger:

@@ -8,23 +8,40 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/wood-bison/fluent-question-brain/internal/normalize"
 	"github.com/wood-bison/fluent-question-brain/internal/search"
+	"github.com/wood-bison/fluent-question-brain/internal/store"
 )
+
+type cardPromoter interface {
+	PromoteCard(context.Context, normalize.Card, string, string, string) (store.StoredRevision, error)
+}
 
 type Server struct {
 	databaseURL   string
 	searchService search.Service
+	promoter      cardPromoter
+	internalToken string
 }
 
 func New(databaseURL string, service ...search.Service) *Server {
 	var searchService search.Service
+	var promoter cardPromoter
 	if len(service) > 0 {
 		searchService = service[0]
+		promoter, _ = service[0].(cardPromoter)
 	}
-	return &Server{databaseURL: databaseURL, searchService: searchService}
+	return &Server{
+		databaseURL:   databaseURL,
+		searchService: searchService,
+		promoter:      promoter,
+		internalToken: strings.TrimSpace(os.Getenv("QUESTION_BRAIN_INTERNAL_TOKEN")),
+	}
 }
 
 func (s *Server) Handler() http.Handler {
@@ -34,6 +51,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /health/ready", s.ready)
 	mux.HandleFunc("POST /v1/search", s.search)
 	mux.HandleFunc("GET /v1/questions/{stableKey}", s.question)
+	mux.HandleFunc("POST /v1/promote", s.promote)
 	return requestID(mux)
 }
 
@@ -175,6 +193,91 @@ func (s *Server) question(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, question)
+}
+
+type promoteRequest struct {
+	WorkspaceKey  string              `json:"workspace_key"`
+	WorkspaceName string              `json:"workspace_name"`
+	SourceRef     string              `json:"source_ref"`
+	StableKey     string              `json:"stable_key"`
+	Slug          string              `json:"slug"`
+	Title         string              `json:"title"`
+	Track         string              `json:"track"`
+	Topic         string              `json:"topic"`
+	Scope         string              `json:"scope"`
+	Lang          string              `json:"lang"`
+	Priority      string              `json:"priority"`
+	Group         string              `json:"group"`
+	Level         string              `json:"level"`
+	Question      string              `json:"question"`
+	Sections      []normalize.Section `json:"sections"`
+}
+
+func (s *Server) promote(w http.ResponseWriter, r *http.Request) {
+	if s.promoter == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "promote_service_unavailable"})
+		return
+	}
+	if s.internalToken == "" || r.Header.Get("X-Question-Brain-Token") != s.internalToken {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var request promoteRequest
+	decoder := json.NewDecoder(io.LimitReader(r.Body, 2<<20))
+	if err := decoder.Decode(&request); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_promote_request"})
+		return
+	}
+	if strings.TrimSpace(request.WorkspaceKey) == "" {
+		request.WorkspaceKey = "fluent-interview"
+	}
+	if strings.TrimSpace(request.WorkspaceName) == "" {
+		request.WorkspaceName = "Fluent Interview"
+	}
+	if strings.TrimSpace(request.SourceRef) == "" {
+		request.SourceRef = "payload://question/" + strings.TrimSpace(request.StableKey)
+	}
+	canonical, err := json.Marshal(map[string]any{
+		"stable_key": request.StableKey,
+		"slug":       request.Slug,
+		"title":      request.Title,
+		"track":      request.Track,
+		"topic":      request.Topic,
+		"scope":      request.Scope,
+		"lang":       request.Lang,
+		"priority":   request.Priority,
+		"group":      request.Group,
+		"level":      request.Level,
+		"question":   request.Question,
+		"sections":   request.Sections,
+	})
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "encode_promote_payload"})
+		return
+	}
+	card, err := normalize.CardFromPayload(request.SourceRef, canonical)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return
+	}
+	actor := strings.TrimSpace(r.Header.Get("X-Question-Brain-Actor"))
+	if actor == "" {
+		actor = "payload-cms"
+	}
+	stored, err := s.promoter.PromoteCard(r.Context(), card, request.WorkspaceKey, request.WorkspaceName, actor)
+	if err != nil {
+		writeJSON(w, http.StatusBadGateway, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":           "published",
+		"action":           stored.Action,
+		"question_id":      stored.QuestionID,
+		"revision_id":      stored.RevisionID,
+		"content_hash":     stored.Hash,
+		"revision_created": stored.RevisionCreated,
+		"source":           "payload-cms",
+	})
 }
 
 func requestID(next http.Handler) http.Handler {

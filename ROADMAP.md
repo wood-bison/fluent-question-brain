@@ -43,12 +43,14 @@ previous gate has an open blocker.
 
 ## G4 — authoring and application integration
 
-- [ ] Build Payload as the editorial UI against the isolated `cms` schema.
-- [ ] Implement promote/review commands into the Go API; never dual-write
+- [x] Build Payload as the editorial UI against the isolated `cms` schema.
+- [x] Implement promote/review commands into the Go API; never dual-write
       published content.
-- [ ] Switch Fluent Engineering Lab reads to the versioned API behind a
-      feature flag.
-- [ ] Verify Russian/English UI and content fallbacks end to end.
+- [x] Provide a dependency-free Fluent Engineering Lab read adapter with an
+      explicit feature flag and rollback path. The learner projection remains
+      owned by Lab; parity evidence is committed there before enabling it.
+- [x] Verify Russian/English content fallbacks end to end through Payload → Go
+      API, including a published two-locale smoke card.
 
 ## G5 — production hardening and retirement
 

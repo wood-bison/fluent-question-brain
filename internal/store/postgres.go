@@ -82,6 +82,36 @@ func (p *Postgres) Close() {
 }
 
 func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspaceKey, workspaceName string) (StoredRevision, error) {
+	return p.upsertCard(ctx, card, workspaceKey, workspaceName, "fluent-question-vault", "vault-importer")
+}
+
+// PromoteCard is the only write path exposed to an authoring surface. Payload
+// owns drafts in cms; this transaction owns the published revision in content
+// and emits the same outbox event used by imports.
+func (p *Postgres) PromoteCard(ctx context.Context, card normalize.Card, workspaceKey, workspaceName, actor string) (StoredRevision, error) {
+	if strings.TrimSpace(actor) == "" {
+		actor = "payload-cms"
+	}
+	return p.upsertCard(ctx, card, workspaceKey, workspaceName, "payload-cms", actor)
+}
+
+func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspaceKey, workspaceName, sourceSystem, actor string) (StoredRevision, error) {
+	eventType := "question.imported"
+	if sourceSystem == "payload-cms" {
+		eventType = "question.promoted"
+	}
+	auditMetadata, err := json.Marshal(map[string]string{"source": sourceSystem, "actor": actor})
+	if err != nil {
+		return StoredRevision{}, fmt.Errorf("encode audit metadata: %w", err)
+	}
+	outboxPayload, err := json.Marshal(map[string]string{"reason": "published", "source": sourceSystem})
+	if err != nil {
+		return StoredRevision{}, fmt.Errorf("encode outbox payload: %w", err)
+	}
+	status := "draft"
+	if sourceSystem == "payload-cms" {
+		status = "published"
+	}
 	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return StoredRevision{}, fmt.Errorf("begin card transaction: %w", err)
@@ -115,10 +145,13 @@ func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspac
 	var questionID string
 	err = tx.QueryRow(ctx, `
 		insert into content.question (workspace_id, stable_key, slug, status)
-		values ($1::uuid, $2, $3, 'draft')
-		on conflict (workspace_id, stable_key) do update set slug = excluded.slug, updated_at = now()
+		values ($1::uuid, $2, $3, $4)
+		on conflict (workspace_id, stable_key) do update set
+		  slug = excluded.slug,
+		  status = case when excluded.status = 'published' then 'published' else content.question.status end,
+		  updated_at = now()
 		returning id::text
-	`, workspaceID, card.StableKey, card.Slug).Scan(&questionID)
+	`, workspaceID, card.StableKey, card.Slug, status).Scan(&questionID)
 	if err != nil {
 		return StoredRevision{}, fmt.Errorf("upsert question: %w", err)
 	}
@@ -130,7 +163,7 @@ func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspac
 		values ($1::uuid, coalesce((select max(revision_no) + 1 from content.question_revision where question_id = $1::uuid), 1), $2, $3::jsonb, $4, $5)
 		on conflict (question_id, content_hash) do nothing
 		returning id::text
-	`, questionID, card.Hash, card.Payload, "fluent-question-vault", card.SourceRef).Scan(&revisionID)
+	`, questionID, card.Hash, card.Payload, sourceSystem, card.SourceRef).Scan(&revisionID)
 	revisionCreated := err == nil
 	if err != nil && err != pgx.ErrNoRows {
 		return StoredRevision{}, fmt.Errorf("upsert revision: %w", err)
@@ -149,7 +182,7 @@ func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspac
 	prompt, shortAnswer, explanation := normalize.EnglishFields(card)
 	body, err := json.Marshal(map[string]any{
 		"source": map[string]string{
-			"system": "fluent-question-vault",
+			"system": sourceSystem,
 			"path":   card.SourceRef,
 		},
 		"sections": normalize.SectionsForBody(card),
@@ -217,15 +250,15 @@ func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspac
 	if revisionCreated {
 		if _, err = tx.Exec(ctx, `
 			insert into content.audit_event (workspace_id, aggregate_type, aggregate_id, event_type, actor, metadata)
-			values ($1::uuid, 'question_revision', $2::uuid, 'question.imported', 'vault-importer', $3::jsonb)
-		`, workspaceID, revisionID, `{"source":"fluent-question-vault"}`); err != nil {
+			values ($1::uuid, 'question_revision', $2::uuid, $3, $4, $5::jsonb)
+		`, workspaceID, revisionID, eventType, actor, auditMetadata); err != nil {
 			return StoredRevision{}, fmt.Errorf("write audit event: %w", err)
 		}
 		if _, err = tx.Exec(ctx, `
 			insert into content.outbox_event (aggregate_type, aggregate_id, event_type, idempotency_key, payload)
-			values ('question_revision', $1::uuid, 'question.revision.imported', $2, $3::jsonb)
+			values ('question_revision', $1::uuid, $3, $2, $4::jsonb)
 			on conflict (idempotency_key) do nothing
-		`, revisionID, "question-revision:"+revisionID, `{"reason":"g1-round-trip"}`); err != nil {
+		`, revisionID, "question-revision:"+revisionID, "question.revision.published", outboxPayload); err != nil {
 			return StoredRevision{}, fmt.Errorf("write outbox event: %w", err)
 		}
 	}

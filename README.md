@@ -24,10 +24,12 @@ allowing two writers to silently diverge.
 
 ## Current milestone
 
-This repository starts at G1 from the audit: the canonical schema and service
-contract. It is deliberately not pretending that the full search UI or CMS is
-already complete. The next hard gate is a round-trip of one real card from the
-vault into Postgres and back, with an immutable content hash.
+G0–G3 are closed and G4 is now running end to end locally: the full bilingual
+vault is reconciled, exact/FTS/trigram/semantic retrieval is explainable, and
+Payload drafts publish through a token-protected Go API boundary into the
+canonical `content` schema. Fluent Engineering Lab remains the learner product;
+its read switch is deliberately opt-in until parity evidence is committed in
+that repository.
 
 See:
 
@@ -49,15 +51,18 @@ docker compose -f deploy/compose/compose.yaml up --build
 ```
 
 The database is exposed on `localhost:55437`, the Go API on
-`localhost:48127`, and the local Jaeger UI on `localhost:56686`. The API
-currently exposes lifecycle endpoints and a clear
-`501 Not Implemented` response for search until the G1 round-trip is closed;
-that is intentional and prevents a demo endpoint from becoming a hidden
-production dependency.
+`localhost:48127`, the Payload authoring studio on `localhost:48128`, and the
+local Jaeger UI on `localhost:56686`.
 
 ```sh
 curl -i http://localhost:48127/health/live
 curl -i http://localhost:48127/health/ready
+# Search with explainable provenance
+curl -sS -X POST http://localhost:48127/v1/search \
+  -H 'content-type: application/json' \
+  -d '{"query":"event loop","locale":"en","limit":5}'
+# Payload authoring studio
+open http://localhost:48128/admin
 # Trace UI (local Jaeger all-in-one)
 open http://localhost:56686
 ```

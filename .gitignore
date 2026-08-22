@@ -13,6 +13,7 @@ apps/cms/node_modules/
 apps/cms/.next/
 apps/cms/.payload/
 apps/cms/dist/
+*.tsbuildinfo
 
 # Local Compose state
 deploy/compose/.data/
