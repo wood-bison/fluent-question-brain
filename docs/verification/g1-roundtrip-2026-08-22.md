@@ -27,6 +27,25 @@ The Compose smoke script also verified the pgvector extension, canonical
 tables, the search-document trigger, and API health against a fresh/healthy
 stack.
 
-Still open in G1: an explicit duplicate candidate. The source-topic placement
-proposal and Compose migration smoke are now covered. Search remains gated
-until the duplicate evidence record exists.
+Duplicate evidence is now recorded for `legacy.q001` and `legacy.q061`:
+
+```text
+decision=not_duplicate exact_score=0.31 semantic_score=0.78 actor=g1-audit
+```
+
+The evidence was written through the auditable command boundary:
+
+```sh
+go run ./cmd/qb-audit \
+  -database-url "$DATABASE_URL" \
+  -left legacy.q001 \
+  -right legacy.q061 \
+  -decision not_duplicate \
+  -exact-score 0.31 \
+  -semantic-score 0.78
+```
+
+The decision created one `content.duplicate_candidate` row and one
+`duplicate_candidate.decided` audit event. The two cards share a Kafka topic
+but have different interview intents, so they remain separate. G1 is now
+closed; search remains gated until the G3 retrieval contract is implemented.

@@ -20,6 +20,16 @@ type StoredRevision struct {
 	Payload    []byte
 }
 
+type DuplicateDecision struct {
+	WorkspaceKey   string
+	LeftStableKey  string
+	RightStableKey string
+	ExactScore     float64
+	SemanticScore  float64
+	Decision       string
+	Actor          string
+}
+
 func Open(ctx context.Context, databaseURL string) (*Postgres, error) {
 	config, err := pgxpool.ParseConfig(databaseURL)
 	if err != nil {
@@ -181,6 +191,75 @@ func (p *Postgres) ExportRevision(ctx context.Context, revisionID string) (Store
 	}
 	stored.Payload = []byte(payload)
 	return stored, nil
+}
+
+// RecordDuplicateDecision makes the duplicate review explicit and auditable.
+// Stable keys are resolved to the current revisions in one transaction so a
+// review can never point at an unversioned or unrelated card.
+func (p *Postgres) RecordDuplicateDecision(ctx context.Context, decision DuplicateDecision) error {
+	if decision.Decision == "" {
+		decision.Decision = "open"
+	}
+	if decision.Actor == "" {
+		decision.Actor = "g1-audit"
+	}
+	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return fmt.Errorf("begin duplicate decision transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var workspaceID, leftRevisionID, rightRevisionID string
+	err = tx.QueryRow(ctx, `
+		select w.id::text, left_q.current_revision_id::text, right_q.current_revision_id::text
+		from content.workspace w
+		join content.question left_q on left_q.workspace_id = w.id and left_q.stable_key = $2
+		join content.question right_q on right_q.workspace_id = w.id and right_q.stable_key = $3
+		where w.stable_key = $1
+	`, decision.WorkspaceKey, decision.LeftStableKey, decision.RightStableKey).Scan(&workspaceID, &leftRevisionID, &rightRevisionID)
+	if err != nil {
+		return fmt.Errorf("resolve duplicate revisions: %w", err)
+	}
+	if leftRevisionID > rightRevisionID {
+		leftRevisionID, rightRevisionID = rightRevisionID, leftRevisionID
+	}
+	var candidateID string
+	err = tx.QueryRow(ctx, `
+		insert into content.duplicate_candidate
+		  (workspace_id, left_revision_id, right_revision_id, exact_score, semantic_score, decision, decided_by, decided_at)
+		values ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, now())
+		on conflict (left_revision_id, right_revision_id) do update set
+		  exact_score = excluded.exact_score,
+		  semantic_score = excluded.semantic_score,
+		  decision = excluded.decision,
+		  decided_by = excluded.decided_by,
+		  decided_at = excluded.decided_at
+		returning id::text
+	`, workspaceID, leftRevisionID, rightRevisionID, decision.ExactScore, decision.SemanticScore, decision.Decision, decision.Actor).Scan(&candidateID)
+	if err != nil {
+		return fmt.Errorf("upsert duplicate candidate: %w", err)
+	}
+	metadata, err := json.Marshal(map[string]any{
+		"left_stable_key":  decision.LeftStableKey,
+		"right_stable_key": decision.RightStableKey,
+		"exact_score":      decision.ExactScore,
+		"semantic_score":   decision.SemanticScore,
+		"decision":         decision.Decision,
+	})
+	if err != nil {
+		return fmt.Errorf("encode duplicate evidence: %w", err)
+	}
+	if _, err = tx.Exec(ctx, `
+		insert into content.audit_event
+		  (workspace_id, aggregate_type, aggregate_id, event_type, actor, metadata)
+		values ($1::uuid, 'duplicate_candidate', $2::uuid, 'duplicate_candidate.decided', $3, $4::jsonb)
+	`, workspaceID, candidateID, decision.Actor, metadata); err != nil {
+		return fmt.Errorf("write duplicate audit event: %w", err)
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit duplicate decision: %w", err)
+	}
+	return nil
 }
 
 func (p *Postgres) CloseByStableKey(ctx context.Context, workspaceKey, stableKey string) error {

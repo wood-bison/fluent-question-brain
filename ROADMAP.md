@@ -19,7 +19,7 @@ previous gate has an open blocker.
       `fluent-question-vault`.
 - [x] Persist a revision and its `content_hash` transactionally.
 - [x] Export the same card and prove a byte-stable normalized round-trip.
-- [ ] Record one duplicate candidate and one placement decision with audit
+- [x] Record one duplicate candidate and one placement decision with audit
       evidence.
 - [x] Add a migration test against the Compose Postgres image.
 
