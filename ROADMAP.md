@@ -21,7 +21,7 @@ previous gate has an open blocker.
 - [x] Export the same card and prove a byte-stable normalized round-trip.
 - [ ] Record one duplicate candidate and one placement decision with audit
       evidence.
-- [ ] Add a migration test against the Compose Postgres image.
+- [x] Add a migration test against the Compose Postgres image.
 
 ## G2 — ingestion and reconciliation
 

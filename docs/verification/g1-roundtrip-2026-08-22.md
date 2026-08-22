@@ -27,6 +27,6 @@ The Compose smoke script also verified the pgvector extension, canonical
 tables, the search-document trigger, and API health against a fresh/healthy
 stack.
 
-Still open in G1: an explicit duplicate candidate, a placement decision, and
-an automated migration test. Search remains gated until those evidence records
-exist.
+Still open in G1: an explicit duplicate candidate. The source-topic placement
+proposal and Compose migration smoke are now covered. Search remains gated
+until the duplicate evidence record exists.
