@@ -1,0 +1,16 @@
+{
+  "contract_version": "question-brain.translation-run.v1",
+  "workspace_key": "fluent-interview",
+  "model": "google-translate",
+  "provider": "google-translate:text-endpoint",
+  "approved": true,
+  "started_at": "2026-08-22T18:26:15.26391201Z",
+  "finished_at": "2026-08-22T18:26:15.263941052Z",
+  "source_count": 0,
+  "target_count": 1368,
+  "existing_before": 1368,
+  "remaining_after": 0,
+  "translated": 0,
+  "failed": 0,
+  "items": []
+}

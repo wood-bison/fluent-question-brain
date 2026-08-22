@@ -62,6 +62,145 @@ type LocaleText struct {
 	Text        string
 }
 
+// TranslationSource is the immutable English revision that needs a Russian
+// locale. The translation command never creates a new question revision; a
+// locale is an additive representation of the same pinned revision.
+type TranslationSource struct {
+	QuestionID  string
+	RevisionID  string
+	StableKey   string
+	ContentHash string
+	Payload     []byte
+}
+
+// TranslationCoverage returns the current published production denominator
+// and the number of those revisions that already have a Russian locale. It
+// deliberately excludes fixture content so the release gate cannot look green
+// because of smoke records.
+func (p *Postgres) TranslationCoverage(ctx context.Context, workspaceKey string) (total, russian int, err error) {
+	err = p.pool.QueryRow(ctx, `
+		select count(*)::int, count(ru.id)::int
+		from content.question q
+		join content.question_revision qr on qr.id = q.current_revision_id
+		left join content.question_locale ru on ru.revision_id = qr.id and ru.locale = 'ru'
+		where q.workspace_id = (select id from content.workspace where stable_key = $1)
+		  and q.status = 'published'
+		  and q.content_kind = 'production'
+	`, strings.TrimSpace(workspaceKey)).Scan(&total, &russian)
+	if err != nil {
+		return 0, 0, fmt.Errorf("query translation coverage: %w", err)
+	}
+	return total, russian, nil
+}
+
+// MissingRussianSources returns current published production revisions with
+// no Russian locale. The ordering is stable so a dry-run report and a resumed
+// translation batch can be compared without hidden pagination state.
+func (p *Postgres) MissingRussianSources(ctx context.Context, workspaceKey string) ([]TranslationSource, error) {
+	rows, err := p.pool.Query(ctx, `
+		select q.id::text, qr.id::text, q.stable_key, qr.content_hash, qr.normalized_payload
+		from content.question q
+		join content.question_revision qr on qr.id = q.current_revision_id
+		left join content.question_locale ru on ru.revision_id = qr.id and ru.locale = 'ru'
+		where q.workspace_id = (select id from content.workspace where stable_key = $1)
+		  and q.status = 'published'
+		  and q.content_kind = 'production'
+		  and ru.id is null
+		order by q.stable_key
+	`, strings.TrimSpace(workspaceKey))
+	if err != nil {
+		return nil, fmt.Errorf("query missing Russian locales: %w", err)
+	}
+	defer rows.Close()
+	items := make([]TranslationSource, 0)
+	for rows.Next() {
+		var item TranslationSource
+		if err := rows.Scan(&item.QuestionID, &item.RevisionID, &item.StableKey, &item.ContentHash, &item.Payload); err != nil {
+			return nil, fmt.Errorf("scan missing Russian locale: %w", err)
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate missing Russian locales: %w", err)
+	}
+	return items, nil
+}
+
+// StoreRussianTranslation adds one validated locale to an existing
+// immutable revision. It is intentionally insert-only: correcting a draft
+// requires a new explicit translation review rather than silently replacing
+// a published locale. The outbox event lets embeddings/index workers catch up.
+func (p *Postgres) StoreRussianTranslation(ctx context.Context, source TranslationSource, prompt, shortAnswer, explanation string, sections []normalize.Section, actor, provider string) error {
+	prompt = strings.TrimSpace(prompt)
+	if prompt == "" {
+		return fmt.Errorf("Russian translation prompt is required")
+	}
+	if strings.TrimSpace(actor) == "" {
+		actor = "translation-worker"
+	}
+	if strings.TrimSpace(provider) == "" {
+		provider = "unknown"
+	}
+	body, err := json.Marshal(map[string]any{
+		"sections": sections,
+		"translation": map[string]string{
+			"source_locale": "en",
+			"provider":      provider,
+			"actor":         actor,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("encode Russian translation body: %w", err)
+	}
+	metadata, err := json.Marshal(map[string]string{
+		"stable_key":    source.StableKey,
+		"revision_id":   source.RevisionID,
+		"source_hash":   source.ContentHash,
+		"source_locale": "en",
+		"locale":        "ru",
+		"provider":      provider,
+		"actor":         actor,
+	})
+	if err != nil {
+		return fmt.Errorf("encode Russian translation audit: %w", err)
+	}
+	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return fmt.Errorf("begin Russian translation transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	result, err := tx.Exec(ctx, `
+		insert into content.question_locale (revision_id, locale, prompt, short_answer, explanation, body)
+		values ($1::uuid, 'ru', $2, nullif($3, ''), nullif($4, ''), $5::jsonb)
+		on conflict (revision_id, locale) do nothing
+	`, source.RevisionID, prompt, strings.TrimSpace(shortAnswer), strings.TrimSpace(explanation), body)
+	if err != nil {
+		return fmt.Errorf("insert Russian locale: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return nil
+	}
+	if _, err := tx.Exec(ctx, `
+		insert into content.audit_event (workspace_id, aggregate_type, aggregate_id, event_type, actor, metadata)
+		select q.workspace_id, 'question_locale', q.id, 'question.locale.translated', $2, $3::jsonb
+		from content.question q
+		where q.id = $1::uuid
+	`, source.QuestionID, actor, metadata); err != nil {
+		return fmt.Errorf("write Russian translation audit: %w", err)
+	}
+	if _, err := tx.Exec(ctx, `
+		insert into content.outbox_event (aggregate_type, aggregate_id, event_type, idempotency_key, payload)
+		values ('question_locale', $1::uuid, 'question.locale.translated', $2, $3::jsonb)
+		on conflict (idempotency_key) do nothing
+	`, source.QuestionID, "question-locale-ru:"+source.RevisionID, metadata); err != nil {
+		return fmt.Errorf("write Russian translation outbox: %w", err)
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit Russian translation: %w", err)
+	}
+	return nil
+}
+
 func Open(ctx context.Context, databaseURL string) (*Postgres, error) {
 	config, err := pgxpool.ParseConfig(databaseURL)
 	if err != nil {
@@ -1193,6 +1332,66 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 		return duplicateGroups[i].Fingerprint < duplicateGroups[j].Fingerprint
 	})
 
+	// An exact prompt match is only an open quality warning when every pair in
+	// the group still lacks an explicit terminal decision. Keep resolved groups
+	// in the response for auditability, but do not force operators to review a
+	// candidate that was already marked not_duplicate/keep_separate/merge.
+	duplicateDecisions := make(map[string]string)
+	decisionRows, err := p.pool.Query(ctx, `
+		select left_question.stable_key, right_question.stable_key, dc.decision
+		from content.duplicate_candidate dc
+		join content.question_revision left_revision on left_revision.id = dc.left_revision_id
+		join content.question_revision right_revision on right_revision.id = dc.right_revision_id
+		join content.question left_question on left_question.id = left_revision.question_id
+		join content.question right_question on right_question.id = right_revision.question_id
+		join content.workspace w on w.id = left_question.workspace_id
+		where w.stable_key = $1
+		  and left_question.current_revision_id = left_revision.id
+		  and right_question.current_revision_id = right_revision.id
+		  and ($2 or (left_question.content_kind = 'production' and right_question.content_kind = 'production'))
+	`, strings.TrimSpace(request.WorkspaceKey), request.IncludeFixtures)
+	if err != nil {
+		return search.QualityResponse{}, fmt.Errorf("query duplicate decisions: %w", err)
+	}
+	defer decisionRows.Close()
+	for decisionRows.Next() {
+		var leftStableKey, rightStableKey, decision string
+		if err := decisionRows.Scan(&leftStableKey, &rightStableKey, &decision); err != nil {
+			return search.QualityResponse{}, fmt.Errorf("scan duplicate decision: %w", err)
+		}
+		duplicateDecisions[qualityDuplicatePairKey(leftStableKey, rightStableKey)] = decision
+	}
+	if err := decisionRows.Err(); err != nil {
+		return search.QualityResponse{}, fmt.Errorf("iterate duplicate decisions: %w", err)
+	}
+
+	openDuplicateGroups := make([]search.QualityDuplicateGroup, 0, len(duplicateGroups))
+	resolvedDuplicateGroups := make([]search.QualityResolvedDuplicateGroup, 0)
+	for _, group := range duplicateGroups {
+		allResolved := true
+		decisions := make([]string, 0, len(group.StableKeys))
+		for leftIndex := 0; leftIndex < len(group.StableKeys); leftIndex++ {
+			for rightIndex := leftIndex + 1; rightIndex < len(group.StableKeys); rightIndex++ {
+				decision, ok := duplicateDecisions[qualityDuplicatePairKey(group.StableKeys[leftIndex], group.StableKeys[rightIndex])]
+				if !ok || !terminalDuplicateDecision(decision) {
+					allResolved = false
+					continue
+				}
+				decisions = append(decisions, decision)
+			}
+		}
+		if !allResolved {
+			openDuplicateGroups = append(openDuplicateGroups, group)
+			continue
+		}
+		sort.Strings(decisions)
+		resolvedDuplicateGroups = append(resolvedDuplicateGroups, search.QualityResolvedDuplicateGroup{
+			Fingerprint: group.Fingerprint,
+			StableKeys:  append([]string(nil), group.StableKeys...),
+			Decisions:   decisions,
+		})
+	}
+
 	duplicateStates := make(map[string]int)
 	duplicateRows, err := p.pool.Query(ctx, `
 		select dc.decision, count(*)
@@ -1221,19 +1420,20 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	}
 
 	response := search.QualityResponse{
-		ContractVersion: "question-brain.quality.v1",
-		WorkspaceKey:    release.WorkspaceKey,
-		ReleaseID:       release.ReleaseID,
-		GeneratedAt:     time.Now().UTC(),
-		Total:           release.Total,
-		IncludeFixtures: request.IncludeFixtures,
-		Checks:          release.Checks,
-		Locales:         qualityBuckets(locales),
-		Tracks:          qualityBuckets(tracks),
-		Topics:          qualityBuckets(topics),
-		DuplicateGroups: duplicateGroups,
-		DuplicateStates: qualityBuckets(duplicateStates),
-		Warnings:        qualityWarnings(release.Checks, len(duplicateGroups)),
+		ContractVersion:         "question-brain.quality.v1",
+		WorkspaceKey:            release.WorkspaceKey,
+		ReleaseID:               release.ReleaseID,
+		GeneratedAt:             time.Now().UTC(),
+		Total:                   release.Total,
+		IncludeFixtures:         request.IncludeFixtures,
+		Checks:                  release.Checks,
+		Locales:                 qualityBuckets(locales),
+		Tracks:                  qualityBuckets(tracks),
+		Topics:                  qualityBuckets(topics),
+		DuplicateGroups:         openDuplicateGroups,
+		ResolvedDuplicateGroups: resolvedDuplicateGroups,
+		DuplicateStates:         qualityBuckets(duplicateStates),
+		Warnings:                qualityWarnings(release.Checks, len(openDuplicateGroups)),
 	}
 	response.Provenance.Explainable = true
 	response.Provenance.Source = "content.question.current_revision"
@@ -1257,6 +1457,22 @@ func qualityBucketValue(value map[string]any, key string) string {
 
 func normalizeQualityPrompt(value string) string {
 	return strings.ToLower(strings.Join(strings.Fields(value), " "))
+}
+
+func qualityDuplicatePairKey(left, right string) string {
+	if left > right {
+		left, right = right, left
+	}
+	return left + "\x00" + right
+}
+
+func terminalDuplicateDecision(decision string) bool {
+	switch decision {
+	case "not_duplicate", "keep_separate", "merge":
+		return true
+	default:
+		return false
+	}
 }
 
 func qualityBuckets(values map[string]int) []search.QualityBucket {

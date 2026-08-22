@@ -9,13 +9,18 @@ The response is deliberately answer-free. It contains:
 - locale, track, and source-topic counts;
 - the release graph-placement checks (`released`, `accepted-pending`,
   `proposed`, and `unplaced`);
-- exact prompt duplicate groups as stable keys plus an opaque fingerprint;
+- open exact prompt duplicate groups as stable keys plus an opaque fingerprint;
+- resolved exact prompt groups, including their terminal review decisions, so
+  an audit remains explainable without re-opening settled candidates;
 - duplicate-review decision counts from the audited candidate table; and
 - explicit warnings for graph review debt, missing Russian coverage, or exact
   duplicate groups.
 
 The endpoint is an audit surface, not a publisher. A proposed placement or a
-duplicate group never becomes accepted because it was counted here. Review
+duplicate group never becomes accepted because it was counted here. A group is
+reported under `resolved_duplicate_groups` only after every pair has an
+explicit terminal decision (`not_duplicate`, `keep_separate`, or `merge`);
+otherwise it remains in `duplicate_groups` and keeps the warning. Review
 actions remain explicit and auditable, and answer bodies are fetched only from
 the normal stable-key question read boundary.
 

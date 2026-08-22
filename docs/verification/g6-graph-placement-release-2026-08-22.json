@@ -1,0 +1,16 @@
+{
+  "contract_version": "question-brain.graph-placement.v1",
+  "workspace_key": "fluent-interview",
+  "question_release_id": "question-release-0dd14cc814fba1c7",
+  "graph_release_id": "question-graph-release-80a6c71b552bf6b0",
+  "generated_at": "2026-08-22T17:43:02.98172638Z",
+  "approved": true,
+  "blocked": false,
+  "eligible_questions": 1368,
+  "proposed_placements": 0,
+  "accepted_placements": 1368,
+  "released_topics": 1368,
+  "materialized_topics": 1368,
+  "invalid_placements": 0,
+  "missing_placements": 0
+}

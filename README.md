@@ -24,15 +24,21 @@ allowing two writers to silently diverge.
 
 ## Current milestone
 
-G0–G5 are closed locally. The full bilingual vault is reconciled and released
-as one approved immutable snapshot (`1368/1368` cards, zero duplicate stable
-keys/content hashes), exact/FTS/trigram/semantic retrieval is explainable,
-Payload drafts publish through a token-protected Go API boundary, and
-metrics/logs, backup restore, failure recovery, and immutable revision rollback
-are covered by repeatable smoke scripts. Fluent Engineering Lab is still the
-learner product; its published-only Question Brain read path is enabled with an
-immutable archive fallback. The full Lab parity report is committed in that
-repository, so the source-vault cutover is complete without archiving Lab.
+G0–G5 cover the repository, import, retrieval, authoring, integration, and
+hardening contracts. The current production snapshot contains `1368/1368`
+published production cards and the deterministic source-topic graph release
+has materialized `1368/1368` primary edges. The approved translation audit now
+reports `1368/1368` production cards with a Russian locale; fixture records
+remain excluded from that denominator. One exact
+prompt group is already resolved as `not_duplicate` and is retained as a
+resolved audit record rather than an open warning.
+
+Exact/FTS/trigram/semantic retrieval is explainable, Payload drafts publish
+through a token-protected Go API boundary, and metrics/logs, backup restore,
+failure recovery, and immutable revision rollback are covered by repeatable
+smoke scripts. Fluent Engineering Lab remains the learner product; its
+published-only Question Brain read path is enabled with an immutable archive
+fallback.
 
 See:
 
@@ -43,10 +49,18 @@ See:
   canonical content contract
 - [docs/contracts/question-quality.md](docs/contracts/question-quality.md) —
   answer-free release coverage and duplicate audit contract
+- [docs/contracts/question-graph-release.md](docs/contracts/question-graph-release.md) —
+  explicit dry-run/approve graph materialization contract
+- [docs/contracts/question-translation.md](docs/contracts/question-translation.md) —
+  resumable, provenance-carrying locale completion contract
 - [docs/ARCHIVE-BOUNDARY.md](docs/ARCHIVE-BOUNDARY.md) — how the old question
   registry remains recoverable while the new system is built
 - [docs/verification/g5-vault-release-2026-08-22.json](docs/verification/g5-vault-release-2026-08-22.json)
   — approved source-vault release report
+- [docs/verification/g6-graph-placement-release-2026-08-22.json](docs/verification/g6-graph-placement-release-2026-08-22.json)
+  — approved deterministic graph placement report
+- [docs/verification/g7-russian-translation-2026-08-22.json](docs/verification/g7-russian-translation-2026-08-22.json)
+  — approved RU coverage report (`remaining_after: 0`, non-LLM provider)
 
 ## Run the contract stack
 

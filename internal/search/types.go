@@ -183,21 +183,32 @@ type QualityDuplicateGroup struct {
 	StableKeys  []string `json:"stable_keys"`
 }
 
+// QualityResolvedDuplicateGroup keeps an explicit terminal review decision
+// visible without treating it as unresolved quality debt. The source prompt
+// fingerprint remains opaque; stable keys are present so an operator can
+// follow the auditable decision back to the canonical records.
+type QualityResolvedDuplicateGroup struct {
+	Fingerprint string   `json:"fingerprint"`
+	StableKeys  []string `json:"stable_keys"`
+	Decisions   []string `json:"decisions"`
+}
+
 type QualityResponse struct {
-	ContractVersion string                  `json:"contract_version"`
-	WorkspaceKey    string                  `json:"workspace_key"`
-	ReleaseID       string                  `json:"release_id"`
-	GeneratedAt     time.Time               `json:"generated_at"`
-	Total           int                     `json:"total"`
-	IncludeFixtures bool                    `json:"include_fixtures"`
-	Checks          ReleaseChecks           `json:"checks"`
-	Locales         []QualityBucket         `json:"locales"`
-	Tracks          []QualityBucket         `json:"tracks"`
-	Topics          []QualityBucket         `json:"topics"`
-	DuplicateGroups []QualityDuplicateGroup `json:"duplicate_groups"`
-	DuplicateStates []QualityBucket         `json:"duplicate_states"`
-	Warnings        []string                `json:"warnings"`
-	Provenance      struct {
+	ContractVersion         string                          `json:"contract_version"`
+	WorkspaceKey            string                          `json:"workspace_key"`
+	ReleaseID               string                          `json:"release_id"`
+	GeneratedAt             time.Time                       `json:"generated_at"`
+	Total                   int                             `json:"total"`
+	IncludeFixtures         bool                            `json:"include_fixtures"`
+	Checks                  ReleaseChecks                   `json:"checks"`
+	Locales                 []QualityBucket                 `json:"locales"`
+	Tracks                  []QualityBucket                 `json:"tracks"`
+	Topics                  []QualityBucket                 `json:"topics"`
+	DuplicateGroups         []QualityDuplicateGroup         `json:"duplicate_groups"`
+	ResolvedDuplicateGroups []QualityResolvedDuplicateGroup `json:"resolved_duplicate_groups"`
+	DuplicateStates         []QualityBucket                 `json:"duplicate_states"`
+	Warnings                []string                        `json:"warnings"`
+	Provenance              struct {
 		Explainable bool     `json:"explainable"`
 		Source      string   `json:"source"`
 		Pipeline    []string `json:"pipeline"`
