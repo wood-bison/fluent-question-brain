@@ -41,6 +41,8 @@ See:
   an earlier gate has an open blocker
 - [docs/contracts/question-revision.md](docs/contracts/question-revision.md) —
   canonical content contract
+- [docs/contracts/question-quality.md](docs/contracts/question-quality.md) —
+  answer-free release coverage and duplicate audit contract
 - [docs/ARCHIVE-BOUNDARY.md](docs/ARCHIVE-BOUNDARY.md) — how the old question
   registry remains recoverable while the new system is built
 - [docs/verification/g5-vault-release-2026-08-22.json](docs/verification/g5-vault-release-2026-08-22.json)
@@ -63,6 +65,8 @@ local Jaeger UI on `localhost:56686`.
 curl -i http://localhost:48127/health/live
 curl -i http://localhost:48127/health/ready
 curl -i http://localhost:48127/metrics
+# Release-scoped quality/coverage audit (no answer bodies)
+curl -sS 'http://localhost:48127/v1/quality?workspace=fluent-interview' | jq
 # Search with explainable provenance
 curl -sS -X POST http://localhost:48127/v1/search \
   -H 'content-type: application/json' \

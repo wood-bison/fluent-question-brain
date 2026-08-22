@@ -165,6 +165,45 @@ type ReleaseResponse struct {
 	} `json:"provenance"`
 }
 
+// QualityRequest asks for an aggregate, answer-free audit of one published
+// release. It is intentionally separate from CatalogResponse: clients can
+// inspect coverage and review debt without downloading question bodies.
+type QualityRequest struct {
+	WorkspaceKey    string
+	IncludeFixtures bool
+}
+
+type QualityBucket struct {
+	Key   string `json:"key"`
+	Count int    `json:"count"`
+}
+
+type QualityDuplicateGroup struct {
+	Fingerprint string   `json:"fingerprint"`
+	StableKeys  []string `json:"stable_keys"`
+}
+
+type QualityResponse struct {
+	ContractVersion string                  `json:"contract_version"`
+	WorkspaceKey    string                  `json:"workspace_key"`
+	ReleaseID       string                  `json:"release_id"`
+	GeneratedAt     time.Time               `json:"generated_at"`
+	Total           int                     `json:"total"`
+	IncludeFixtures bool                    `json:"include_fixtures"`
+	Checks          ReleaseChecks           `json:"checks"`
+	Locales         []QualityBucket         `json:"locales"`
+	Tracks          []QualityBucket         `json:"tracks"`
+	Topics          []QualityBucket         `json:"topics"`
+	DuplicateGroups []QualityDuplicateGroup `json:"duplicate_groups"`
+	DuplicateStates []QualityBucket         `json:"duplicate_states"`
+	Warnings        []string                `json:"warnings"`
+	Provenance      struct {
+		Explainable bool     `json:"explainable"`
+		Source      string   `json:"source"`
+		Pipeline    []string `json:"pipeline"`
+	} `json:"provenance"`
+}
+
 type Topic struct {
 	StableKey string `json:"stable_key"`
 	Title     string `json:"title"`

@@ -31,6 +31,10 @@ type releaseReader interface {
 	Release(context.Context, search.ReleaseRequest) (search.ReleaseResponse, error)
 }
 
+type qualityReader interface {
+	Quality(context.Context, search.QualityRequest) (search.QualityResponse, error)
+}
+
 type Server struct {
 	databaseURL   string
 	searchService search.Service
@@ -65,6 +69,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/search", s.search)
 	mux.HandleFunc("GET /v1/catalog", s.catalog)
 	mux.HandleFunc("GET /v1/release", s.release)
+	mux.HandleFunc("GET /v1/quality", s.quality)
 	mux.HandleFunc("GET /v1/questions/{stableKey}", s.question)
 	mux.HandleFunc("POST /v1/questions/{stableKey}/rollback", s.rollback)
 	mux.HandleFunc("POST /v1/promote", s.promote)
@@ -242,6 +247,29 @@ func (s *Server) release(w http.ResponseWriter, r *http.Request) {
 		workspaceKey = "fluent-interview"
 	}
 	response, err := reader.Release(r.Context(), search.ReleaseRequest{
+		WorkspaceKey:    workspaceKey,
+		IncludeFixtures: parseBool(r.URL.Query().Get("include_fixtures")),
+	})
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s *Server) quality(w http.ResponseWriter, r *http.Request) {
+	reader, ok := s.searchService.(qualityReader)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{
+			"error": "quality_service_unavailable",
+		})
+		return
+	}
+	workspaceKey := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspaceKey == "" {
+		workspaceKey = "fluent-interview"
+	}
+	response, err := reader.Quality(r.Context(), search.QualityRequest{
 		WorkspaceKey:    workspaceKey,
 		IncludeFixtures: parseBool(r.URL.Query().Get("include_fixtures")),
 	})

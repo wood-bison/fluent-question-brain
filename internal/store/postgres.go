@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -1113,6 +1114,177 @@ func containsLocale(locales []string, wanted string) bool {
 		}
 	}
 	return false
+}
+
+// Quality returns release-scoped aggregate evidence for operators and future
+// clients. It deliberately omits prompts, answers, normalized payloads, and
+// source paths: the endpoint is for measuring coverage/review debt, not for
+// creating a second content read boundary.
+func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (search.QualityResponse, error) {
+	release, err := p.Release(ctx, search.ReleaseRequest{
+		WorkspaceKey:    request.WorkspaceKey,
+		IncludeFixtures: request.IncludeFixtures,
+	})
+	if err != nil {
+		return search.QualityResponse{}, fmt.Errorf("read quality release: %w", err)
+	}
+
+	tracks := make(map[string]int)
+	topics := make(map[string]int)
+	locales := make(map[string]int)
+	duplicatePrompts := make(map[string][]string)
+	rows, err := p.pool.Query(ctx, `
+		select
+			q.stable_key,
+			qr.normalized_payload,
+			coalesce(array_agg(distinct ql.locale order by ql.locale)
+				filter (where ql.locale is not null), '{}'::text[])
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		join content.question_revision qr on qr.id = q.current_revision_id
+		left join content.question_locale ql on ql.revision_id = qr.id
+		where w.stable_key = $1
+		  and ($2 or q.content_kind = 'production')
+		group by q.stable_key, qr.normalized_payload
+		order by q.stable_key
+	`, strings.TrimSpace(request.WorkspaceKey), request.IncludeFixtures)
+	if err != nil {
+		return search.QualityResponse{}, fmt.Errorf("query quality metadata: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var stableKey string
+		var payload []byte
+		var availableLocales []string
+		if err := rows.Scan(&stableKey, &payload, &availableLocales); err != nil {
+			return search.QualityResponse{}, fmt.Errorf("scan quality metadata: %w", err)
+		}
+		for _, locale := range availableLocales {
+			locales[locale]++
+		}
+		var value map[string]any
+		if err := json.Unmarshal(payload, &value); err != nil {
+			return search.QualityResponse{}, fmt.Errorf("decode quality metadata for %s: %w", stableKey, err)
+		}
+		tracks[qualityBucketValue(value, "track")]++
+		topics[qualityBucketValue(value, "topic")]++
+		prompt := normalizeQualityPrompt(qualityBucketValue(value, "question"))
+		if prompt != "" {
+			duplicatePrompts[prompt] = append(duplicatePrompts[prompt], stableKey)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return search.QualityResponse{}, fmt.Errorf("iterate quality metadata: %w", err)
+	}
+
+	duplicateGroups := make([]search.QualityDuplicateGroup, 0)
+	for prompt, stableKeys := range duplicatePrompts {
+		if len(stableKeys) < 2 {
+			continue
+		}
+		sort.Strings(stableKeys)
+		hash := sha256.Sum256([]byte(prompt))
+		duplicateGroups = append(duplicateGroups, search.QualityDuplicateGroup{
+			Fingerprint: fmt.Sprintf("prompt-%x", hash[:8]),
+			StableKeys:  append([]string(nil), stableKeys...),
+		})
+	}
+	sort.Slice(duplicateGroups, func(i, j int) bool {
+		return duplicateGroups[i].Fingerprint < duplicateGroups[j].Fingerprint
+	})
+
+	duplicateStates := make(map[string]int)
+	duplicateRows, err := p.pool.Query(ctx, `
+		select dc.decision, count(*)
+		from content.duplicate_candidate dc
+		join content.question_revision left_revision on left_revision.id = dc.left_revision_id
+		join content.question left_question on left_question.id = left_revision.question_id
+		join content.workspace w on w.id = left_question.workspace_id
+		where w.stable_key = $1
+		  and ($2 or left_question.content_kind = 'production')
+		group by dc.decision
+	`, strings.TrimSpace(request.WorkspaceKey), request.IncludeFixtures)
+	if err != nil {
+		return search.QualityResponse{}, fmt.Errorf("query duplicate states: %w", err)
+	}
+	defer duplicateRows.Close()
+	for duplicateRows.Next() {
+		var decision string
+		var count int
+		if err := duplicateRows.Scan(&decision, &count); err != nil {
+			return search.QualityResponse{}, fmt.Errorf("scan duplicate state: %w", err)
+		}
+		duplicateStates[decision] = count
+	}
+	if err := duplicateRows.Err(); err != nil {
+		return search.QualityResponse{}, fmt.Errorf("iterate duplicate states: %w", err)
+	}
+
+	response := search.QualityResponse{
+		ContractVersion: "question-brain.quality.v1",
+		WorkspaceKey:    release.WorkspaceKey,
+		ReleaseID:       release.ReleaseID,
+		GeneratedAt:     time.Now().UTC(),
+		Total:           release.Total,
+		IncludeFixtures: request.IncludeFixtures,
+		Checks:          release.Checks,
+		Locales:         qualityBuckets(locales),
+		Tracks:          qualityBuckets(tracks),
+		Topics:          qualityBuckets(topics),
+		DuplicateGroups: duplicateGroups,
+		DuplicateStates: qualityBuckets(duplicateStates),
+		Warnings:        qualityWarnings(release.Checks, len(duplicateGroups)),
+	}
+	response.Provenance.Explainable = true
+	response.Provenance.Source = "content.question.current_revision"
+	response.Provenance.Pipeline = []string{
+		"published-current-revision",
+		"locale-availability",
+		"normalized-taxonomy-metadata",
+		"exact-prompt-duplicate-audit",
+		"duplicate-review-state",
+		"graph-placement-state",
+	}
+	return response, nil
+}
+
+func qualityBucketValue(value map[string]any, key string) string {
+	if raw, ok := value[key].(string); ok && strings.TrimSpace(raw) != "" {
+		return strings.TrimSpace(raw)
+	}
+	return "unclassified"
+}
+
+func normalizeQualityPrompt(value string) string {
+	return strings.ToLower(strings.Join(strings.Fields(value), " "))
+}
+
+func qualityBuckets(values map[string]int) []search.QualityBucket {
+	buckets := make([]search.QualityBucket, 0, len(values))
+	for key, count := range values {
+		buckets = append(buckets, search.QualityBucket{Key: key, Count: count})
+	}
+	sort.Slice(buckets, func(i, j int) bool {
+		if buckets[i].Count != buckets[j].Count {
+			return buckets[i].Count > buckets[j].Count
+		}
+		return buckets[i].Key < buckets[j].Key
+	})
+	return buckets
+}
+
+func qualityWarnings(checks search.ReleaseChecks, duplicateGroups int) []string {
+	warnings := make([]string, 0, 3)
+	if checks.GraphReleased < checks.Published {
+		warnings = append(warnings, "published questions still have graph placement review debt")
+	}
+	if checks.MissingRussian > 0 {
+		warnings = append(warnings, "some published questions fall back from Russian to English")
+	}
+	if duplicateGroups > 0 {
+		warnings = append(warnings, "exact prompt duplicate groups require explicit review")
+	}
+	return warnings
 }
 
 func catalogMetadata(payload map[string]any) search.CatalogMetadata {
