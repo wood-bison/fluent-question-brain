@@ -1,0 +1,47 @@
+name: fluent-question-brain
+
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.6-pg18
+    environment:
+      POSTGRES_DB: question_brain
+      POSTGRES_USER: question_brain
+      POSTGRES_PASSWORD: question_brain
+    ports:
+      - "${PGPORT:-55432}:5432"
+    volumes:
+      # PostgreSQL 18 uses a major-version subdirectory under this mount.
+      # Mounting /var/lib/postgresql keeps upgrades and pg_upgrade safe.
+      - question-brain-postgres:/var/lib/postgresql
+      - ../../db/migrations/0001_question_brain.sql:/docker-entrypoint-initdb.d/001_question_brain.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U question_brain -d question_brain"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/compose/Dockerfile.api
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      HTTP_ADDR: ":8080"
+      DATABASE_URL: postgres://question_brain:question_brain@postgres:5432/question_brain?sslmode=disable
+      EMBEDDING_PROFILE: ${EMBEDDING_PROFILE:-semantic-v1}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/question-brain", "--healthcheck"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  question-brain-postgres:
+    name: fluent-question-brain-postgres

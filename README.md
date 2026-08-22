@@ -1,0 +1,71 @@
+# Fluent Question Brain
+
+Performance-oriented, reusable question graph and retrieval service.
+
+This is a new repository for the question system. It is intentionally
+separate from `fluent-engineering-lab` (the interview-learning application)
+and from `fluent-question-vault` (the Obsidian card mirror). The new service
+owns the canonical content graph, revisions, search, duplicate detection,
+placement decisions, and indexing jobs. Fluent Engineering Lab remains the
+product that guides a learner through interview preparation and will consume
+this service when the integration gate is opened.
+
+## Architecture decision
+
+The first production boundary is a modular Go service backed by one
+PostgreSQL database with `pgvector`, `pg_trgm`, and full-text search. There is
+no second vector database and no graph database in the steady-state path.
+
+Payload CMS is part of the product, but it is an authoring surface rather than
+another source of truth. Payload drafts live in the `cms` schema and are
+promoted through an explicit command into the Go-owned `content` schema. This
+keeps versions, localization, review, and search indexing useful without
+allowing two writers to silently diverge.
+
+## Current milestone
+
+This repository starts at G1 from the audit: the canonical schema and service
+contract. It is deliberately not pretending that the full search UI or CMS is
+already complete. The next hard gate is a round-trip of one real card from the
+vault into Postgres and back, with an immutable content hash.
+
+See:
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) — system boundaries and performance rules
+- [ROADMAP.md](ROADMAP.md) — gated delivery plan; later gates cannot start while
+  an earlier gate has an open blocker
+- [docs/contracts/question-revision.md](docs/contracts/question-revision.md) —
+  canonical content contract
+- [docs/ARCHIVE-BOUNDARY.md](docs/ARCHIVE-BOUNDARY.md) — how the old question
+  registry remains recoverable while the new system is built
+
+## Run the contract stack
+
+Requirements: Docker Desktop with Compose.
+
+```sh
+cp .env.example .env
+docker compose -f deploy/compose/compose.yaml up --build
+```
+
+The database is exposed on `localhost:55432` and the Go API on
+`localhost:8080`. The API currently exposes lifecycle endpoints and a clear
+`501 Not Implemented` response for search until the G1 round-trip is closed;
+that is intentional and prevents a demo endpoint from becoming a hidden
+production dependency.
+
+```sh
+curl -i http://localhost:8080/health/live
+curl -i http://localhost:8080/health/ready
+```
+
+## Local checks
+
+```sh
+make check
+```
+
+`make check` validates the SQL/Compose contract and runs Go tests when a Go
+toolchain is available. CI will pin a current supported Go toolchain and run
+the same checks on every change.
+

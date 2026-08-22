@@ -1,0 +1,25 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+          cache: true
+      - run: test -z "$(gofmt -l ./cmd ./internal)"
+      - run: go test ./...
+
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/check-contract.sh
+      - run: docker compose -f deploy/compose/compose.yaml config --quiet
