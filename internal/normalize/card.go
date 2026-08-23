@@ -113,9 +113,16 @@ func ParseMarkdown(sourceRef string, input []byte) (Card, error) {
 	meta := make(map[string]string)
 	var sections []Section
 	var current *Section
+	inFence := false
 	for _, rawLine := range lines[1:] {
 		line := strings.TrimRight(rawLine, " \t")
 		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "```") || strings.HasPrefix(trimmed, "~~~") {
+			inFence = !inFence
+		}
+		if !inFence && strings.HasPrefix(trimmed, "# ") {
+			return Card{}, fmt.Errorf("%s: multiple H1 headings (%q); one file must hold exactly one card", sourceRef, trimmed)
+		}
 		if strings.HasPrefix(trimmed, "## ") {
 			if current != nil {
 				current.Body = normalizeText(current.Body)
@@ -166,6 +173,12 @@ func ParseMarkdown(sourceRef string, input []byte) (Card, error) {
 	card.Task = taskBlock(card, meta["difficulty"])
 	card.Rubric = rubricBlock(card)
 	card.Choices = choicesBlock(card)
+	// A file holding many standalone questions under one H1 used to collapse
+	// silently into a single card (QB-BUG-6). Without identity or taxonomy
+	// metadata such a file cannot be one card; refuse instead of corrupting.
+	if strings.TrimSpace(meta["id"]) == "" && card.Track == "" && card.Topic == "" && len(sections) >= 3 {
+		return Card{}, fmt.Errorf("%s: %d sections but no ID/Track/Topic metadata — looks like a multi-question dump; split into one card per file", sourceRef, len(sections))
+	}
 	rawPayload, err := canonicalPayload(card)
 	if err != nil {
 		return Card{}, err

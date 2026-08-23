@@ -34,30 +34,32 @@ type Options struct {
 }
 
 type Item struct {
-	SourceRef   string `json:"source_ref"`
-	StableKey   string `json:"stable_key,omitempty"`
-	ContentHash string `json:"content_hash,omitempty"`
-	Action      string `json:"action"`
-	QuestionID  string `json:"question_id,omitempty"`
-	Error       string `json:"error,omitempty"`
+	SourceRef   string   `json:"source_ref"`
+	StableKey   string   `json:"stable_key,omitempty"`
+	ContentHash string   `json:"content_hash,omitempty"`
+	Action      string   `json:"action"`
+	QuestionID  string   `json:"question_id,omitempty"`
+	Error       string   `json:"error,omitempty"`
+	Warnings    []string `json:"warnings,omitempty"`
 }
 
 type Report struct {
-	SourceSystem string         `json:"source_system"`
-	SourceRoot   string         `json:"source_root"`
-	WorkspaceKey string         `json:"workspace_key"`
-	DryRun       bool           `json:"dry_run"`
-	StartedAt    time.Time      `json:"started_at"`
-	FinishedAt   time.Time      `json:"finished_at"`
-	RunID        string         `json:"run_id,omitempty"`
-	Totals       map[string]int `json:"totals"`
-	Archived     int64          `json:"archived"`
-	Items        []Item         `json:"items"`
+	SourceSystem      string         `json:"source_system"`
+	SourceRoot        string         `json:"source_root"`
+	WorkspaceKey      string         `json:"workspace_key"`
+	DryRun            bool           `json:"dry_run"`
+	StartedAt         time.Time      `json:"started_at"`
+	FinishedAt        time.Time      `json:"finished_at"`
+	RunID             string         `json:"run_id,omitempty"`
+	Totals            map[string]int `json:"totals"`
+	Archived          int64          `json:"archived"`
+	Items             []Item         `json:"items"`
+	UnrecognizedFiles []string       `json:"unrecognized_files,omitempty"`
 }
 
 func Run(ctx context.Context, options Options) (Report, error) {
 	started := time.Now().UTC()
-	files, root, mode, err := resolveFiles(options)
+	files, root, mode, unrecognized, err := resolveFiles(options)
 	if err != nil {
 		return Report{}, err
 	}
@@ -69,6 +71,12 @@ func Run(ctx context.Context, options Options) (Report, error) {
 		StartedAt:    started,
 		Totals:       map[string]int{"files": len(files)},
 		Items:        make([]Item, 0, len(files)),
+	}
+	if len(unrecognized) > 0 {
+		// Markdown outside the four canonical directories used to disappear
+		// silently under --root; report it instead of quietly skipping.
+		report.UnrecognizedFiles = unrecognized
+		report.Totals["unrecognized_files"] = len(unrecognized)
 	}
 	if options.WorkspaceKey == "" {
 		options.WorkspaceKey = "fluent-interview"
@@ -123,6 +131,20 @@ func Run(ctx context.Context, options Options) (Report, error) {
 		}
 		item.StableKey = card.StableKey
 		item.ContentHash = card.Hash
+		// Empty taxonomy used to pass silently, leaving a card with no place
+		// in the topic tree (QB-BUG-6). Surface it as an explicit warning.
+		if strings.TrimSpace(card.Track) == "" {
+			item.Warnings = append(item.Warnings, "missing Track metadata: card will have no track bucket")
+		}
+		if strings.TrimSpace(card.Topic) == "" {
+			item.Warnings = append(item.Warnings, "missing Topic metadata: card will stay unplaced in the topic tree")
+		}
+		if strings.TrimSpace(card.Level) == "" {
+			item.Warnings = append(item.Warnings, "missing Level metadata")
+		}
+		if len(item.Warnings) > 0 {
+			report.Totals["warnings"]++
+		}
 		if options.DryRun {
 			item.Action = "would_create"
 		} else {
@@ -174,43 +196,40 @@ func finishWithError(ctx context.Context, db *store.Postgres, report Report, cau
 	return report, cause
 }
 
-func resolveFiles(options Options) ([]string, string, string, error) {
+func resolveFiles(options Options) ([]string, string, string, []string, error) {
 	if len(options.Files) > 0 {
 		files := make([]string, 0, len(options.Files))
 		for _, raw := range options.Files {
 			file, err := filepath.Abs(raw)
 			if err != nil {
-				return nil, "", "", err
+				return nil, "", "", nil, err
 			}
 			files = append(files, file)
 		}
 		sort.Strings(files)
-		return files, filepath.Dir(files[0]), "single_file", nil
+		return files, filepath.Dir(files[0]), "single_file", nil, nil
 	}
 	if options.Root == "" {
-		return nil, "", "", fmt.Errorf("root or file is required")
+		return nil, "", "", nil, fmt.Errorf("root or file is required")
 	}
 	root, err := filepath.Abs(options.Root)
 	if err != nil {
-		return nil, "", "", err
+		return nil, "", "", nil, err
 	}
-	files, err := collectFiles(root)
+	files, unrecognized, err := collectFiles(root)
 	if err != nil {
-		return nil, "", "", err
+		return nil, "", "", nil, err
 	}
-	return files, root, "reconcile", nil
+	return files, root, "reconcile", unrecognized, nil
 }
 
-func collectFiles(root string) ([]string, error) {
-	var files []string
+func collectFiles(root string) ([]string, []string, error) {
+	var files, unrecognized []string
 	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
 		if entry.IsDir() {
-			return nil
-		}
-		if !strings.EqualFold(filepath.Ext(path), ".md") {
 			return nil
 		}
 		rel, err := filepath.Rel(root, path)
@@ -219,16 +238,28 @@ func collectFiles(root string) ([]string, error) {
 		}
 		parts := strings.Split(filepath.ToSlash(rel), "/")
 		if len(parts) == 0 || !cardDirectories[parts[0]] {
+			base := filepath.Base(path)
+			isContentCard := strings.EqualFold(filepath.Ext(path), ".md") &&
+				!strings.HasPrefix(base, "_") &&
+				!strings.EqualFold(base, "readme.md")
+			if isContentCard {
+				unrecognized = append(unrecognized, rel)
+			}
+			return nil
+		}
+		if !strings.EqualFold(filepath.Ext(path), ".md") {
+			unrecognized = append(unrecognized, rel)
 			return nil
 		}
 		files = append(files, path)
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("scan vault: %w", err)
+		return nil, nil, fmt.Errorf("scan vault: %w", err)
 	}
 	sort.Strings(files)
-	return files, nil
+	sort.Strings(unrecognized)
+	return files, unrecognized, nil
 }
 
 func writeReport(path string, report Report) error {
