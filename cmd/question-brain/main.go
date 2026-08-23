@@ -62,6 +62,10 @@ func main() {
 		"profile", cfg.EmbeddingProfile,
 		"endpoint_configured", cfg.EmbeddingProviderEndpoint != "",
 		"model", cfg.EmbeddingModel)
+	database.UseRelevanceThresholds(cfg.SearchMinRankScore, cfg.SearchMinSemanticScore)
+	logger.Info("search relevance thresholds applied",
+		"min_rank_score", cfg.SearchMinRankScore,
+		"min_semantic_score", cfg.SearchMinSemanticScore)
 
 	apiHandler := httpapi.New(cfg.DatabaseURL, database).Handler()
 	rootHandler := http.NewServeMux()

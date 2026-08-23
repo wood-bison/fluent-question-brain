@@ -26,6 +26,23 @@ type Postgres struct {
 	// tests and offline runs.
 	embedder         embedding.Provider
 	embeddingProfile string
+	// Relevance cutoff (QB-BUG-3). A candidate is returned when it matches a
+	// stable key exactly, or the fused rank score reaches minRankScore (two
+	// stages agreeing under reciprocal-rank fusion), or its semantic score
+	// alone reaches minSemanticScore (one strong semantic match).
+	searchMinRankScore     float64
+	searchMinSemanticScore float64
+}
+
+// UseRelevanceThresholds overrides the default relevance cutoffs. It must be
+// called before serving traffic.
+func (p *Postgres) UseRelevanceThresholds(minRankScore, minSemanticScore float64) {
+	if minRankScore >= 0 {
+		p.searchMinRankScore = minRankScore
+	}
+	if minSemanticScore >= 0 {
+		p.searchMinSemanticScore = minSemanticScore
+	}
 }
 
 // UseEmbedding switches the retrieval provider and the embedding profile the
@@ -238,9 +255,11 @@ func Open(ctx context.Context, databaseURL string) (*Postgres, error) {
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
 	return &Postgres{
-		pool:             pool,
-		embedder:         embedding.HashProvider{},
-		embeddingProfile: embedding.ProfileKey,
+		pool:                   pool,
+		embedder:               embedding.HashProvider{},
+		embeddingProfile:       embedding.ProfileKey,
+		searchMinRankScore:     0.02,
+		searchMinSemanticScore: 0.55,
 	}, nil
 }
 
@@ -882,6 +901,14 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 				case when trigram_score >= 0.15 then row_number() over (order by trigram_score desc, stable_key) end as trigram_rank,
 				case when semantic_score >= 0.50 then row_number() over (order by semantic_score desc, stable_key) end as semantic_rank
 			from candidate
+		),
+		fused as (
+			select ranked.*,
+				coalesce(1.0 / (60 + exact_rank), 0) +
+				coalesce(1.0 / (60 + fts_rank), 0) +
+				coalesce(1.0 / (60 + trigram_rank), 0) +
+				coalesce(1.0 / (60 + semantic_rank), 0) as rank_score
+			from ranked
 		)
 		select question_id, revision_id, stable_key, slug, locale, prompt,
 			short_answer, explanation, topic_key, topic_title, exact_score,
@@ -892,15 +919,14 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 				case when trigram_score >= 0.15 then 'trigram'::text end,
 				case when semantic_score >= 0.50 then 'semantic'::text end
 			], null) as match_stages,
-			coalesce(1.0 / (60 + exact_rank), 0) +
-			coalesce(1.0 / (60 + fts_rank), 0) +
-			coalesce(1.0 / (60 + trigram_rank), 0) +
-			coalesce(1.0 / (60 + semantic_rank), 0) as rank_score
-		from ranked
-		where exact_score > 0 or fts_score > 0 or trigram_score >= 0.15 or semantic_score >= 0.50
+			rank_score
+		from fused
+		where exact_score > 0
+			or rank_score >= $8
+			or semantic_score >= $9
 		order by rank_score desc, stable_key
 		limit $7
-	`, query, locale, request.WorkspaceKey, queryVector, p.embeddingProfile, strings.TrimSpace(request.TopicKey), limit)
+	`, query, locale, request.WorkspaceKey, queryVector, p.embeddingProfile, strings.TrimSpace(request.TopicKey), limit, p.searchMinRankScore, p.searchMinSemanticScore)
 	if err != nil {
 		return nil, fmt.Errorf("search candidates: %w", err)
 	}

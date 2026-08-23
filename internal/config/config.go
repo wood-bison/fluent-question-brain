@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 )
 
 type Config struct {
@@ -16,7 +17,13 @@ type Config struct {
 	// and offline pipelines keep working without network access.
 	EmbeddingProviderEndpoint string
 	EmbeddingModel            string
-	OTELEndpoint              string
+	// SearchMinRankScore and SearchMinSemanticScore implement the relevance
+	// cutoff (QB-BUG-3): a candidate survives only when the fused rank score
+	// reaches SearchMinRankScore (two stages agreeing) or its semantic score
+	// alone reaches SearchMinSemanticScore (one strong semantic match).
+	SearchMinRankScore     float64
+	SearchMinSemanticScore float64
+	OTELEndpoint           string
 }
 
 func FromEnv() (Config, error) {
@@ -28,6 +35,13 @@ func FromEnv() (Config, error) {
 		EmbeddingModel:            valueOr("EMBEDDING_MODEL", "bge-m3"),
 		OTELEndpoint:              os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"),
 	}
+	var err error
+	if c.SearchMinRankScore, err = floatEnv("SEARCH_MIN_RANK_SCORE", 0.02); err != nil {
+		return Config{}, err
+	}
+	if c.SearchMinSemanticScore, err = floatEnv("SEARCH_MIN_SEMANTIC_SCORE", 0.505); err != nil {
+		return Config{}, err
+	}
 	if c.DatabaseURL == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")
 	}
@@ -36,6 +50,18 @@ func FromEnv() (Config, error) {
 		return Config{}, fmt.Errorf("DATABASE_URL must be a valid URL")
 	}
 	return c, nil
+}
+
+func floatEnv(key string, defaultValue float64) (float64, error) {
+	raw := os.Getenv(key)
+	if raw == "" {
+		return defaultValue, nil
+	}
+	value, err := strconv.ParseFloat(raw, 64)
+	if err != nil {
+		return 0, fmt.Errorf("%s must be a number: %w", key, err)
+	}
+	return value, nil
 }
 
 func valueOr(key, defaultValue string) string {

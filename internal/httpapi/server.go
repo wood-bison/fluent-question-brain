@@ -195,7 +195,7 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 		"topic_key": request.TopicKey,
 		"results":   results,
 		"provenance": map[string]any{
-			"pipeline":    []string{"exact", "fts", "trigram", "semantic-dev-hash-v1"},
+			"pipeline":    []string{"exact", "fts", "trigram", "semantic"},
 			"explainable": true,
 		},
 	})

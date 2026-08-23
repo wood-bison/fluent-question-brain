@@ -71,7 +71,12 @@ The API search pipeline is intentionally staged:
 3. PostgreSQL full-text and trigram candidates.
 4. Semantic candidates from the matching embedding profile.
 5. Reciprocal-rank fusion with deterministic tie-breakers.
-6. Return evidence: revision id, locale, match stages, scores, and graph
+6. Relevance cutoff: a candidate survives only on an exact identity match, a
+   fused score at or above `SEARCH_MIN_RANK_SCORE`, or a semantic score at or
+   above `SEARCH_MIN_SEMANTIC_SCORE` (see
+   `docs/contracts/question-search.md`). An empty result set is a valid
+   answer.
+7. Return evidence: revision id, locale, match stages, scores, and graph
    placement. A client must be able to explain why a card was returned.
 
 Approximate vector search is never allowed to silently reduce recall under a
