@@ -48,3 +48,10 @@ the cross-language probes from the 2026-08-23 audit stay non-empty.
 
 An empty result set is a valid answer: a query that matches nothing above the
 cutoff returns `results: []` instead of an unrelated card.
+
+## Dimension filters
+
+The request accepts optional `level` and `company` fields. Both are exact,
+case-insensitive equality filters against indexed columns on
+`content.question`; an absent filter never restricts results, and there is no
+fallback from a filtered dimension to unfiltered content.

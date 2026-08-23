@@ -421,9 +421,12 @@ func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspac
 
 	if _, err = tx.Exec(ctx, `
 		update content.question
-		set current_revision_id = $1::uuid, updated_at = now()
+		set current_revision_id = $1::uuid,
+		    level = nullif($3, ''),
+		    company = nullif($4, ''),
+		    updated_at = now()
 		where id = $2::uuid
-	`, revisionID, questionID); err != nil {
+	`, revisionID, questionID, card.Level, card.Company); err != nil {
 		return StoredRevision{}, fmt.Errorf("set current revision: %w", err)
 	}
 
@@ -855,6 +858,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 			ql.prompt,
 			coalesce(ql.short_answer, '') as short_answer,
 			coalesce(ql.explanation, '') as explanation,
+			qr.normalized_payload as payload,
 			coalesce(topic.stable_key, '') as topic_key,
 			coalesce(topic.title, '') as topic_title,
 			case when lower(q.stable_key) = lower($1) or lower(q.slug) = lower($1) then 1.0 else 0.0 end as exact_score,
@@ -892,6 +896,8 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 				join content.topic t_filter on t_filter.id = qt_filter.topic_id
 				where qt_filter.question_id = q.id and t_filter.stable_key = $6
 			  ))
+			  and ($10 = '' or lower(q.level) = lower($10))
+			  and ($11 = '' or lower(q.company) = lower($11))
 		)
 		,
 		ranked as (
@@ -919,14 +925,17 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 				case when trigram_score >= 0.15 then 'trigram'::text end,
 				case when semantic_score >= 0.50 then 'semantic'::text end
 			], null) as match_stages,
-			rank_score
+			rank_score,
+			coalesce(payload->'task', 'null'::jsonb) as task,
+			coalesce(payload->'rubric', 'null'::jsonb) as rubric,
+			coalesce(payload->'choices', 'null'::jsonb) as choices
 		from fused
 		where exact_score > 0
 			or rank_score >= $8
 			or semantic_score >= $9
 		order by rank_score desc, stable_key
 		limit $7
-	`, query, locale, request.WorkspaceKey, queryVector, p.embeddingProfile, strings.TrimSpace(request.TopicKey), limit, p.searchMinRankScore, p.searchMinSemanticScore)
+	`, query, locale, request.WorkspaceKey, queryVector, p.embeddingProfile, strings.TrimSpace(request.TopicKey), limit, p.searchMinRankScore, p.searchMinSemanticScore, strings.TrimSpace(request.Level), strings.TrimSpace(request.Company))
 	if err != nil {
 		return nil, fmt.Errorf("search candidates: %w", err)
 	}
@@ -934,14 +943,19 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 	results := make([]search.Result, 0, limit)
 	for rows.Next() {
 		var result search.Result
+		var task, rubric, choices json.RawMessage
 		if err := rows.Scan(
 			&result.QuestionID, &result.RevisionID, &result.StableKey, &result.Slug,
 			&result.Locale, &result.Prompt, &result.ShortAnswer, &result.Explanation,
 			&result.TopicKey, &result.TopicTitle, &result.ExactScore, &result.FTSScore,
 			&result.TrigramScore, &result.SemanticScore, &result.MatchStages, &result.RankScore,
+			&task, &rubric, &choices,
 		); err != nil {
 			return nil, fmt.Errorf("scan search result: %w", err)
 		}
+		result.Task = jsonRawOrNull(task)
+		result.Rubric = jsonRawOrNull(rubric)
+		result.Choices = jsonRawOrNull(choices)
 		results = append(results, result)
 	}
 	if err := rows.Err(); err != nil {
@@ -957,11 +971,15 @@ func (p *Postgres) GetQuestion(ctx context.Context, stableKey, workspaceKey, loc
 	}
 	var result search.Question
 	var body []byte
+	var task, rubric, choices json.RawMessage
 	err := p.pool.QueryRow(ctx, `
 		select q.id::text, qr.id::text, q.stable_key, q.slug, q.status,
 			qr.content_hash, ql.locale, ql.prompt,
 			coalesce(ql.short_answer, '') as short_answer,
-			coalesce(ql.explanation, '') as explanation, ql.body
+			coalesce(ql.explanation, '') as explanation, ql.body,
+			coalesce(qr.normalized_payload->'task', 'null'::jsonb),
+			coalesce(qr.normalized_payload->'rubric', 'null'::jsonb),
+			coalesce(qr.normalized_payload->'choices', 'null'::jsonb)
 		from content.workspace w
 		join content.question q on q.workspace_id = w.id and q.stable_key = $1 and q.status = 'published'
 		join content.question_revision qr on qr.id = q.current_revision_id
@@ -976,10 +994,14 @@ func (p *Postgres) GetQuestion(ctx context.Context, stableKey, workspaceKey, loc
 		&result.QuestionID, &result.RevisionID, &result.StableKey, &result.Slug,
 		&result.Status, &result.ContentHash, &result.Locale, &result.Prompt,
 		&result.ShortAnswer, &result.Explanation, &body,
+		&task, &rubric, &choices,
 	)
 	if err != nil {
 		return search.Question{}, fmt.Errorf("get question: %w", err)
 	}
+	result.Task = jsonRawOrNull(task)
+	result.Rubric = jsonRawOrNull(rubric)
+	result.Choices = jsonRawOrNull(choices)
 	if err := json.Unmarshal(body, &result.Body); err != nil {
 		return search.Question{}, fmt.Errorf("decode question body: %w", err)
 	}
@@ -1414,12 +1436,16 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 
 	tracks := make(map[string]int)
 	topics := make(map[string]int)
+	levels := make(map[string]int)
+	companies := make(map[string]int)
 	locales := make(map[string]int)
 	duplicatePrompts := make(map[string][]string)
 	rows, err := p.pool.Query(ctx, `
 		select
 			q.stable_key,
 			qr.normalized_payload,
+			q.level,
+			q.company,
 			coalesce(array_agg(distinct ql.locale order by ql.locale)
 				filter (where ql.locale is not null), '{}'::text[])
 		from content.workspace w
@@ -1428,7 +1454,7 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 		left join content.question_locale ql on ql.revision_id = qr.id
 		where w.stable_key = $1
 		  and ($2 or q.content_kind = 'production')
-		group by q.stable_key, qr.normalized_payload
+		group by q.stable_key, qr.normalized_payload, q.level, q.company
 		order by q.stable_key
 	`, strings.TrimSpace(request.WorkspaceKey), request.IncludeFixtures)
 	if err != nil {
@@ -1438,8 +1464,9 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	for rows.Next() {
 		var stableKey string
 		var payload []byte
+		var level, company *string
 		var availableLocales []string
-		if err := rows.Scan(&stableKey, &payload, &availableLocales); err != nil {
+		if err := rows.Scan(&stableKey, &payload, &level, &company, &availableLocales); err != nil {
 			return search.QualityResponse{}, fmt.Errorf("scan quality metadata: %w", err)
 		}
 		for _, locale := range availableLocales {
@@ -1451,6 +1478,8 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 		}
 		tracks[qualityBucketValue(value, "track")]++
 		topics[qualityBucketValue(value, "topic")]++
+		levels[nullableBucketValue(level)]++
+		companies[nullableBucketValue(company)]++
 		prompt := normalizeQualityPrompt(qualityBucketValue(value, "question"))
 		if prompt != "" {
 			duplicatePrompts[prompt] = append(duplicatePrompts[prompt], stableKey)
@@ -1574,6 +1603,8 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 		Locales:                 qualityBuckets(locales),
 		Tracks:                  qualityBuckets(tracks),
 		Topics:                  qualityBuckets(topics),
+		Levels:                  qualityBuckets(levels),
+		Companies:               qualityBuckets(companies),
 		DuplicateGroups:         openDuplicateGroups,
 		ResolvedDuplicateGroups: resolvedDuplicateGroups,
 		DuplicateStates:         qualityBuckets(duplicateStates),
@@ -1592,11 +1623,30 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	return response, nil
 }
 
+// jsonRawOrNull turns a SQL COALESCE'd 'null' JSON value back into a Go nil
+// so the API omits absent task/rubric/choices blocks entirely.
+func jsonRawOrNull(raw json.RawMessage) json.RawMessage {
+	if len(raw) == 0 || string(raw) == "null" {
+		return nil
+	}
+	return raw
+}
+
 func qualityBucketValue(value map[string]any, key string) string {
 	if raw, ok := value[key].(string); ok && strings.TrimSpace(raw) != "" {
 		return strings.TrimSpace(raw)
 	}
 	return "unclassified"
+}
+
+// nullableBucketValue maps a missing level/company dimension to the same
+// "unclassified" bucket used by track/topic; an absent dimension is a legal
+// state for legacy content, not an error.
+func nullableBucketValue(value *string) string {
+	if value == nil || strings.TrimSpace(*value) == "" {
+		return "unclassified"
+	}
+	return strings.TrimSpace(*value)
 }
 
 func normalizeQualityPrompt(value string) string {

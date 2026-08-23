@@ -7,6 +7,9 @@ served by `/v1/release` and `/v1/catalog`.
 The response is deliberately answer-free. It contains:
 
 - locale, track, and source-topic counts;
+- `levels` and `companies` cuts: published-question counts per level and per
+  source organization. Cards without a value land in the `unclassified`
+  bucket — an absent dimension is legal for legacy content;
 - the release graph-placement checks (`released`, `accepted-pending`,
   `proposed`, and `unplaced`);
 - index-freshness counters: `checks.outbox_pending` (unpublished outbox

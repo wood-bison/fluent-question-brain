@@ -171,6 +171,8 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 		Query    string `json:"query"`
 		Locale   string `json:"locale"`
 		TopicKey string `json:"topic_key"`
+		Level    string `json:"level"`
+		Company  string `json:"company"`
 		Limit    int    `json:"limit"`
 	}
 	decoder := json.NewDecoder(io.LimitReader(r.Body, 1<<20))
@@ -183,6 +185,8 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 		Query:        request.Query,
 		Locale:       request.Locale,
 		TopicKey:     request.TopicKey,
+		Level:        request.Level,
+		Company:      request.Company,
 		Limit:        request.Limit,
 	})
 	if err != nil {
@@ -193,6 +197,8 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 		"query":     request.Query,
 		"locale":    request.Locale,
 		"topic_key": request.TopicKey,
+		"level":     request.Level,
+		"company":   request.Company,
 		"results":   results,
 		"provenance": map[string]any{
 			"pipeline":    []string{"exact", "fts", "trigram", "semantic"},

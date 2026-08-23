@@ -16,6 +16,39 @@ type Section struct {
 	Body  string `json:"body"`
 }
 
+// RubricLevel is one ordered assessment grade inside a rubric block: what a
+// candidate must demonstrate for this level to be awarded (QB-BUG-8).
+type RubricLevel struct {
+	Label string `json:"label"`
+	Text  string `json:"text"`
+}
+
+// ChoiceOption is one answer option inside a choices block (QB-BUG-7).
+type ChoiceOption struct {
+	Label string `json:"label"`
+	Text  string `json:"text"`
+}
+
+// ChoicesBlock stores a screening question with an explicit answer key and
+// the reason the remaining options are wrong.
+type ChoicesBlock struct {
+	Options   []ChoiceOption `json:"options"`
+	AnswerKey string         `json:"answer_key"`
+	Rationale string         `json:"rationale,omitempty"`
+}
+
+// TaskBlock stores a practical exercise as structured data instead of prose:
+// the condition, optional starter schema/signature, the reference solution,
+// a walkthrough, difficulty and time/memory constraints where applicable.
+type TaskBlock struct {
+	Condition   string `json:"condition"`
+	Starter     string `json:"starter,omitempty"`
+	Solution    string `json:"solution,omitempty"`
+	Walkthrough string `json:"walkthrough,omitempty"`
+	Difficulty  string `json:"difficulty,omitempty"`
+	Constraints string `json:"constraints,omitempty"`
+}
+
 // Card is the small, source-independent shape used by the first importer.
 // The original markdown remains in the source mirror; the canonical payload
 // stores normalized sections so no editor-only syntax becomes runtime truth.
@@ -32,25 +65,33 @@ type Card struct {
 	Priority  string
 	Group     string
 	Level     string
+	Company   string
 	Question  string
 	Sections  []Section
+	Task      *TaskBlock
+	Rubric    []RubricLevel
+	Choices   *ChoicesBlock
 	Payload   []byte
 	Hash      string
 }
 
 type canonicalCard struct {
-	StableKey string    `json:"stable_key"`
-	Slug      string    `json:"slug"`
-	Title     string    `json:"title"`
-	Track     string    `json:"track,omitempty"`
-	Topic     string    `json:"topic,omitempty"`
-	Scope     string    `json:"scope,omitempty"`
-	Lang      string    `json:"lang,omitempty"`
-	Priority  string    `json:"priority,omitempty"`
-	Group     string    `json:"group,omitempty"`
-	Level     string    `json:"level,omitempty"`
-	Question  string    `json:"question"`
-	Sections  []Section `json:"sections"`
+	StableKey string        `json:"stable_key"`
+	Slug      string        `json:"slug"`
+	Title     string        `json:"title"`
+	Track     string        `json:"track,omitempty"`
+	Topic     string        `json:"topic,omitempty"`
+	Scope     string        `json:"scope,omitempty"`
+	Lang      string        `json:"lang,omitempty"`
+	Priority  string        `json:"priority,omitempty"`
+	Group     string        `json:"group,omitempty"`
+	Level     string        `json:"level,omitempty"`
+	Company   string        `json:"company,omitempty"`
+	Question  string        `json:"question"`
+	Sections  []Section     `json:"sections"`
+	Task      *TaskBlock    `json:"task,omitempty"`
+	Rubric    []RubricLevel `json:"rubric,omitempty"`
+	Choices   *ChoicesBlock `json:"choices,omitempty"`
 }
 
 var headingPattern = regexp.MustCompile(`^#\s+(.+?)\s*$`)
@@ -118,9 +159,13 @@ func ParseMarkdown(sourceRef string, input []byte) (Card, error) {
 		Priority:  meta["priority"],
 		Group:     meta["group"],
 		Level:     meta["level"],
+		Company:   firstNonEmpty(meta["company"], meta["организация"]),
 		Question:  question,
 		Sections:  sections,
 	}
+	card.Task = taskBlock(card, meta["difficulty"])
+	card.Rubric = rubricBlock(card)
+	card.Choices = choicesBlock(card)
 	rawPayload, err := canonicalPayload(card)
 	if err != nil {
 		return Card{}, err
@@ -167,10 +212,158 @@ func canonicalPayload(card Card) ([]byte, error) {
 		Priority:  card.Priority,
 		Group:     card.Group,
 		Level:     card.Level,
+		Company:   card.Company,
 		Question:  card.Question,
 		Sections:  append([]Section(nil), card.Sections...),
+		Task:      card.Task,
+		Rubric:    append([]RubricLevel(nil), card.Rubric...),
+		Choices:   card.Choices,
 	}
 	return json.Marshal(payload)
+}
+
+// taskSectionTitles maps the accepted markdown section titles onto task
+// block fields. Both English and Russian conventions are recognized; a
+// section keeps its raw body so code blocks survive verbatim.
+var taskSectionTitles = []struct {
+	title string
+	field func(block *TaskBlock) *string
+}{
+	{"Task", func(b *TaskBlock) *string { return &b.Condition }},
+	{"Задача", func(b *TaskBlock) *string { return &b.Condition }},
+	{"Условие", func(b *TaskBlock) *string { return &b.Condition }},
+	{"Условие задачи", func(b *TaskBlock) *string { return &b.Condition }},
+	{"Starter", func(b *TaskBlock) *string { return &b.Starter }},
+	{"Schema", func(b *TaskBlock) *string { return &b.Starter }},
+	{"DDL", func(b *TaskBlock) *string { return &b.Starter }},
+	{"Схема", func(b *TaskBlock) *string { return &b.Starter }},
+	{"Входные данные", func(b *TaskBlock) *string { return &b.Starter }},
+	{"Solution", func(b *TaskBlock) *string { return &b.Solution }},
+	{"Решение", func(b *TaskBlock) *string { return &b.Solution }},
+	{"Эталонное решение", func(b *TaskBlock) *string { return &b.Solution }},
+	{"Walkthrough", func(b *TaskBlock) *string { return &b.Walkthrough }},
+	{"Разбор", func(b *TaskBlock) *string { return &b.Walkthrough }},
+	{"Разбор решения", func(b *TaskBlock) *string { return &b.Walkthrough }},
+	{"Constraints", func(b *TaskBlock) *string { return &b.Constraints }},
+	{"Ограничения", func(b *TaskBlock) *string { return &b.Constraints }},
+}
+
+// taskBlock assembles the optional typed task block from recognized sections
+// (QB-BUG-6 prerequisite for importing practical exercises). Cards without
+// any task section get nil, which serializes to nothing — existing payloads
+// and their content hashes stay byte-identical.
+func taskBlock(card Card, difficulty string) *TaskBlock {
+	block := &TaskBlock{Difficulty: strings.ToUpper(strings.TrimSpace(difficulty))}
+	found := false
+	for _, section := range card.Sections {
+		for _, mapping := range taskSectionTitles {
+			if !strings.EqualFold(section.Title, mapping.title) {
+				continue
+			}
+			if strings.TrimSpace(section.Body) == "" {
+				continue
+			}
+			*mapping.field(block) = section.Body
+			found = true
+		}
+	}
+	if !found {
+		return nil
+	}
+	// A real exercise carries evidence of being solvable: a reference
+	// solution, a walkthrough, or a starter schema/signature. A section
+	// merely *called* "Task" inside a narrative card is prose, not a task;
+	// treating it as one would silently corrupt the card.
+	if block.Condition == "" || (block.Solution == "" && block.Walkthrough == "" && block.Starter == "") {
+		return nil
+	}
+	return block
+}
+
+// rubricBlock parses an ordered assessment rubric (QB-BUG-8). Lines may be
+// written as `- Развёрнуто: …`, `2 — …`, or `2. …`; the source order is kept.
+func rubricBlock(card Card) []RubricLevel {
+	body := firstNonEmpty(
+		sectionBody(card, "Rubric"),
+		sectionBody(card, "Рубрика"),
+		sectionBody(card, "Рубрика оценки"),
+	)
+	if body == "" {
+		return nil
+	}
+	var levels []RubricLevel
+	for _, line := range strings.Split(body, "\n") {
+		line = strings.TrimSpace(line)
+		line = strings.TrimPrefix(line, "-")
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		if l, t, ok := cutRubricEntry(line); ok && strings.TrimSpace(t) != "" {
+			levels = append(levels, RubricLevel{Label: strings.TrimSpace(l), Text: strings.TrimSpace(t)})
+		}
+	}
+	if len(levels) == 0 {
+		return nil
+	}
+	return levels
+}
+
+func cutRubricEntry(line string) (label, text string, ok bool) {
+	for _, separator := range []string{"\u2014", "\u2013", ": ", " - ", ". "} {
+		if label, text, found := strings.Cut(line, separator); found {
+			return label, text, true
+		}
+	}
+	return "", "", false
+}
+
+// choicesBlock parses a screening question with answer options (QB-BUG-7):
+// option lines `А) text` / `A) text` / `- Б) text`, a key line `Ключ: А`
+// or `Key: A`, and free text after the key explaining why the rest are wrong.
+func choicesBlock(card Card) *ChoicesBlock {
+	body := firstNonEmpty(
+		sectionBody(card, "Options"),
+		sectionBody(card, "Варианты"),
+		sectionBody(card, "Варианты ответа"),
+		sectionBody(card, "Choices"),
+	)
+	if body == "" {
+		return nil
+	}
+	optionPattern := regexp.MustCompile(`^[-*]?\s*([АБВГДЕA-F])\)\s*(.+)$`)
+	keyPattern := regexp.MustCompile(`(?i)^(?:ключ|key|ответ|answer)\s*:\s*([АБВГДЕA-F])\s*$`)
+	block := &ChoicesBlock{}
+	var rationale strings.Builder
+	inRationale := false
+	for _, line := range strings.Split(body, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			continue
+		}
+		if match := keyPattern.FindStringSubmatch(trimmed); match != nil {
+			block.AnswerKey = strings.ToUpper(match[1])
+			inRationale = true
+			continue
+		}
+		if !inRationale {
+			if match := optionPattern.FindStringSubmatch(trimmed); match != nil {
+				block.Options = append(block.Options, ChoiceOption{
+					Label: strings.ToUpper(match[1]),
+					Text:  strings.TrimSpace(match[2]),
+				})
+				continue
+			}
+		}
+		if inRationale {
+			rationale.WriteString(trimmed + "\n")
+		}
+	}
+	if len(block.Options) == 0 || block.AnswerKey == "" {
+		return nil
+	}
+	block.Rationale = strings.TrimSpace(rationale.String())
+	return block
 }
 
 func splitIDTitle(raw string) (string, string) {
