@@ -208,10 +208,10 @@ func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	parseInt := func(key string, fallback int) int {
+	parseInt := func(key string, defaultValue int) int {
 		value, err := strconv.Atoi(strings.TrimSpace(r.URL.Query().Get(key)))
 		if err != nil {
-			return fallback
+			return defaultValue
 		}
 		return value
 	}

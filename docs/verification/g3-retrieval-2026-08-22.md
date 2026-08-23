@@ -14,11 +14,11 @@ curl -sS -X POST http://localhost:48127/v1/search \
   -H 'content-type: application/json' \
   -d '{"query":"Kafka ordering","locale":"en","limit":5}'
 
-curl -sS 'http://localhost:48127/v1/questions/legacy.q001?locale=ru'
+curl -sS 'http://localhost:48127/v1/questions/question.q001?locale=ru'
 ```
 
 Search responses include exact, FTS, trigram, and semantic scores plus a
-`match_stages` explanation. The current sample returned `legacy.q023` first
+`match_stages` explanation. The current sample returned `question.q023` first
 with `fts` and `trigram` stages, followed by other Kafka ordering cards.
 
 ## Index benchmark

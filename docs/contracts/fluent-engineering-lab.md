@@ -49,12 +49,12 @@ match stages, and a stable `revision_id`/`content_hash`. The Lab can safely
 cache a response by `(workspace, locale, query, topic_key, revision_id)` and
 invalidate it when the graph release changes.
 
-## Runtime read switch
+## Runtime read boundary
 
-The production-shaped Lab adapter is enabled after the published parity gate:
+The production Lab adapter is always pointed at the released Question Brain
+boundary:
 
 ```text
-QUESTION_BRAIN_READS=1
 QUESTION_BRAIN_BASE_URL=http://127.0.0.1:48127
 QUESTION_BRAIN_WORKSPACE=fluent-interview
 QUESTION_BRAIN_TIMEOUT_MS=1200
@@ -65,37 +65,33 @@ The dependency-free reference adapter is committed at
 vendor it or copy the same contract into its own workspace without coupling
 its learner UI to this repository's Go implementation details.
 
-When the flag is `1`, only the read projection changes. The existing learner
-contract remains the response shape; missing graph metadata is treated as a
-closed, reviewable projection error rather than guessed in the browser. The
-catalog is the bounded exception for profile-scoped `Explore freely`: it
-allows the Lab to render every published card while marking placement and
-mastery as provisional. Write and authoring operations stay in Payload → Go
-API and are never proxied from the learner UI.
+The learner contract remains the response shape; missing graph metadata is
+treated as a closed, reviewable projection error rather than guessed in the
+browser. The catalog is the only index for profile-scoped `Explore freely`:
+it renders every published card while marking placement and mastery as
+provisional. Write and authoring operations stay in Payload → Go API and are
+never proxied from the learner UI.
 
 ## Locale contract
 
 The Lab sends the active UI locale explicitly (`en` or `ru`) on every card
-read. If a locale is absent, the Go API returns the configured fallback and
-still reports the actual `locale` in the response. UI copy and question content
-are therefore switched independently without duplicating source records.
+read. If that locale is absent, the Go API returns a typed not-found result;
+it never substitutes another language. UI copy and question content are
+therefore switched independently without hiding translation debt.
 
 ## Rollout and rollback
 
-1. Run the parity report for the same stable-key slice against the current Lab
-   archive and Question Brain.
-2. Enable `QUESTION_BRAIN_READS=1` only in a disposable Lab process and compare
-   counts, locale coverage, `content_hash`, and graph placement.
-3. Promote the flag for one learner profile at a time; keep the old archive
-   read path available as a read-only fallback for the rollout window.
-4. Roll back by setting the flag to `0`; no data migration or schema rollback
-   is required.
+1. Run the parity report for the same stable-key slice against the released
+   Question Brain catalog.
+2. Compare counts, locale coverage, `content_hash`, and graph placement in a
+   disposable Lab process.
+3. Promote the same released boundary to the learner environment only after
+   the report is green; no alternate content source is enabled.
 
 This is deliberately a contract and adapter seam, not a second copy of the
 question registry. The full cutover report is
 `fluent-engineering-lab/docs/verification/g4-lab-parity-2026-08-22.json`:
-`1146/1146` archive questions match published Question Brain content across
-the complete stable-key/locale slice, with zero missing, prompt, content, or
-transport mismatches. The Lab archive is retained only as a read-only recovery
-projection; source-vault publication is owned by the approved `qb-release`
-command or Payload → Go promote boundary.
+`1146/1146` source questions match published Question Brain content across the
+complete stable-key/locale slice, with zero missing, prompt, content, or
+transport mismatches. Source-vault publication is owned by the approved
+`qb-release` command or Payload → Go promote boundary.

@@ -28,4 +28,4 @@ inspect local traces.
 The only persistent volume is the named Postgres volume. Payload uses the same
 database connection but only the isolated `cms` schema; its migrations are
 committed under `apps/cms/src/migrations` and run before the CMS server starts.
-Backups and a restore drill are mandatory before the legacy runtime is retired.
+Backups and a restore drill are mandatory for every release.

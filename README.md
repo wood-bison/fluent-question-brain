@@ -37,8 +37,7 @@ Exact/FTS/trigram/semantic retrieval is explainable, Payload drafts publish
 through a token-protected Go API boundary, and metrics/logs, backup restore,
 failure recovery, and immutable revision rollback are covered by repeatable
 smoke scripts. Fluent Engineering Lab remains the learner product; its
-published-only Question Brain read path is enabled with an immutable archive
-fallback.
+published-only Question Brain read path is the sole learner content source.
 
 See:
 
@@ -53,8 +52,6 @@ See:
   explicit dry-run/approve graph materialization contract
 - [docs/contracts/question-translation.md](docs/contracts/question-translation.md) —
   resumable, provenance-carrying locale completion contract
-- [docs/ARCHIVE-BOUNDARY.md](docs/ARCHIVE-BOUNDARY.md) — how the old question
-  registry remains recoverable while the new system is built
 - [docs/verification/g5-vault-release-2026-08-22.json](docs/verification/g5-vault-release-2026-08-22.json)
   — approved source-vault release report
 - [docs/verification/g6-graph-placement-release-2026-08-22.json](docs/verification/g6-graph-placement-release-2026-08-22.json)

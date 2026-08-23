@@ -30,9 +30,9 @@ func FromEnv() (Config, error) {
 	return c, nil
 }
 
-func valueOr(key, fallback string) string {
+func valueOr(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}
-	return fallback
+	return defaultValue
 }

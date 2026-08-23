@@ -11,7 +11,7 @@ func TestParseMarkdownProducesStableHash(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ParseMarkdown() error = %v", err)
 	}
-	if card.StableKey != "legacy.q001" || card.Slug != "q001" {
+	if card.StableKey != "question.q001" || card.Slug != "q001" {
 		t.Fatalf("identity = %q/%q", card.StableKey, card.Slug)
 	}
 	if !strings.Contains(string(card.Payload), "Because.") {
@@ -38,7 +38,7 @@ func TestParseMarkdownPrefersExplicitMetadataID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ParseMarkdown() error = %v", err)
 	}
-	if card.StableKey != "legacy.b012" || card.Slug != "b012" {
-		t.Fatalf("identity = %q/%q, want legacy.b012/b012", card.StableKey, card.Slug)
+	if card.StableKey != "question.b012" || card.Slug != "b012" {
+		t.Fatalf("identity = %q/%q, want question.b012/b012", card.StableKey, card.Slug)
 	}
 }

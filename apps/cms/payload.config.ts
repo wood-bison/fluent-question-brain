@@ -23,7 +23,7 @@ export default buildConfig({
   localization: {
     locales: ['en', 'ru'],
     defaultLocale: 'ru',
-    fallback: true,
+    fallback: false,
   },
   db: postgresAdapter({
     pool: {

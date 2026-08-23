@@ -35,9 +35,9 @@ export type QuestionBrainSearchResponse = {
   }
 }
 
-const envNumber = (value: string | undefined, fallback: number): number => {
+const envNumber = (value: string | undefined, defaultValue: number): number => {
   const parsed = Number(value)
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue
 }
 
 export function questionBrainConfig(env: Record<string, string | undefined> = process.env): QuestionBrainConfig {

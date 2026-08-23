@@ -730,6 +730,10 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 	if query == "" {
 		return nil, fmt.Errorf("search query is required")
 	}
+	locale := strings.TrimSpace(request.Locale)
+	if locale == "" {
+		locale = "en"
+	}
 	limit := request.Limit
 	if limit <= 0 {
 		limit = 20
@@ -761,8 +765,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 			join lateral (
 				select ql.*
 				from content.question_locale ql
-				where ql.revision_id = qr.id
-				order by case when ql.locale = nullif($2, '') then 0 when ql.locale = 'en' then 1 else 2 end, ql.locale
+				where ql.revision_id = qr.id and ql.locale = $2
 				limit 1
 			) ql on true
 			left join lateral (
@@ -814,7 +817,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 		where exact_score > 0 or fts_score > 0 or trigram_score >= 0.15 or semantic_score >= 0.50
 		order by rank_score desc, stable_key
 		limit $7
-	`, query, strings.TrimSpace(request.Locale), request.WorkspaceKey, queryVector, embedding.ProfileKey, strings.TrimSpace(request.TopicKey), limit)
+	`, query, locale, request.WorkspaceKey, queryVector, embedding.ProfileKey, strings.TrimSpace(request.TopicKey), limit)
 	if err != nil {
 		return nil, fmt.Errorf("search candidates: %w", err)
 	}
@@ -839,6 +842,10 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 }
 
 func (p *Postgres) GetQuestion(ctx context.Context, stableKey, workspaceKey, locale string) (search.Question, error) {
+	locale = strings.TrimSpace(locale)
+	if locale == "" {
+		locale = "en"
+	}
 	var result search.Question
 	var body []byte
 	err := p.pool.QueryRow(ctx, `
@@ -851,12 +858,11 @@ func (p *Postgres) GetQuestion(ctx context.Context, stableKey, workspaceKey, loc
 		join lateral (
 			select ql.*
 			from content.question_locale ql
-			where ql.revision_id = qr.id
-			order by case when ql.locale = nullif($3, '') then 0 when ql.locale = 'en' then 1 else 2 end, ql.locale
+			where ql.revision_id = qr.id and ql.locale = $3
 			limit 1
 		) ql on true
 		where w.stable_key = $2
-	`, stableKey, workspaceKey, strings.TrimSpace(locale)).Scan(
+	`, stableKey, workspaceKey, locale).Scan(
 		&result.QuestionID, &result.RevisionID, &result.StableKey, &result.Slug,
 		&result.Status, &result.ContentHash, &result.Locale, &result.Prompt,
 		&result.ShortAnswer, &result.Explanation, &body,
@@ -997,8 +1003,7 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 			join lateral (
 				select ql.*
 				from content.question_locale ql
-				where ql.revision_id = qr.id
-				order by case when ql.locale = $2 then 0 when ql.locale = 'en' then 1 else 2 end, ql.locale
+				where ql.revision_id = qr.id and ql.locale = $2
 				limit 1
 			) ql on true
 			where w.stable_key = $1
@@ -1081,7 +1086,7 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 	}
 	response.Provenance.Explainable = true
 	response.Provenance.Source = "content.question.current_revision"
-	response.Provenance.Pipeline = []string{"published-current-revision", "locale-fallback", "topic-relations"}
+	response.Provenance.Pipeline = []string{"published-current-revision", "exact-locale", "topic-relations"}
 	return response, nil
 }
 

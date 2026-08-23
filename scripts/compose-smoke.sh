@@ -27,7 +27,7 @@ curl -fsS -X POST "http://127.0.0.1:${api_port}/v1/search" \
   | grep -q '"explainable":true'
 
 # A request creates a server span; Jaeger v2 exports the service catalog over
-# its compatibility API after the OTLP batch flushes.
+# its health API after the OTLP batch flushes.
 curl -fsS "http://127.0.0.1:${api_port}/" >/dev/null
 sleep 7
 curl -fsS "http://127.0.0.1:${jaeger_ui_port}/api/services" | grep -q 'question-brain-api'

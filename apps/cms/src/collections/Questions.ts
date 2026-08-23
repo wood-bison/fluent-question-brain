@@ -35,7 +35,7 @@ export const Questions: CollectionConfig = {
       required: true,
       unique: true,
       admin: {
-        description: 'Stable graph identity, for example legacy.q001. Never rename after publish.',
+        description: 'Stable graph identity, for example question.q001. Never rename after publish.',
       },
     },
     {

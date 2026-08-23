@@ -75,8 +75,8 @@ The API search pipeline is intentionally staged:
    placement. A client must be able to explain why a card was returned.
 
 Approximate vector search is never allowed to silently reduce recall under a
-tenant/topic filter. We will use iterative scans or a measured partition/index
-strategy and keep an exact fallback for small or highly selective sets.
+tenant/topic filter. We use iterative scans or a measured partition/index
+strategy; exact search remains an explicit first-stage candidate source.
 
 ## Performance envelope
 
@@ -107,7 +107,7 @@ must choose retention, access control, and a persistent trace backend.
 
 The production stack has one Compose project name, explicit health checks,
 bounded resource settings, and a documented stop/start path. Backups and
-restore drills are required before the legacy runtime is retired.
+restore drills are required for every release.
 
 ## What is deliberately not in G1
 

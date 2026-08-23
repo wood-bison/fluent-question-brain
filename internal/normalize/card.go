@@ -98,14 +98,13 @@ func ParseMarkdown(sourceRef string, input []byte) (Card, error) {
 	if id == "" {
 		id = slugify(title)
 	}
-	// The explicit metadata ID is the source-of-truth identity. A few legacy
-	// cards have a copied or stale H1 prefix; preferring `ID:` prevents two
-	// distinct cards from collapsing into one stable key during import.
+	// The explicit metadata ID is the source-of-truth identity. A copied or
+	// stale H1 prefix must never be allowed to change the canonical key.
 	if metadataID := strings.TrimSpace(meta["id"]); metadataID != "" {
 		id = metadataID
 	}
 	question := firstNonEmpty(meta["question"], title)
-	stableKey := "legacy." + strings.ToLower(strings.TrimSpace(id))
+	stableKey := "question." + strings.ToLower(strings.TrimSpace(id))
 	card := Card{
 		SourceRef: sourceRef,
 		ID:        id,
@@ -248,8 +247,8 @@ func EnglishFields(card Card) (prompt, shortAnswer, explanation string) {
 }
 
 // RussianFields extracts the Russian understanding layer as a first-class
-// locale. Cards without Russian sections keep an explicit English fallback at
-// read time instead of duplicating source text during import.
+// locale. Cards without Russian sections remain explicitly incomplete; the
+// read API never substitutes another locale.
 func RussianFields(card Card) (prompt, shortAnswer, explanation string) {
 	prompt = firstNonEmpty(sectionBody(card, "Question (RU)"), sectionBody(card, "Core Idea (RU)"))
 	shortAnswer = firstNonEmpty(sectionBody(card, "Core Idea (RU)"), sectionBody(card, "Russian Answer"))
@@ -264,5 +263,5 @@ func TopicStableKey(topic string) string {
 	if strings.TrimSpace(topic) == "" {
 		return ""
 	}
-	return "legacy." + slugify(topic)
+	return "topic." + slugify(topic)
 }

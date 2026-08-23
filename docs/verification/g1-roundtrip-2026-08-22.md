@@ -15,7 +15,7 @@ go run ./cmd/qb-import \
 Observed result:
 
 ```text
-imported stable_key=legacy.q001 revision_id=688be8ab-6d22-45ed-8306-b5abd3e94052 content_hash=a07b771cb03e5d20a51a0cf266c193750e7dd5cdec32ffa2b9d8dec024312455 round_trip=ok
+imported stable_key=question.q001 revision_id=688be8ab-6d22-45ed-8306-b5abd3e94052 content_hash=a07b771cb03e5d20a51a0cf266c193750e7dd5cdec32ffa2b9d8dec024312455 round_trip=ok
 ```
 
 Running the same import twice produced one revision, one locale, one proposed
@@ -27,7 +27,7 @@ The Compose smoke script also verified the pgvector extension, canonical
 tables, the search-document trigger, and API health against a fresh/healthy
 stack.
 
-Duplicate evidence is now recorded for `legacy.q001` and `legacy.q061`:
+Duplicate evidence is now recorded for `question.q001` and `question.q061`:
 
 ```text
 decision=not_duplicate exact_score=0.31 semantic_score=0.78 actor=g1-audit
@@ -38,8 +38,8 @@ The evidence was written through the auditable command boundary:
 ```sh
 go run ./cmd/qb-audit \
   -database-url "$DATABASE_URL" \
-  -left legacy.q001 \
-  -right legacy.q061 \
+  -left question.q001 \
+  -right question.q061 \
   -decision not_duplicate \
   -exact-score 0.31 \
   -semantic-score 0.78

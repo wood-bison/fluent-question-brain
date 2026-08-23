@@ -86,7 +86,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'ru') | ('en' | 'ru')[];
+  fallbackLocale: false;
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'ru';
@@ -151,7 +151,7 @@ export interface User {
 export interface Question {
   id: number;
   /**
-   * Stable graph identity, for example legacy.q001. Never rename after publish.
+   * Stable graph identity, for example question.q001. Never rename after publish.
    */
   stableKey: string;
   slug: string;

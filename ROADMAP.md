@@ -7,8 +7,7 @@ previous gate has an open blocker.
 
 - [x] Create a separate repository with a stable name and ownership boundary.
 - [x] Record Go + PostgreSQL/pgvector + Payload architecture decision.
-- [x] Add one Compose project name, env contract, health endpoints, and a
-      recoverable legacy boundary.
+- [x] Add one Compose project name, env contract, and health endpoints.
 - [x] Add a migration with extensions, revisions, locales, graph edges,
       embeddings, decisions, and outbox records.
 
@@ -49,8 +48,8 @@ previous gate has an open blocker.
 - [x] Provide a dependency-free Fluent Engineering Lab read adapter with an
       explicit feature flag and rollback path. The learner projection remains
       owned by Lab; parity evidence is committed there before enabling it.
-- [x] Verify Russian/English content fallbacks end to end through Payload → Go
-      API, including a published two-locale smoke card.
+- [x] Verify Russian/English content is served only when the requested locale is
+      present, including a published two-locale smoke card.
 
 ## G5 — production hardening and source-vault cutover (closed)
 
@@ -60,10 +59,8 @@ previous gate has an open blocker.
 - [x] Run load, restore, migration, and failure-injection drills.
 - [x] Verify backups and a tested immutable-revision rollback path.
 - [x] Publish the retirement checklist, release the approved source-vault
-      snapshot, and record full Lab parity. The legacy Lab archive remains a
-      read-only recovery projection; its old Studio compatibility endpoints are
-      not a canonical writer and are not used for learner content. The Lab
-      product remains active and is never archived.
+      snapshot, and record full Lab parity. The Lab product remains active and
+      reads only released Question Brain content.
 
 ## Definition of done for the product
 

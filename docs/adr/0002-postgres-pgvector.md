@@ -16,7 +16,6 @@ shows that the single transactional boundary cannot meet the SLO.
 - Revisions, relationships, exact search, semantic search, and outbox events
   share transaction and backup semantics.
 - HNSW is an optimization, not a correctness requirement. Exact search remains
-  the fallback and the recall benchmark oracle.
+  the first-stage candidate source and the recall benchmark oracle.
 - A new embedding model or dimension is additive: create a profile, backfill,
   compare, then switch reads.
-
