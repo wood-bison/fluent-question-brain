@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/wood-bison/fluent-question-brain/internal/config"
+	"github.com/wood-bison/fluent-question-brain/internal/embedding"
 	"github.com/wood-bison/fluent-question-brain/internal/httpapi"
 	"github.com/wood-bison/fluent-question-brain/internal/store"
 	"github.com/wood-bison/fluent-question-brain/internal/telemetry"
@@ -49,6 +50,18 @@ func main() {
 		os.Exit(2)
 	}
 	defer database.Close()
+	if cfg.EmbeddingProviderEndpoint != "" {
+		database.UseEmbedding(
+			embedding.NewOllamaProvider(cfg.EmbeddingProviderEndpoint, cfg.EmbeddingModel),
+			cfg.EmbeddingProfile,
+		)
+	} else {
+		database.UseEmbedding(embedding.HashProvider{}, embedding.ProfileKey)
+	}
+	logger.Info("embedding provider selected",
+		"profile", cfg.EmbeddingProfile,
+		"endpoint_configured", cfg.EmbeddingProviderEndpoint != "",
+		"model", cfg.EmbeddingModel)
 
 	apiHandler := httpapi.New(cfg.DatabaseURL, database).Handler()
 	rootHandler := http.NewServeMux()

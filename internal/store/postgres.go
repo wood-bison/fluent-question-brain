@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -19,6 +20,23 @@ import (
 
 type Postgres struct {
 	pool *pgxpool.Pool
+	// embedder produces query-time vectors for semantic retrieval; the
+	// profile key selects which generation of stored vectors it compares
+	// against. Defaults keep the deterministic hash pipeline working for
+	// tests and offline runs.
+	embedder         embedding.Provider
+	embeddingProfile string
+}
+
+// UseEmbedding switches the retrieval provider and the embedding profile the
+// search stage reads. It must be called before serving traffic.
+func (p *Postgres) UseEmbedding(provider embedding.Provider, profileKey string) {
+	if provider != nil {
+		p.embedder = provider
+	}
+	if strings.TrimSpace(profileKey) != "" {
+		p.embeddingProfile = strings.TrimSpace(profileKey)
+	}
 }
 
 type StoredRevision struct {
@@ -219,7 +237,11 @@ func Open(ctx context.Context, databaseURL string) (*Postgres, error) {
 		pool.Close()
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
-	return &Postgres{pool: pool}, nil
+	return &Postgres{
+		pool:             pool,
+		embedder:         embedding.HashProvider{},
+		embeddingProfile: embedding.ProfileKey,
+	}, nil
 }
 
 func (p *Postgres) Close() {
@@ -661,6 +683,58 @@ func (p *Postgres) ClaimOutbox(ctx context.Context, limit int) ([]OutboxItem, er
 	return items, nil
 }
 
+// EmbeddingProfileActive reports whether the requested embedding profile
+// exists and is currently active. The indexer refuses to write vectors under
+// an inactive profile so search-time and write-time generations cannot drift.
+func (p *Postgres) EmbeddingProfileActive(ctx context.Context, profileKey string) (bool, error) {
+	var active bool
+	err := p.pool.QueryRow(ctx, `
+		select active
+		from content.embedding_profile
+		where profile_key = $1
+	`, profileKey).Scan(&active)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("query embedding profile: %w", err)
+	}
+	return active, nil
+}
+
+// LocalesMissingEmbedding returns every current-revision locale that has no
+// stored vector under the given profile, with the exact text the indexer must
+// embed.
+func (p *Postgres) LocalesMissingEmbedding(ctx context.Context, profileKey string) ([]LocaleText, error) {
+	rows, err := p.pool.Query(ctx, `
+		select ql.id::text, qr.content_hash,
+			concat_ws(E'\n', ql.prompt, ql.short_answer, ql.explanation, ql.body::text)
+		from content.question_locale ql
+		join content.question_revision qr on qr.id = ql.revision_id
+		join content.question q on q.current_revision_id = ql.revision_id
+		left join content.question_embedding e
+			on e.locale_id = ql.id and e.profile_key = $1
+		where e.id is null
+		order by ql.id
+	`, profileKey)
+	if err != nil {
+		return nil, fmt.Errorf("list locales missing embedding: %w", err)
+	}
+	defer rows.Close()
+	locales := make([]LocaleText, 0)
+	for rows.Next() {
+		var locale LocaleText
+		if err := rows.Scan(&locale.ID, &locale.ContentHash, &locale.Text); err != nil {
+			return nil, fmt.Errorf("scan locale missing embedding: %w", err)
+		}
+		locales = append(locales, locale)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate locales missing embedding: %w", err)
+	}
+	return locales, nil
+}
+
 func (p *Postgres) RevisionLocales(ctx context.Context, revisionID string) ([]LocaleText, error) {
 	rows, err := p.pool.Query(ctx, `
 		select ql.id::text, qr.content_hash,
@@ -746,7 +820,11 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 	if limit > 100 {
 		limit = 100
 	}
-	queryVector := embedding.VectorLiteral((embedding.HashProvider{}).Embed(query))
+	queryEmbedding, err := p.embedder.Embed(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("embed search query: %w", err)
+	}
+	queryVector := embedding.VectorLiteral(queryEmbedding)
 	rows, err := p.pool.Query(ctx, `
 		with candidate as (
 			select
@@ -754,13 +832,13 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 				qr.id::text as revision_id,
 				q.stable_key,
 				q.slug,
-				ql.locale,
-				ql.prompt,
-				ql.short_answer,
-				ql.explanation,
-				coalesce(topic.stable_key, '') as topic_key,
-				coalesce(topic.title, '') as topic_title,
-				case when lower(q.stable_key) = lower($1) or lower(q.slug) = lower($1) then 1.0 else 0.0 end as exact_score,
+			ql.locale,
+			ql.prompt,
+			coalesce(ql.short_answer, '') as short_answer,
+			coalesce(ql.explanation, '') as explanation,
+			coalesce(topic.stable_key, '') as topic_key,
+			coalesce(topic.title, '') as topic_title,
+			case when lower(q.stable_key) = lower($1) or lower(q.slug) = lower($1) then 1.0 else 0.0 end as exact_score,
 				coalesce(ts_rank_cd(ql.search_document, websearch_to_tsquery('simple', unaccent($1))), 0)::double precision as fts_score,
 				coalesce(similarity(ql.prompt, $1), 0)::double precision as trigram_score,
 				coalesce(semantic.semantic_score, 0)::double precision as semantic_score
@@ -822,7 +900,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 		where exact_score > 0 or fts_score > 0 or trigram_score >= 0.15 or semantic_score >= 0.50
 		order by rank_score desc, stable_key
 		limit $7
-	`, query, locale, request.WorkspaceKey, queryVector, embedding.ProfileKey, strings.TrimSpace(request.TopicKey), limit)
+	`, query, locale, request.WorkspaceKey, queryVector, p.embeddingProfile, strings.TrimSpace(request.TopicKey), limit)
 	if err != nil {
 		return nil, fmt.Errorf("search candidates: %w", err)
 	}
@@ -855,8 +933,9 @@ func (p *Postgres) GetQuestion(ctx context.Context, stableKey, workspaceKey, loc
 	var body []byte
 	err := p.pool.QueryRow(ctx, `
 		select q.id::text, qr.id::text, q.stable_key, q.slug, q.status,
-			qr.content_hash, ql.locale, ql.prompt, ql.short_answer,
-			ql.explanation, ql.body
+			qr.content_hash, ql.locale, ql.prompt,
+			coalesce(ql.short_answer, '') as short_answer,
+			coalesce(ql.explanation, '') as explanation, ql.body
 		from content.workspace w
 		join content.question q on q.workspace_id = w.id and q.stable_key = $1 and q.status = 'published'
 		join content.question_revision qr on qr.id = q.current_revision_id
@@ -992,11 +1071,11 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 				q.slug,
 				q.status,
 				qr.content_hash,
-				ql.locale,
-				ql.prompt,
-				ql.short_answer,
-				ql.explanation,
-				qr.normalized_payload,
+			ql.locale,
+			ql.prompt,
+			coalesce(ql.short_answer, '') as short_answer,
+			coalesce(ql.explanation, '') as explanation,
+			qr.normalized_payload,
 				coalesce((
 					select array_agg(available.locale order by available.locale)
 					from content.question_locale available

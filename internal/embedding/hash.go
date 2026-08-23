@@ -1,6 +1,7 @@
 package embedding
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/binary"
 	"math"
@@ -20,7 +21,7 @@ const (
 // quality.
 type HashProvider struct{}
 
-func (HashProvider) Embed(text string) []float32 {
+func (HashProvider) Embed(ctx context.Context, text string) ([]float32, error) {
 	vector := make([]float64, Dimensions)
 	for _, token := range tokens(text) {
 		digest := sha256.Sum256([]byte(token))
@@ -36,14 +37,14 @@ func (HashProvider) Embed(text string) []float32 {
 		norm += value * value
 	}
 	if norm == 0 {
-		return make([]float32, Dimensions)
+		return make([]float32, Dimensions), nil
 	}
 	norm = math.Sqrt(norm)
 	encoded := make([]float32, Dimensions)
 	for i, value := range vector {
 		encoded[i] = float32(value / norm)
 	}
-	return encoded
+	return encoded, nil
 }
 
 func VectorLiteral(vector []float32) string {
@@ -52,6 +53,20 @@ func VectorLiteral(vector []float32) string {
 		values[i] = strconv.FormatFloat(float64(value), 'f', 8, 32)
 	}
 	return "[" + strings.Join(values, ",") + "]"
+}
+
+// EmbedBatch implements Provider; hashing is local and stateless, so the
+// batch is computed per text.
+func (p HashProvider) EmbedBatch(ctx context.Context, texts []string) ([][]float32, error) {
+	vectors := make([][]float32, 0, len(texts))
+	for _, text := range texts {
+		vector, err := p.Embed(ctx, text)
+		if err != nil {
+			return nil, err
+		}
+		vectors = append(vectors, vector)
+	}
+	return vectors, nil
 }
 
 func tokens(text string) []string {

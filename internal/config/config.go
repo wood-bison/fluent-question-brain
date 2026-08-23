@@ -10,7 +10,13 @@ type Config struct {
 	HTTPAddr         string
 	DatabaseURL      string
 	EmbeddingProfile string
-	OTELEndpoint     string
+	// EmbeddingProviderEndpoint and EmbeddingModel select the real embedding
+	// backend (local Ollama, e.g. bge-m3). When the endpoint is empty the API
+	// falls back to the deterministic hash provider and hash profile so tests
+	// and offline pipelines keep working without network access.
+	EmbeddingProviderEndpoint string
+	EmbeddingModel            string
+	OTELEndpoint              string
 }
 
 func FromEnv() (Config, error) {
@@ -18,7 +24,9 @@ func FromEnv() (Config, error) {
 		HTTPAddr:         valueOr("HTTP_ADDR", ":8080"),
 		DatabaseURL:      os.Getenv("DATABASE_URL"),
 		EmbeddingProfile: valueOr("EMBEDDING_PROFILE", "semantic-v1"),
-		OTELEndpoint:     os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"),
+		EmbeddingProviderEndpoint: os.Getenv("EMBEDDING_PROVIDER_ENDPOINT"),
+		EmbeddingModel:            valueOr("EMBEDDING_MODEL", "bge-m3"),
+		OTELEndpoint:              os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"),
 	}
 	if c.DatabaseURL == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")
