@@ -27,7 +27,12 @@ allowing two writers to silently diverge.
 G0–G5 cover the repository, import, retrieval, authoring, integration, and
 hardening contracts. The current production snapshot contains `1368/1368`
 published production cards and the deterministic source-topic graph release
-has materialized `1368/1368` primary edges. The approved translation audit now
+has materialized `1368/1368` primary edges. Per the graph contract, a primary
+edge is the binding of a question to its topic (`question_topic` rows);
+typed edges *between* questions (`prerequisite`, `related`, `contrast`, … in
+`question_edge`) are a planned authoring extension and are intentionally
+absent — an empty `question_edge` table is the expected state, not a defect.
+The approved translation audit now
 reports `1368/1368` production cards with a Russian locale; fixture records
 remain excluded from that denominator. One exact
 prompt group is already resolved as `not_duplicate` and is retained as a
