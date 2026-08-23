@@ -22,13 +22,29 @@ transaction creates the immutable revision, audit event, and outbox item. If
 the API is unavailable, Payload returns the publish error and the draft stays
 available for retry.
 
-The index worker can be run as a one-shot Compose-network job while the worker
-service is being promoted to a long-running deployment:
+### Indexer service
+
+The embedding index worker runs as the long-running `indexer` Compose service.
+It polls the outbox every 10 seconds (`--interval`), embeds claimed events into
+the active profile, and shuts down gracefully on `SIGTERM`. Events whose
+revision cannot be resolved fail with a recorded `last_error`; events that
+resolve to zero locales also fail instead of silently succeeding, so index
+starvation is always visible in the queue.
+
+```sh
+docker compose -p fluent-question-brain -f deploy/compose/compose.yaml up -d --build indexer
+docker compose -p fluent-question-brain -f deploy/compose/compose.yaml logs --tail=100 indexer
+docker compose -p fluent-question-brain -f deploy/compose/compose.yaml ps indexer
+```
+
+The container healthcheck reuses the binary itself:
+`/qb-index --healthcheck` verifies database connectivity. The one-shot mode is
+kept for smoke tests and CI only:
 
 ```sh
 docker run --rm --network fluent-question-brain_default \
   -v "$PWD":/src -w /src golang:1.24-bookworm \
-  sh -c 'go run ./cmd/qb-index --database-url postgres://question_brain:question_brain@postgres:5432/question_brain?sslmode=disable'
+  sh -c 'go run ./cmd/qb-index --once --database-url postgres://question_brain:question_brain@postgres:5432/question_brain?sslmode=disable'
 ```
 
 ## Tracing

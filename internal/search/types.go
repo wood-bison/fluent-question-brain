@@ -144,6 +144,11 @@ type ReleaseChecks struct {
 	GraphUnplaced        int `json:"graph_unplaced"`
 	MissingEnglish       int `json:"missing_english"`
 	MissingRussian       int `json:"missing_russian"`
+	// Index-freshness counters are computed by the quality audit surface
+	// (/v1/quality) only; /v1/release omits them. Pointers keep the release
+	// contract byte-identical while letting the audit report index lag.
+	OutboxPending           *int `json:"outbox_pending,omitempty"`
+	LocalesWithoutEmbedding *int `json:"locales_without_embedding,omitempty"`
 }
 
 type ReleaseResponse struct {

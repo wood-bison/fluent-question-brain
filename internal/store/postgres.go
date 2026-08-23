@@ -51,9 +51,12 @@ type ImportItem struct {
 }
 
 type OutboxItem struct {
-	ID          string
-	AggregateID string
-	Attempts    int
+	ID            string
+	AggregateType string
+	AggregateID   string
+	EventType     string
+	Payload       []byte
+	Attempts      int
 }
 
 type LocaleText struct {
@@ -636,7 +639,8 @@ func (p *Postgres) ClaimOutbox(ctx context.Context, limit int) ([]OutboxItem, er
 		set claimed_at = now(), attempts = event.attempts + 1
 		from picked
 		where event.id = picked.id
-		returning event.id::text, event.aggregate_id::text, event.attempts
+		returning event.id::text, event.aggregate_type, event.aggregate_id::text,
+			event.event_type, event.payload, event.attempts
 	`, limit)
 	if err != nil {
 		return nil, fmt.Errorf("claim outbox: %w", err)
@@ -645,7 +649,8 @@ func (p *Postgres) ClaimOutbox(ctx context.Context, limit int) ([]OutboxItem, er
 	items := make([]OutboxItem, 0, limit)
 	for rows.Next() {
 		var item OutboxItem
-		if err := rows.Scan(&item.ID, &item.AggregateID, &item.Attempts); err != nil {
+		if err := rows.Scan(&item.ID, &item.AggregateType, &item.AggregateID,
+			&item.EventType, &item.Payload, &item.Attempts); err != nil {
 			return nil, fmt.Errorf("scan claimed outbox: %w", err)
 		}
 		items = append(items, item)
@@ -1273,6 +1278,35 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 		return search.QualityResponse{}, fmt.Errorf("read quality release: %w", err)
 	}
 
+	// Index-freshness audit: an outbox backlog or missing embeddings used to
+	// be invisible here while search silently degraded (QB-BUG-9).
+	var outboxPending int
+	if err := p.pool.QueryRow(ctx, `
+		select count(*)
+		from content.outbox_event
+		where published_at is null
+	`).Scan(&outboxPending); err != nil {
+		return search.QualityResponse{}, fmt.Errorf("count pending outbox events: %w", err)
+	}
+	var localesWithoutEmbedding int
+	if err := p.pool.QueryRow(ctx, `
+		select count(*)
+		from content.question_locale ql
+		join content.question q on q.current_revision_id = ql.revision_id
+		join content.workspace w on w.id = q.workspace_id
+		left join content.question_embedding e
+			on e.locale_id = ql.id
+			and e.profile_key = (
+				select profile_key from content.embedding_profile where active limit 1)
+		where w.stable_key = $1
+		  and e.id is null
+	`, strings.TrimSpace(request.WorkspaceKey)).Scan(&localesWithoutEmbedding); err != nil {
+		return search.QualityResponse{}, fmt.Errorf("count locales without embedding: %w", err)
+	}
+	checks := release.Checks
+	checks.OutboxPending = &outboxPending
+	checks.LocalesWithoutEmbedding = &localesWithoutEmbedding
+
 	tracks := make(map[string]int)
 	topics := make(map[string]int)
 	locales := make(map[string]int)
@@ -1431,14 +1465,14 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 		GeneratedAt:             time.Now().UTC(),
 		Total:                   release.Total,
 		IncludeFixtures:         request.IncludeFixtures,
-		Checks:                  release.Checks,
+		Checks:                  checks,
 		Locales:                 qualityBuckets(locales),
 		Tracks:                  qualityBuckets(tracks),
 		Topics:                  qualityBuckets(topics),
 		DuplicateGroups:         openDuplicateGroups,
 		ResolvedDuplicateGroups: resolvedDuplicateGroups,
 		DuplicateStates:         qualityBuckets(duplicateStates),
-		Warnings:                qualityWarnings(release.Checks, len(openDuplicateGroups)),
+		Warnings:                qualityWarnings(checks, len(openDuplicateGroups)),
 	}
 	response.Provenance.Explainable = true
 	response.Provenance.Source = "content.question.current_revision"
@@ -1495,7 +1529,7 @@ func qualityBuckets(values map[string]int) []search.QualityBucket {
 }
 
 func qualityWarnings(checks search.ReleaseChecks, duplicateGroups int) []string {
-	warnings := make([]string, 0, 3)
+	warnings := make([]string, 0, 5)
 	if checks.GraphReleased < checks.Published {
 		warnings = append(warnings, "published questions still have graph placement review debt")
 	}
@@ -1504,6 +1538,12 @@ func qualityWarnings(checks search.ReleaseChecks, duplicateGroups int) []string 
 	}
 	if duplicateGroups > 0 {
 		warnings = append(warnings, "exact prompt duplicate groups require explicit review")
+	}
+	if checks.OutboxPending != nil && *checks.OutboxPending > 0 {
+		warnings = append(warnings, fmt.Sprintf("embedding index is lagging: %d outbox events are still pending", *checks.OutboxPending))
+	}
+	if checks.LocalesWithoutEmbedding != nil && *checks.LocalesWithoutEmbedding > 0 {
+		warnings = append(warnings, fmt.Sprintf("embedding index is incomplete: %d current-revision locales have no vector under the active profile", *checks.LocalesWithoutEmbedding))
 	}
 	return warnings
 }

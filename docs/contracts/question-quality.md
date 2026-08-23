@@ -9,12 +9,19 @@ The response is deliberately answer-free. It contains:
 - locale, track, and source-topic counts;
 - the release graph-placement checks (`released`, `accepted-pending`,
   `proposed`, and `unplaced`);
+- index-freshness counters: `checks.outbox_pending` (unpublished outbox
+  events) and `checks.locales_without_embedding` (current-revision locales
+  with no vector under the active embedding profile). Both are part of the
+  quality audit only — `/v1/release` omits them — and either value above zero
+  also produces an entry in `warnings`, because a lagging indexer silently
+  degrades semantic search;
 - open exact prompt duplicate groups as stable keys plus an opaque fingerprint;
 - resolved exact prompt groups, including their terminal review decisions, so
   an audit remains explainable without re-opening settled candidates;
 - duplicate-review decision counts from the audited candidate table; and
-- explicit warnings for graph review debt, missing Russian coverage, or exact
-  duplicate groups.
+- explicit warnings for graph review debt, missing Russian coverage, exact
+  duplicate groups, or a lagging embedding index (`outbox_pending` /
+  `locales_without_embedding` above zero).
 
 The endpoint is an audit surface, not a publisher. A proposed placement or a
 duplicate group never becomes accepted because it was counted here. A group is

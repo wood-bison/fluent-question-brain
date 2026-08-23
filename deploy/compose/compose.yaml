@@ -61,6 +61,24 @@ services:
       retries: 3
     restart: unless-stopped
 
+  indexer:
+    build:
+      context: ../..
+      dockerfile: deploy/compose/Dockerfile.indexer
+    environment:
+      DATABASE_URL: postgres://question_brain:question_brain@postgres:5432/question_brain?sslmode=disable
+    logging: *json-logging
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/qb-index", "--healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
   cms:
     build:
       context: ../../apps/cms
