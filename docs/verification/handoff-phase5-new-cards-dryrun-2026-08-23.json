@@ -1,0 +1,159 @@
+{
+  "source_system": "fluent-question-vault",
+  "source_root": "/vault/Question Cards",
+  "workspace_key": "fluent-interview",
+  "dry_run": true,
+  "started_at": "2026-08-23T20:35:54.541822254Z",
+  "finished_at": "2026-08-23T20:35:54.548483421Z",
+  "totals": {
+    "files": 24,
+    "would_create": 24
+  },
+  "archived": 0,
+  "items": [
+    {
+      "source_ref": "/vault/Question Cards/G-301 — SLA SLO and SLI what each term guarantees.md",
+      "stable_key": "question.g-301",
+      "content_hash": "216e74cd4298d09689cc3687c4f63c256761498f8d97a0fa45fc924a5b4992e4",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/G-302 — Binary search and its variations.md",
+      "stable_key": "question.g-302",
+      "content_hash": "3eb05f266987a11ca99f996a1439363c67e60c4bf5b61d0309daac7103063dc6",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-101 — Implement graceful shutdown for a Go HTTP service.md",
+      "stable_key": "question.o-101",
+      "content_hash": "099389e6f2a0c6e9c7b8bd70e95fe703b1da584fc820765016255fdbc3dcd2ed",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-102 — Merge N channels into one.md",
+      "stable_key": "question.o-102",
+      "content_hash": "6af623344aca4bf4bd9ceee5c5337ffe7468a67943d521e29c923c3a57f05a3f",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-103 — Interruptible Sleep via context.md",
+      "stable_key": "question.o-103",
+      "content_hash": "381fe03602c31eb920776b64f1f0234ff78e8a26ffd021637908fb5be70787a3",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-104 — Value receiver vs pointer receiver what does the code print.md",
+      "stable_key": "question.o-104",
+      "content_hash": "52613c69a3969186daac14053b54796486d919d9a26d36dbf1ce357d46c98a1c",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-105 — Design the API of a Go network key-value client package.md",
+      "stable_key": "question.o-105",
+      "content_hash": "3af5c4af6d71021dd3610214f419ae44da8ae877403894d286a318c2a967f27e",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-106 — Fix the data race in a currency conversion service.md",
+      "stable_key": "question.o-106",
+      "content_hash": "15bbe3bc7e1dca11a88590897fd64a1fe0732e09a7a0bc017514372f91a8d31d",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-110 — FizzBuzz Foo Bar Buzz with follow-ups.md",
+      "stable_key": "question.o-110",
+      "content_hash": "5770460940a7e5628d429f583948ba197327d71754d7e0c654563ee3bccad3a1",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-111 — N-th Fibonacci number iteratively.md",
+      "stable_key": "question.o-111",
+      "content_hash": "ac7b0bcca762405f25c390f5e152baf4207dc312d3f43a0587071bfdd017ec72",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-112 — Build and reverse a linked list.md",
+      "stable_key": "question.o-112",
+      "content_hash": "491c8dba3d2a583390634e47207444b23e139c20c27e2a6d86cb7795b69d7de0",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-120 — SQL most expensive cars salon listing and manufacturer counts.md",
+      "stable_key": "question.o-120",
+      "content_hash": "4c8d8e4df999895450424dd2362ba3273f338ff3fb10bd37aee8a0cea96a1f70",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-121 — SQL departments without employees and headcount ranking.md",
+      "stable_key": "question.o-121",
+      "content_hash": "60a3e4a0c9e35051b23d2190da95512737303c06ba6228e1a1ee741da5081b24",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-130 — Python decorator measuring execution time.md",
+      "stable_key": "question.o-130",
+      "content_hash": "f8f411e351bf2f43f63cd220d3c0fb83fbd8017af066b1d3bb1c9bdd45b03755",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-131 — Python dict identity aliasing and key equality.md",
+      "stable_key": "question.o-131",
+      "content_hash": "179c92dd580e51618bdc3c4e019f70906e610bc899027904acd15309829d1b69",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/O-140 — System design currency hub for multi-currency sales.md",
+      "stable_key": "question.o-140",
+      "content_hash": "fb52128671544de6f63e3539a4e4a28a6683b5c3c83fa27a2c77844ccbecdbe2",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/SD-201 — High availability is which kind of requirement.md",
+      "stable_key": "question.sd-201",
+      "content_hash": "27290022353683825883f4bc79a0f1bd6e3cd0314774a55babec87b6804d7112",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/SD-202 — Which HTTP method is idempotent POST or PUT.md",
+      "stable_key": "question.sd-202",
+      "content_hash": "73c0e5874d56fa38b228f278e5f907d69087c4d80ebf8ac57e646dd43791d24c",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/SD-203 — Vertical vs horizontal scaling of a DB server.md",
+      "stable_key": "question.sd-203",
+      "content_hash": "53185062aa5a219c81a5f046c783c5344c76e49ae0eb4f6d3a90b2354b7e8e09",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/SD-204 — Splitting a big DB into four small ones partitioning or sharding.md",
+      "stable_key": "question.sd-204",
+      "content_hash": "a921e29fc7ca42c48dfe0a87ccfc61e8614cfa48fcd0065853434b958b08570b",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/SD-205 — Token validation is a task of api-gateway or load balancer.md",
+      "stable_key": "question.sd-205",
+      "content_hash": "b35a8b74b6bfb0fca0e0374b8271df772b811861425d596b18052a67546a8ee0",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/SD-206 — SAGA pattern solves which problem.md",
+      "stable_key": "question.sd-206",
+      "content_hash": "8497a50715edf86ecffabb1a87a976cf904048838741b0d63a482d70ede361d3",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/SD-207 — Kafka message after commit sync or async interaction.md",
+      "stable_key": "question.sd-207",
+      "content_hash": "d9e52d537893a18f9e4227fe1affc2f23d2357b559da28a675a610c8a5243e06",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/SD-208 — What is SLA.md",
+      "stable_key": "question.sd-208",
+      "content_hash": "31e1ebd8dee3505ddedd6a5259e7e68e95e894319901e9de4fa0b3ea89f5d56b",
+      "action": "would_create"
+    }
+  ]
+}
