@@ -1,0 +1,427 @@
+{
+  "source_system": "fluent-question-vault",
+  "source_root": "/vault/Question Cards",
+  "workspace_key": "fluent-interview",
+  "dry_run": true,
+  "started_at": "2026-08-24T09:54:23.147059514Z",
+  "finished_at": "2026-08-24T09:54:23.162413847Z",
+  "totals": {
+    "files": 63,
+    "warnings": 11,
+    "would_create": 63
+  },
+  "archived": 0,
+  "items": [
+    {
+      "source_ref": "/vault/Question Cards/OZ-101 — C.md",
+      "stable_key": "question.oz-101",
+      "content_hash": "c96297743431776189f14102e902e687bd7f77b52a29e5699274d427a0302372",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-102 — SQL.md",
+      "stable_key": "question.oz-102",
+      "content_hash": "c13e2cfc6580bd267b6c13be29a92e49b7bb920b9b19f9f941952f9b74760ecb",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-103 — Какие знаешь примитивы синхронизации в ОС.md",
+      "stable_key": "question.oz-103",
+      "content_hash": "5f098dc4903e764a1b4e7e7247a0aca775ddf687338e58961aef54b4edf70844",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-104 — Что такое user space и kernel space Зачем нужно такое разделение.md",
+      "stable_key": "question.oz-104",
+      "content_hash": "1a66aacbec26d2776d3905263fad6f5e0688df59a7f7b1dc526b9414adc5a35b",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-105 — Что такое файловый дескриптор.md",
+      "stable_key": "question.oz-105",
+      "content_hash": "dbff04c660e69ad4b93dab998ba3ee77031efbf06987e01753af7f8cc6738e1f",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-106 — На голом сервере запущен какой-то сервис и в нем есть утечка памяти. Что произой.md",
+      "stable_key": "question.oz-106",
+      "content_hash": "3db7a708fd73d38b1ec57c564dd68770276afbb936f12e529e76b2e79cfb6b23",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-107 — Чем отличается процесс от системного потока.md",
+      "stable_key": "question.oz-107",
+      "content_hash": "513d0edae3751f316dcdfdce54edb90330185985d9415106ce0341228baf34a8",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-108 — Что такое GOMAXPROCS Зачем это нужно.md",
+      "stable_key": "question.oz-108",
+      "content_hash": "bd12b7cb77492fcbf21421ffeb933c967352229a703586455f682430d6f6a2fc",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-109 — Разработчик дал на ревью код своего нового кэша, нам необходимо провести код-рев.md",
+      "stable_key": "question.oz-109",
+      "content_hash": "5fe2b9ef3a32cc972f9eefcc36c8462aa6db095b7c5f167c4414429f25a8921a",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-110 — Как устроена структура данных хеш-таблица Интересует не детали реализации в како.md",
+      "stable_key": "question.oz-110",
+      "content_hash": "c0d0b8520f1fd6e0d8c1323a6c0fc98679de97dac9e1b5be7d03fb3aee370c59",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-111 — Расскажи самую сложную или интересную инженерную задачу, которую приходилось.md",
+      "stable_key": "question.oz-111",
+      "content_hash": "f8011585c6a8d10e694323a2ccae68d87692fb7cb1bec72076c37d8b511a3269",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-112 — Что выведет этот код.md",
+      "stable_key": "question.oz-112",
+      "content_hash": "1347f543ba5e91d20b46e84b478aac438f9578d9c015d860dae0170f738ff4cb",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-113 — Рассказать, как устроен LRU cache.md",
+      "stable_key": "question.oz-113",
+      "content_hash": "3ceb19a67c44bbd24b28fc0c01602ee2fac96508567e9f40ba8269e566a49f50",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-114 — Есть 3 сущности - пользователь, чат, сообщение.md",
+      "stable_key": "question.oz-114",
+      "content_hash": "8989985a29299805525f887d931f8c85a1337f98c0d9f3f8b0536e1a53c707a9",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-115 — Дана таблица orders.md",
+      "stable_key": "question.oz-115",
+      "content_hash": "3ef8d4ed1bc5262a61206a027a2169d73518282b4e1a0c46d0e06243cbd059a2",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-116 — Что выведет данная программа. Почему так.md",
+      "stable_key": "question.oz-116",
+      "content_hash": "87c7e9f1844dec26028faacad2b3bce9308d04e4b78da35f27675c5e16548954",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-117 — Что выведет этот код, и почему.md",
+      "stable_key": "question.oz-117",
+      "content_hash": "e5377133efe90da4e1f0637c20d2e4ade391c908e02b5b3de7b014e46ebed110",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-118 — Что из себя представляет протокол HTTP Из какиx основных частей состоит HTTP зап.md",
+      "stable_key": "question.oz-118",
+      "content_hash": "315cea044b23a93cee9e7607cc2577afff50975f6e134b75032578106f295eba",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-119 — Какие существуют инструменты для мониторинга и отладки микросервисов.md",
+      "stable_key": "question.oz-119",
+      "content_hash": "c14e7da3f4a557de33157c52f26d00141e5161a87af578a3b601bab2de379356",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-120 — -.md",
+      "stable_key": "question.oz-120",
+      "content_hash": "ae4abbc2c16f6a6253626a9eaf7916af79976693b6a5e4aede4e105742c79ef7",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-121 — Как убить процесс linux'e.md",
+      "stable_key": "question.oz-121",
+      "content_hash": "9327556efe1325a6bb701f0ce1819e650c2ecbffa15f19439528c7ffb11d0f74",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-122 — Чем различаются протоколы TCP и UDP.md",
+      "stable_key": "question.oz-122",
+      "content_hash": "abedde4ee5289b3b10b3501d93cad034965932975b0ce9afe4bb628536139950",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-123 — На примере создания заказа. Есть запрос на сервис и есть ответ, между этими двум.md",
+      "stable_key": "question.oz-123",
+      "content_hash": "e4828bb2c9cd4cfd779abb324de5015095fb2d3bb1abae5c132154f115367de0",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-124 — Мой сервис используют внешний API для построения маршрутов, в рамках тарифа у на.md",
+      "stable_key": "question.oz-124",
+      "content_hash": "ddfffe49799f6cea1442d63b8db157d6228f01e0561455cb236e930822a3b9bb",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-125 — Есть два сервиса A и B, сервис A отправляет запросы в сервис B по HTTP. Какие.md",
+      "stable_key": "question.oz-125",
+      "content_hash": "87107c547b6d808802ac45625caadcdbecb7ee9fbdadb6dd8ba4f0000ba3a115",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-126 — В чем разница между REST и RPC подходами.md",
+      "stable_key": "question.oz-126",
+      "content_hash": "9013ff9d801828c2a23e053f0a76c39a48a5826d3d18b1a8fa54184ea3221cae",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-127 — В чем разница между proxy reverse-proxy.md",
+      "stable_key": "question.oz-127",
+      "content_hash": "36f89c5bf2a1697557e83eedc7917fd14dd06ec945628674c0955e64ab1d127b",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-128 — Есть таблица на 1 миллиард записей, которая активно используется в продашкне. Ну.md",
+      "stable_key": "question.oz-128",
+      "content_hash": "ec12e3b93671ba9e880444dc22034354b53ec5049f20acae14c621f6006c19fb",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-129 — Какие типы локов (блокировок) есть в PostgreSQL Кто берет эти локи.md",
+      "stable_key": "question.oz-129",
+      "content_hash": "8707b1ef455a7c2639d977dbe700a95fa6d863f43eab0e37390ff5117467972b",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-130 — Какие аномалии могут быть при исполнении несколько транзакций параллельно.md",
+      "stable_key": "question.oz-130",
+      "content_hash": "eff98eca49b7dcec1ce6de130cd9a0890b05b7ed67e917c000cd95ca5cf8ee16",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-131 — Что такое транзакция Какие уровни изоляции транзакций существуют в РСУБД.md",
+      "stable_key": "question.oz-131",
+      "content_hash": "00e2a0cc05f538580dd638285232805b7e282f7cacc34d49e65ecf0eaab56169",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-132 — Построить оптимальный индекс для.md",
+      "stable_key": "question.oz-132",
+      "content_hash": "be4e88a77bc6645b4d09baa2ef26e9246934260f93a0695dc2f901c5f25eaa64",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-133 — Какие существуют общие типы ограничений (constraint) в реляционных базах данных.md",
+      "stable_key": "question.oz-133",
+      "content_hash": "966c8836e0ae51505088070d09567ffef1504b05d8955d0ef06ba1d73f8b8569",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-134 — Нужно описать модель библиотеки. Есть 3 сущности Автор , Книга , Читатель.md",
+      "stable_key": "question.oz-134",
+      "content_hash": "e79047a9669674362c28a24413395c7ced09dfaf03f201e9946230d6ef37622d",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-135 — Есть набор урлов.md",
+      "stable_key": "question.oz-135",
+      "content_hash": "a289df94241669848b8cf9d557ef0047864b6c7fb69b583b55a6f8c106cff810",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-136 — У нас есть база данных с паролями пользователей, пароли захешированы (функция.md",
+      "stable_key": "question.oz-136",
+      "content_hash": "fa077e464f1b6882de525ddb5d4d169aa1e3484de6eb0b28f2896a412aa54b62",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-137 — Что выведет на экран эта программа.md",
+      "stable_key": "question.oz-137",
+      "content_hash": "4610142f4dd70d98fabe02d3fc90fc27af85ac1e79d245287d2014b13fa8a63a",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-138 — Нужно написать простую библиотеку in-memory cache.md",
+      "stable_key": "question.oz-138",
+      "content_hash": "eeed22a03e726a65e0270b97d59bdce8d2944aed18f3f6b76294de45d5b26aa4",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-139 — Это почти реальный пример из одного из наших сервисов. Этот код - обертка над ке.md",
+      "stable_key": "question.oz-139",
+      "content_hash": "e6b4749e53b40d16035717ba658a71ab4b28a323c45d09ae51d014a6872f16ac",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-140 — Написать код функции, которая делает merge N каналов. Весь входной поток.md",
+      "stable_key": "question.oz-140",
+      "content_hash": "f819189bd78e8b504f8be7a6a390b139f9d15d2e4d8b5a1e42c5de036451382b",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-141 — Что выведет данная программа Она отработает корректно.md",
+      "stable_key": "question.oz-141",
+      "content_hash": "0ce8b3e7563c3646828daf6d7f3abf4e5ac5cdd552fe0a2247a5ac77376ece15",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-142 — Напишите функцию которая бы возвращала ошибку не импортируя для этого никаких.md",
+      "stable_key": "question.oz-142",
+      "content_hash": "45f1f4f2f456ebbbf2604b6da1652862c65f33318ae8fae305bec4d88ca22e11",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-143 — pprof. Что это такое и зачем нужно.md",
+      "stable_key": "question.oz-143",
+      "content_hash": "8685f2491bbe781c260cd5b3ccc18edcc2835c479f5068cf6e202c47471d3688",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-144 — Что выведет данный код.md",
+      "stable_key": "question.oz-144",
+      "content_hash": "d0af92cbc2543d0568746ee0240553d9e47b7b873dfb2a8910bddd6b2c83f9b7",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-145 — a = map[B]int{}.md",
+      "stable_key": "question.oz-145",
+      "content_hash": "6be85a210e9ffc60db6b0b760265c3e096cea2131acec40bb2b99e79831c411d",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-146 — .md",
+      "stable_key": "question.oz-146",
+      "content_hash": "d2289eac8945fae4aae241644a27e327b968649801d6be74c0500ac4bcb916f6",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-147 — Чем горутины отличаются от потоков.md",
+      "stable_key": "question.oz-147",
+      "content_hash": "35561cde96250c36d6eabb5da457710547f34a115e3efcfbbd6cdc0bb86cb3cd",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-148 — Что такое defer Что выведет следующий код.md",
+      "stable_key": "question.oz-148",
+      "content_hash": "241a9525e13456c0add31c08accef8a8dd26312d8b08a39a65c15f3f657022d2",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-149 — Что выведет данный код.md",
+      "stable_key": "question.oz-149",
+      "content_hash": "fa12cbb4178917dd2f0258296b47b7a27213726fe8b0f52ac41f46bce6e13f41",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-150 — Что такое замыкание Приведите пример использования замыкания.md",
+      "stable_key": "question.oz-150",
+      "content_hash": "18b68f7fae9cbcec44637affe238edda6f24a53c5a04961a35a6c533c41a8e73",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-151 — Что такое mutex и зачем он нужен.md",
+      "stable_key": "question.oz-151",
+      "content_hash": "32d54cce4ee2bb5a7c8e687adc44f8363bb5ed9f5e79ebf198ce0eb3cf4f9f7d",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-152 — Что такое каналы Зачем нужны.md",
+      "stable_key": "question.oz-152",
+      "content_hash": "fb8f3541ec379f9d33a18389bcd63fe7741f62467ddf4380c4f2642c2c30d783",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-153 — Можно ли передать переменную в несколько горутин Пример (с ошибкой) - что будет.md",
+      "stable_key": "question.oz-153",
+      "content_hash": "a77c03c42e702d4034c1989c2b5691155a8d393bad65ba646d6c0de680616cfa",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-154 — Что такое слайс Как он устроен.md",
+      "stable_key": "question.oz-154",
+      "content_hash": "7ac8afa224064a317e5fd54e2e0c85ef70965df33c677b3df26c93a2c7a289bf",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-155 — Что из себя представляет строка в Go.md",
+      "stable_key": "question.oz-155",
+      "content_hash": "7cd9023fb2a04a504ffad166b510be14cc986e896cbd8a593c382d376888713a",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-156 — Есть база с такой схемой данных.md",
+      "stable_key": "question.oz-156",
+      "content_hash": "31a3d3c24218634e1ea8dfdb05f1e301b77af98365dbd5155f02768b1753dfbb",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-157 — Является ли слайс монотонным.md",
+      "stable_key": "question.oz-157",
+      "content_hash": "8fc76a66ae830196f2d1d685bf98357676fc9f6752a048d7237490956608f88e",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-158 — Дан слайс целых чисел. Напишите функцию remove, удаляющую все нули.md",
+      "stable_key": "question.oz-158",
+      "content_hash": "2e7a734a49360e2a0ce94a936610032b0554981d183777934734d1d447baa6e2",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-159 — Требуется реализовать функцию zip, которая соединяет элементы двух слайсов в сла.md",
+      "stable_key": "question.oz-159",
+      "content_hash": "21469e3021015efae71aba10d50e3a20808cf895a13ec5b369cd12e5d5132940",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-160 — Требуется реализовать функцию uniqRandn, которая генерирует слайс длины n уникал.md",
+      "stable_key": "question.oz-160",
+      "content_hash": "12eaa6327e5212a74be36c68b613ad77a948420311a5024eff03bc23716fa20c",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-161 — Что выведет программа Почему.md",
+      "stable_key": "question.oz-161",
+      "content_hash": "02e366f50ef5357b9bf92090054d3a51f9abdfda3c95393ce35d1b9b17b1388e",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-162 — Что выведет программа.md",
+      "stable_key": "question.oz-162",
+      "content_hash": "29f0990cfc01d3fc3cb4459699a44379ea80d49034b61e8482fd64c5f71e3725",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-163 — Что выведет программа.md",
+      "stable_key": "question.oz-163",
+      "content_hash": "908f6857cbba18d0f6f7dd393bc4258c77666fa925041ce58f95a9b7c53f05ea",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    }
+  ]
+}

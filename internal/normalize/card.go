@@ -68,6 +68,8 @@ type Card struct {
 	Group          string
 	Level          string
 	Company        string
+	Timing         string
+	Usage          string
 	ProgramKey     string
 	PathKey        string
 	DomainKey      string
@@ -95,6 +97,8 @@ type canonicalCard struct {
 	Group          string        `json:"group,omitempty"`
 	Level          string        `json:"level,omitempty"`
 	Company        string        `json:"company,omitempty"`
+	Timing         string        `json:"timing,omitempty"`
+	Usage          string        `json:"usage,omitempty"`
 	ProgramKey     string        `json:"program_key,omitempty"`
 	PathKey        string        `json:"path_key,omitempty"`
 	DomainKey      string        `json:"domain_key,omitempty"`
@@ -186,6 +190,8 @@ func ParseMarkdown(sourceRef string, input []byte) (Card, error) {
 		Group:          meta["group"],
 		Level:          meta["level"],
 		Company:        firstNonEmpty(meta["company"], meta["организация"]),
+		Timing:         meta["timing"],
+		Usage:          meta["usage"],
 		ProgramKey:     placement.ProgramKey,
 		PathKey:        placement.PathKey,
 		DomainKey:      placement.DomainKey,
@@ -251,6 +257,8 @@ func canonicalPayload(card Card) ([]byte, error) {
 		Group:          card.Group,
 		Level:          card.Level,
 		Company:        card.Company,
+		Timing:         card.Timing,
+		Usage:          card.Usage,
 		ProgramKey:     card.ProgramKey,
 		PathKey:        card.PathKey,
 		DomainKey:      card.DomainKey,
@@ -343,14 +351,28 @@ func rubricBlock(card Card) []RubricLevel {
 		if line == "" {
 			continue
 		}
-		if l, t, ok := cutRubricEntry(line); ok && strings.TrimSpace(t) != "" {
+		if l, t, ok := cutRubricEntry(line); ok && strings.TrimSpace(t) != "" && !listIndexLabel(l) {
 			levels = append(levels, RubricLevel{Label: strings.TrimSpace(l), Text: strings.TrimSpace(t)})
+			continue
+		}
+		// Not an entry header: a continuation of the previous level's text
+		// (grade answers in source material span multiple lines and often
+		// carry numbered sub-questions).
+		if len(levels) > 0 {
+			levels[len(levels)-1].Text += "\n" + line
 		}
 	}
 	if len(levels) == 0 {
 		return nil
 	}
 	return levels
+}
+
+// listIndexLabel reports whether a rubric label is really a numbered list
+// index ("1", "2.") rather than an assessment level name — such lines are
+// continuations of the previous level's text.
+func listIndexLabel(label string) bool {
+	return regexp.MustCompile(`^\d+[.)]?$`).MatchString(strings.TrimSpace(label))
 }
 
 func cutRubricEntry(line string) (label, text string, ok bool) {

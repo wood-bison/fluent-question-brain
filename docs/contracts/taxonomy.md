@@ -386,7 +386,11 @@ The other values below are historical drift, not a menu to pick from.
 
 ---
 
-**Legacy registry snapshot: 132 topic rows, 1392 production placements.**
+**Legacy registry snapshot: 133 topic rows, 1392 production placements.**
+
+`Go / Runtime **Legacy registry snapshot: 132 topic rows, 1392 production placements.** Language` added 2026-08-24 with review: the Ozon Go batch
+(63 tasks) needed one language/runtime home for theory, practice and
+screening cards; no existing Go topic covered them without fragmenting.
 
 The authoritative count is the live `content.topic` registry joined to
 `question_topic`; it includes the zero-card historical row `systems`. The

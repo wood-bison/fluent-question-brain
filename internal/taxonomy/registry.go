@@ -155,6 +155,7 @@ var legacyTopicTitles = []string{
 	"Go / Graceful Shutdown",
 	"Go / Interfaces & Generics",
 	"Go / Memory & GC",
+	"Go / Runtime & Language",
 	"Go / Package API Design",
 	"Go / Sync & Patterns",
 	"Go / Tooling & Testing",

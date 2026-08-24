@@ -13,8 +13,8 @@ func TestRegistryHasExpectedLabShapeAndLegacySnapshot(t *testing.T) {
 		t.Fatalf("domain registry length = %d, want 7", len(Domains()))
 	}
 	topics := LegacyTopics()
-	if len(topics) != 132 {
-		t.Fatalf("legacy topic snapshot length = %d, want 132", len(topics))
+	if len(topics) != 133 {
+		t.Fatalf("legacy topic snapshot length = %d, want 133", len(topics))
 	}
 	for index := 1; index < len(topics); index++ {
 		if topics[index] == topics[index-1] {

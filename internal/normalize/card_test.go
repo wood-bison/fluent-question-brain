@@ -141,3 +141,13 @@ Question: Legacy question?
 		t.Fatalf("expected degenerate fallback prompt==answer, got %q vs %q", prompt, shortAnswer)
 	}
 }
+
+func TestParseMarkdownCapturesTimingAndUsage(t *testing.T) {
+	card, err := ParseMarkdown("t.md", []byte("# T-1 — Sample\n\nID: T-1\nTopic: Go / Sync & Patterns\nTiming: 5 мин\nUsage: 6 раз\nQuestion: Q?\n\n## Core Idea (RU)\n\nX.\n"))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if card.Timing != "5 мин" || card.Usage != "6 раз" {
+		t.Fatalf("timing=%q usage=%q", card.Timing, card.Usage)
+	}
+}
