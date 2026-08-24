@@ -81,6 +81,29 @@ the importer and API never reconstruct it from legacy fields. Use
 `--unmapped-current --approve --report <file>` to establish an auditable
 no-inference baseline before the reviewed manifest exists.
 
+### Topic registry proposal (review queue)
+
+For the next curriculum slice, the repository also carries an exact-topic
+editorial registry at
+`docs/manifests/curriculum-topic-registry-2026-08-24.json`. It is a review
+queue, not a runtime taxonomy and not an importer fallback. Each row names one
+canonical topic title, one explicit Path/Domain decision, a rationale, and
+`review_state: proposed`. The proposal generator joins only the exact primary
+topic title returned by the released catalog. It never uses prefixes, Track,
+Group, card title, breadcrumb, embeddings, or task metadata; an absent topic
+row remains `unmapped`.
+
+The registry includes a separate `path.python` stack. It was added because the
+released corpus contains Python cards; leaving those cards under an unrelated
+stack would make path counts look complete while hiding content.
+
+The generated
+`releases/curriculum-mapping-2026-08-24-editorial-proposal.json` is complete and
+revision-pinned, but it must not be mounted by the learner stack until the
+editorial review changes each accepted row explicitly and the dry-run has zero
+pin/coverage errors. Proposed rows are visible review debt and do not create
+Lab stations, runtime buttons, mastery, or prerequisite edges.
+
 For an existing Compose PostgreSQL volume, initdb mounts are not replayed.
 Run `scripts/apply-curriculum-mapping-migration.sh` once, verify the migration
 with `scripts/migration-smoke.sh`, and only then rebuild/restart the API. The
@@ -361,12 +384,12 @@ The other values below are historical drift, not a menu to pick from.
 
 - `Caching` → `topic.caching` (13)
 
-### Python — 4 topics, 12 cards
+### Python — 4 topics, 17 cards
 
-- `Python / Concurrency & GIL` → `topic.python-concurrency-gil` (1)  ⚠️ single
-- `Python / Iterators & Generators` → `topic.python-iterators-generators` (1)  ⚠️ single
-- `Python / Metaprogramming` → `topic.python-metaprogramming` (3)
-- `Python / OOP & Data Model` → `topic.python-oop-data-model` (7)
+- `Python / Concurrency & GIL` → `topic.python-concurrency-gil` (2)
+- `Python / Iterators & Generators` → `topic.python-iterators-generators` (2)
+- `Python / Metaprogramming` → `topic.python-metaprogramming` (4)
+- `Python / OOP & Data Model` → `topic.python-oop-data-model` (9)
 
 ### RxJS — 10 topics, 12 cards
 

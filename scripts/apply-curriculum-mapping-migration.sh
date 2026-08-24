@@ -14,5 +14,9 @@ compose=(docker compose -p fluent-question-brain -f "${repo_root}/deploy/compose
 "${compose[@]}" exec -T postgres psql -v ON_ERROR_STOP=1 -U question_brain -d question_brain \
   < "${repo_root}/db/migrations/0013_runtime_station_capabilities.sql"
 
+"${compose[@]}" exec -T postgres psql -v ON_ERROR_STOP=1 -U question_brain -d question_brain \
+  < "${repo_root}/db/migrations/0014_python_path.sql"
+
 echo "question-brain curriculum mapping migration: applied 0012_curriculum_mapping_release.sql"
 echo "question-brain curriculum mapping migration: applied 0013_runtime_station_capabilities.sql"
+echo "question-brain curriculum mapping migration: applied 0014_python_path.sql"

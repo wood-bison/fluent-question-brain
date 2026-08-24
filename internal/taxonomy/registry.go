@@ -59,6 +59,7 @@ var paths = []Path{
 	{Key: "path.system-design", Title: "System Design", ProgramKey: DefaultProgramKey},
 	{Key: "path.algorithms", Title: "Algorithms", ProgramKey: DefaultProgramKey},
 	{Key: "path.behavioral", Title: "Behavioral", ProgramKey: DefaultProgramKey},
+	{Key: "path.python", Title: "Python", ProgramKey: DefaultProgramKey},
 }
 
 var domains = []Domain{
@@ -343,6 +344,7 @@ var pathAliases = map[string]string{
 	"system design":        "path.system-design",
 	"algorithms":           "path.algorithms",
 	"behavioral":           "path.behavioral",
+	"python":               "path.python",
 }
 
 var domainAliases = map[string]string{

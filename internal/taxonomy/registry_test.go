@@ -6,8 +6,8 @@ func TestRegistryHasExpectedLabShapeAndLegacySnapshot(t *testing.T) {
 	if len(Programs()) != 1 || Programs()[0].Key != DefaultProgramKey {
 		t.Fatalf("program registry = %#v", Programs())
 	}
-	if len(Paths()) != 8 {
-		t.Fatalf("path registry length = %d, want 8", len(Paths()))
+	if len(Paths()) != 9 {
+		t.Fatalf("path registry length = %d, want 9", len(Paths()))
 	}
 	if len(Domains()) != 7 {
 		t.Fatalf("domain registry length = %d, want 7", len(Domains()))

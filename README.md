@@ -51,6 +51,32 @@ the 19 questions already exercised by released runtime stations; the remaining
 editorial decision exists. The release is applied idempotently by the workspace
 launcher and never inferred from legacy Track/Group/Topic fields.
 
+The next editorial slice is prepared, but deliberately not promoted: the exact
+topic registry at
+`docs/manifests/curriculum-topic-registry-2026-08-24.json` produces the complete
+revision-pinned proposal at
+`releases/curriculum-mapping-2026-08-24-editorial-proposal.json`. Its dry-run
+currently contains **1,572 proposed**, **19 accepted**, and **0 unmapped**
+cards. The Python path was added explicitly in migration `0014_python_path.sql`
+because the current corpus contains Python cards. This is a review queue, not
+a hidden classifier:
+the checked-in registry lists every exact topic decision, unknown topics stay
+unmapped, and `--approve` is intentionally not run for this proposal.
+
+Regenerate the proposal and its answer-free audit after a new Question Brain
+release with:
+
+```sh
+python3 scripts/mapping/generate-editorial-crosswalk.py \
+  --preserve releases/curriculum-mapping-2026-08-24-runtime-crosswalk.json \
+  --manifest releases/curriculum-mapping-2026-08-24-editorial-proposal.json \
+  --report docs/verification/curriculum-topic-review-2026-08-24.json
+```
+
+Review the report and edit the manifest's `mapping_state`/keys explicitly before
+running `qb-map-release --approve`; the workspace launcher continues to apply
+only the released runtime crosswalk until that editorial review is complete.
+
 See:
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — system boundaries and performance rules

@@ -1,0 +1,932 @@
+{
+  "contract_version": "question-brain.curriculum-topic-registry.v1",
+  "taxonomy_version": "question-brain.taxonomy.v1",
+  "source": "question-brain-editorial-topic-registry-v1",
+  "decision_policy": "Exact canonical topic title joins only; every row is proposed until editorial approval.",
+  "entries": [
+    {
+      "topic_title": ".NET / ASP.NET Core",
+      "path_key": "path.dotnet-csharp",
+      "domain_key": "domain.http-api",
+      "rationale": "ASP.NET application boundary.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": ".NET / Async & Concurrency",
+      "path_key": "path.dotnet-csharp",
+      "domain_key": "domain.runtime",
+      "rationale": ".NET language, CLR, async, and dependency lifetime mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": ".NET / C# Language & Type System",
+      "path_key": "path.dotnet-csharp",
+      "domain_key": "domain.runtime",
+      "rationale": ".NET language, CLR, async, and dependency lifetime mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": ".NET / CLR & GC",
+      "path_key": "path.dotnet-csharp",
+      "domain_key": "domain.runtime",
+      "rationale": ".NET language, CLR, async, and dependency lifetime mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": ".NET / DI & Lifetimes",
+      "path_key": "path.dotnet-csharp",
+      "domain_key": "domain.runtime",
+      "rationale": ".NET language, CLR, async, and dependency lifetime mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": ".NET / EF Core",
+      "path_key": "path.dotnet-csharp",
+      "domain_key": "domain.data-postgresql",
+      "rationale": "Entity Framework persistence boundary.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": ".NET / LINQ & Collections",
+      "path_key": "path.dotnet-csharp",
+      "domain_key": "domain.runtime",
+      "rationale": ".NET language, CLR, async, and dependency lifetime mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": ".NET / Performance & Diagnostics",
+      "path_key": "path.dotnet-csharp",
+      "domain_key": "domain.runtime",
+      "rationale": ".NET language, CLR, async, and dependency lifetime mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "AI / RAG / Search",
+      "path_key": "path.system-design",
+      "domain_key": "domain.delivery-observability",
+      "rationale": "Delivery, cloud, and AI system operations.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "AI-assisted Development",
+      "path_key": "path.system-design",
+      "domain_key": "domain.delivery-observability",
+      "rationale": "Delivery, cloud, and AI system operations.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "API Design",
+      "path_key": "path.system-design",
+      "domain_key": "domain.http-api",
+      "rationale": "API and backend security contracts.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms / Binary Search",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms / Design",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms / Graph",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms / Greedy",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms / Hash Table",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms / Sliding Window",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms / Stack",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms / Two Pointers",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Algorithms / Union-Find",
+      "path_key": "path.algorithms",
+      "domain_key": "domain.runtime",
+      "rationale": "Algorithmic problem-solving and data-structure reasoning.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Architecture",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Build & Tooling",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Change Detection",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Change Detection & Lifecycle",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Code Review",
+      "path_key": "path.frontend",
+      "domain_key": "domain.testing",
+      "rationale": "Frontend performance and testability evidence.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Components",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Components & DI",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Components & Templates",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Content Projection",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / DI & RxJS",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / DI scopes",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Dependency Injection",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Directives",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Forms",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Forms & DI",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / HttpClient",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Ivy",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Lifecycle",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Migration",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / NgRx",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Pipes",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Pipes & CD",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Routing",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / RxJS",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Services & DI",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Signals",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Signals & Pipes",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Templates",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / Testing",
+      "path_key": "path.frontend",
+      "domain_key": "domain.testing",
+      "rationale": "Frontend performance and testability evidence.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Angular / zone.js",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Answer Technique",
+      "path_key": "path.behavioral",
+      "domain_key": "domain.testing",
+      "rationale": "Behavioral evidence and interview answer quality.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Architecture & Design Patterns",
+      "path_key": "path.system-design",
+      "domain_key": "domain.distributed-systems",
+      "rationale": "Explicit system-design and architecture cases.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Auth & Backend Security",
+      "path_key": "path.system-design",
+      "domain_key": "domain.http-api",
+      "rationale": "API and backend security contracts.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Behavioral",
+      "path_key": "path.behavioral",
+      "domain_key": "domain.testing",
+      "rationale": "Behavioral evidence and interview answer quality.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Behavioral / Competency",
+      "path_key": "path.behavioral",
+      "domain_key": "domain.testing",
+      "rationale": "Behavioral evidence and interview answer quality.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Behavioral / Conflict & Teamwork",
+      "path_key": "path.behavioral",
+      "domain_key": "domain.testing",
+      "rationale": "Behavioral evidence and interview answer quality.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Behavioral / Leadership Principles",
+      "path_key": "path.behavioral",
+      "domain_key": "domain.testing",
+      "rationale": "Behavioral evidence and interview answer quality.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Behavioral / Project Deep Dive",
+      "path_key": "path.behavioral",
+      "domain_key": "domain.testing",
+      "rationale": "Behavioral evidence and interview answer quality.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Behavioral / Recruiter Screen",
+      "path_key": "path.behavioral",
+      "domain_key": "domain.testing",
+      "rationale": "Behavioral evidence and interview answer quality.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Behavioral / Self & Motivation",
+      "path_key": "path.behavioral",
+      "domain_key": "domain.testing",
+      "rationale": "Behavioral evidence and interview answer quality.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Caching",
+      "path_key": "path.system-design",
+      "domain_key": "domain.distributed-systems",
+      "rationale": "Explicit system-design and architecture cases.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Databases & Data Modeling",
+      "path_key": "path.system-design",
+      "domain_key": "domain.data-postgresql",
+      "rationale": "Storage, persistence, and SQL modelling.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Delivery, Observability & Cloud",
+      "path_key": "path.system-design",
+      "domain_key": "domain.delivery-observability",
+      "rationale": "Delivery, cloud, and AI system operations.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Distributed Systems & Resilience",
+      "path_key": "path.system-design",
+      "domain_key": "domain.distributed-systems",
+      "rationale": "Explicit system-design and architecture cases.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Frontend / Styling",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Frontend Performance",
+      "path_key": "path.frontend",
+      "domain_key": "domain.testing",
+      "rationale": "Frontend performance and testability evidence.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Frontend Security / Accessibility",
+      "path_key": "path.frontend",
+      "domain_key": "domain.http-api",
+      "rationale": "Browser and frontend request/security boundary.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Frontend System Design",
+      "path_key": "path.frontend",
+      "domain_key": "domain.distributed-systems",
+      "rationale": "Frontend system decomposition at product scale.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Git / Tooling",
+      "path_key": "path.system-design",
+      "domain_key": "domain.delivery-observability",
+      "rationale": "Delivery, cloud, and AI system operations.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Channels & select",
+      "path_key": "path.go",
+      "domain_key": "domain.runtime",
+      "rationale": "Go language, memory, scheduler, and synchronization mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Errors & defer & panic",
+      "path_key": "path.go",
+      "domain_key": "domain.runtime",
+      "rationale": "Go language, memory, scheduler, and synchronization mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Goroutines & Scheduler",
+      "path_key": "path.go",
+      "domain_key": "domain.runtime",
+      "rationale": "Go language, memory, scheduler, and synchronization mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Graceful Shutdown",
+      "path_key": "path.go",
+      "domain_key": "domain.runtime",
+      "rationale": "Go language, memory, scheduler, and synchronization mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Interfaces & Generics",
+      "path_key": "path.go",
+      "domain_key": "domain.runtime",
+      "rationale": "Go language, memory, scheduler, and synchronization mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Memory & GC",
+      "path_key": "path.go",
+      "domain_key": "domain.runtime",
+      "rationale": "Go language, memory, scheduler, and synchronization mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Package API Design",
+      "path_key": "path.go",
+      "domain_key": "domain.runtime",
+      "rationale": "Go language, memory, scheduler, and synchronization mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Runtime & Language",
+      "path_key": "path.go",
+      "domain_key": "domain.runtime",
+      "rationale": "Go language, memory, scheduler, and synchronization mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Sync & Patterns",
+      "path_key": "path.go",
+      "domain_key": "domain.runtime",
+      "rationale": "Go language, memory, scheduler, and synchronization mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Go / Tooling & Testing",
+      "path_key": "path.go",
+      "domain_key": "domain.testing",
+      "rationale": "Go tooling and test feedback.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "JS Async Internals",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Java / Concurrency & Async",
+      "path_key": "path.java-spring",
+      "domain_key": "domain.runtime",
+      "rationale": "Java language, JVM, and concurrency mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Java / Core Language",
+      "path_key": "path.java-spring",
+      "domain_key": "domain.runtime",
+      "rationale": "Java language, JVM, and concurrency mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Java / JVM & GC",
+      "path_key": "path.java-spring",
+      "domain_key": "domain.runtime",
+      "rationale": "Java language, JVM, and concurrency mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Java / Spring & Spring Boot",
+      "path_key": "path.java-spring",
+      "domain_key": "domain.http-api",
+      "rationale": "Spring application and HTTP boundary.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "JavaScript / DOM Events",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Messaging & Event Streaming",
+      "path_key": "path.system-design",
+      "domain_key": "domain.distributed-systems",
+      "rationale": "Explicit system-design and architecture cases.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Networking / Browser",
+      "path_key": "path.frontend",
+      "domain_key": "domain.http-api",
+      "rationale": "Browser and frontend request/security boundary.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / Async & Promises",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / Bun",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / Event Loop & Scheduling",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / JS Fundamentals",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / Modules & Packaging",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / NestJS / Auth & Security",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.http-api",
+      "rationale": "NestJS request, validation, and security boundaries.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / NestJS / DI & Architecture",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "NestJS composition and dependency lifecycle.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / NestJS / Data & TypeORM",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.data-postgresql",
+      "rationale": "NestJS persistence and ORM boundary.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / NestJS / Performance & Realtime",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.distributed-systems",
+      "rationale": "Node.js realtime and service concurrency mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / NestJS / Request Pipeline",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.http-api",
+      "rationale": "NestJS request, validation, and security boundaries.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / NestJS / Testing & Production",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.testing",
+      "rationale": "Node.js testing and production verification.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / NestJS / Validation & Errors",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.http-api",
+      "rationale": "NestJS request, validation, and security boundaries.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / Runtime Ops & Debugging",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / Streams & Backpressure",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / TS Applied",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / TS Tooling",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / TS Type System",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / V8 & GC",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node / Workers",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Node Runtime & Streams",
+      "path_key": "path.nodejs-typescript",
+      "domain_key": "domain.runtime",
+      "rationale": "Node.js/TypeScript execution and language mechanics.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "ORM & Persistence Performance",
+      "path_key": "path.system-design",
+      "domain_key": "domain.data-postgresql",
+      "rationale": "Storage, persistence, and SQL modelling.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "OS, Networking & Concurrency Fundamentals",
+      "path_key": "path.system-design",
+      "domain_key": "domain.os-networking",
+      "rationale": "Operating-system and network foundations used in designs.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Oracle / SQL Craft & Analytics",
+      "path_key": "path.system-design",
+      "domain_key": "domain.data-postgresql",
+      "rationale": "Storage, persistence, and SQL modelling.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Python / Concurrency & GIL",
+      "path_key": "path.python",
+      "domain_key": "domain.runtime",
+      "rationale": "Python concurrency and interpreter boundary.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Python / Iterators & Generators",
+      "path_key": "path.python",
+      "domain_key": "domain.runtime",
+      "rationale": "Python iteration and lazy evaluation.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Python / Metaprogramming",
+      "path_key": "path.python",
+      "domain_key": "domain.runtime",
+      "rationale": "Python object model and metaprogramming.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Python / OOP & Data Model",
+      "path_key": "path.python",
+      "domain_key": "domain.runtime",
+      "rationale": "Python object model and data modelling.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "React Rendering / Hooks",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Caching",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Combination",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Completion",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Custom Operators",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Error Handling",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Higher-order Mapping",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Hot vs Cold",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Multicasting",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Observable Creation",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "RxJS / Subjects",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "SQL / Joins & Aggregation",
+      "path_key": "path.system-design",
+      "domain_key": "domain.data-postgresql",
+      "rationale": "Storage, persistence, and SQL modelling.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "State Management",
+      "path_key": "path.frontend",
+      "domain_key": "domain.runtime",
+      "rationale": "Frontend framework, rendering, and reactive runtime.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "System Design",
+      "path_key": "path.system-design",
+      "domain_key": "domain.distributed-systems",
+      "rationale": "Explicit system-design and architecture cases.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "System Design / Product Cases",
+      "path_key": "path.system-design",
+      "domain_key": "domain.distributed-systems",
+      "rationale": "Explicit system-design and architecture cases.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Testing",
+      "path_key": "path.system-design",
+      "domain_key": "domain.testing",
+      "rationale": "System quality and test strategy.",
+      "review_state": "proposed"
+    },
+    {
+      "topic_title": "Web Architecture / Browser Storage",
+      "path_key": "path.frontend",
+      "domain_key": "domain.http-api",
+      "rationale": "Browser and frontend request/security boundary.",
+      "review_state": "proposed"
+    }
+  ]
+}
