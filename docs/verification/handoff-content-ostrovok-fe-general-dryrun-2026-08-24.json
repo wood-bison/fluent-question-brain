@@ -1,0 +1,117 @@
+{
+  "source_system": "fluent-question-vault",
+  "source_root": "/vault/Question Cards",
+  "workspace_key": "fluent-interview",
+  "dry_run": true,
+  "started_at": "2026-08-24T12:13:16.068279427Z",
+  "finished_at": "2026-08-24T12:13:16.074400843Z",
+  "totals": {
+    "files": 17,
+    "would_create": 17
+  },
+  "archived": 0,
+  "items": [
+    {
+      "source_ref": "/vault/Question Cards/OS-401 — Как браузер рендерит страницу.md",
+      "stable_key": "question.os-401",
+      "content_hash": "68bc85c98e030f878dd9bf1be0662dedc68c23d184ba4a78b22adf9b296a2cba",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-402 — Что такое делегирование событий в JS.md",
+      "stable_key": "question.os-402",
+      "content_hash": "5cca0fce4c37f5745d6e2a829db6f3af71fa6ac083fcb7b9dc814c2978b07d65",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-403 — Как работает сборщик мусора в JS.md",
+      "stable_key": "question.os-403",
+      "content_hash": "340b402f9fde1f910b115bbba3254c80a8e7f501b59bfe98c4aa9e43b4bd142b",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-404 — Что обычно понимают под асинхронным выполнением кода в JS.md",
+      "stable_key": "question.os-404",
+      "content_hash": "715ab343b9a62f14870b4a6d27a18d51f00e81e84c9b975fdb0103a979b171f5",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-405 — Что такое debounce и throttle.md",
+      "stable_key": "question.os-405",
+      "content_hash": "d39cfeb916d40dfeb76cf4fbf61b9ad4fc3c10bed9f7d1ba16a2cfc1dc094cdb",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-406 — Зачем в реакт принесли хуки.md",
+      "stable_key": "question.os-406",
+      "content_hash": "55130b49b420d0b2150d50486913192791110ebd1b236cef11399399ed23ce66",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-407 — Библиотека prop-types и typescript.md",
+      "stable_key": "question.os-407",
+      "content_hash": "0ba19f72ef6fd6c3372f1be4e641da0a9b68ea4fda1953fd910b37c9a0a1315a",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-408 — Code Review React BookingMap.md",
+      "stable_key": "question.os-408",
+      "content_hash": "4fdcef948adbe67adc620dcda5b1c66327b4ce4d2e3ec59bfd18fc4eebb55a62",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-409 — Common React Task sticky header and cart.md",
+      "stable_key": "question.os-409",
+      "content_hash": "78680ad29ff73428102b8ac4791fb483e7b5dd877d100d8abf1879aead9d5031",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-410 — Implement compose().md",
+      "stable_key": "question.os-410",
+      "content_hash": "1e72df5d05024ee6bc15ec38daa6b800a602961b03230cd27444591e70ae9ef8",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-411 — В каком порядке выведется консоль.md",
+      "stable_key": "question.os-411",
+      "content_hash": "53e103740924a45529fe5b3b620676e0eb8542e728223461592c73a3c1d40a0e",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-412 — Promise.all polyfill.md",
+      "stable_key": "question.os-412",
+      "content_hash": "47e15cec9efc9dcc1ea01facdc3f3bdf02504785782fc8c140ee40fe3d0c700f",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-413 — Write File Queued.md",
+      "stable_key": "question.os-413",
+      "content_hash": "06c1392fbe35cc62f0fb4f87f13ed319e066bb03eb3c3e56baab1f3be64d3006",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-414 — Server balancing (chooseServer).md",
+      "stable_key": "question.os-414",
+      "content_hash": "7161e7e742399e931a9da77fe90d94c00b782369221dd51bfecf9237dfc9c864",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-415 — IO and Average from dev numbers.md",
+      "stable_key": "question.os-415",
+      "content_hash": "c69878856e61bdbdcb1d1ef3ad3030704dda212ea30aa3b29fdd5e2e880299ef",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-416 — Main diagonal zeros.md",
+      "stable_key": "question.os-416",
+      "content_hash": "64a433c5320f7e6f03a4b63d401c4d35d2530803eb62ce7396290f3f1593bd83",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OS-417 — Устные вопросы (скрининг).md",
+      "stable_key": "question.os-417",
+      "content_hash": "8a1f3a81998a515dd8d3e31ded37cb63f1340518baf119b4a4d29cc229964ac9",
+      "action": "would_create"
+    }
+  ]
+}
