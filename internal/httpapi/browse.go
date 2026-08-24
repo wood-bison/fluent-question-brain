@@ -164,7 +164,7 @@ function tags(m, item) {
   const add = (t, c) => { if (t) box.appendChild(el('span', 'tag' + (c ? ' ' + c : ''), t)); };
   add(item.stable_key, 'k');
   add(m.track); add(m.level);
-  if (item.company && item.company !== 'unclassified') add(item.company, 'c');
+  add(m.company, 'c');
   add(m.topic);
   return box;
 }
@@ -218,7 +218,7 @@ async function load() {
       if (my !== seq) return;
       state.items = (d.results || []).map(x => ({
         stable_key: x.stable_key, prompt: x.prompt,
-        metadata: { track: x.track, level: x.level, topic: x.topic_title }, company: x.company
+        metadata: { track: x.track, level: x.level, topic: x.topic_title, company: x.company }
       }));
       state.total = state.items.length; state.offset = 0;
       $('count').textContent = 'найдено ' + state.total + (state.total === PAGE ? '+' : '');

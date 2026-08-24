@@ -854,6 +854,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 				qr.id::text as revision_id,
 				q.stable_key,
 				q.slug,
+				coalesce(q.company, '') as company,
 			ql.locale,
 			ql.prompt,
 			coalesce(ql.short_answer, '') as short_answer,
@@ -916,7 +917,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 				coalesce(1.0 / (60 + semantic_rank), 0) as rank_score
 			from ranked
 		)
-		select question_id, revision_id, stable_key, slug, locale, prompt,
+		select question_id, revision_id, stable_key, slug, company, locale, prompt,
 			short_answer, explanation, topic_key, topic_title, exact_score,
 			fts_score, trigram_score, semantic_score,
 			array_remove(array[
@@ -946,7 +947,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 		var task, rubric, choices json.RawMessage
 		if err := rows.Scan(
 			&result.QuestionID, &result.RevisionID, &result.StableKey, &result.Slug,
-			&result.Locale, &result.Prompt, &result.ShortAnswer, &result.Explanation,
+			&result.Company, &result.Locale, &result.Prompt, &result.ShortAnswer, &result.Explanation,
 			&result.TopicKey, &result.TopicTitle, &result.ExactScore, &result.FTSScore,
 			&result.TrigramScore, &result.SemanticScore, &result.MatchStages, &result.RankScore,
 			&task, &rubric, &choices,
@@ -1721,6 +1722,7 @@ func catalogMetadata(payload map[string]any) search.CatalogMetadata {
 		Title:         stringField(payload, "title"),
 		Topic:         stringField(payload, "topic"),
 		Track:         stringField(payload, "track"),
+		Company:       stringField(payload, "company"),
 		Priority:      stringField(payload, "priority"),
 		Lang:          stringField(payload, "lang"),
 		Runtime:       stringField(payload, "runtime"),

@@ -83,6 +83,8 @@ curl -i http://localhost:48127/health/ready
 curl -i http://localhost:48127/metrics
 # Release-scoped quality/coverage audit (no answer bodies)
 curl -sS 'http://localhost:48127/v1/quality?workspace=fluent-interview' | jq
+# Read-only question browser with facets and answer inspection
+open http://localhost:48127/browse
 # Search with explainable provenance
 curl -sS -X POST http://localhost:48127/v1/search \
   -H 'content-type: application/json' \

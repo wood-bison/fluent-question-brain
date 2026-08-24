@@ -126,6 +126,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
       <a href="/health/live">Live health ↗</a>
       <a href="/health/ready">Readiness ↗</a>
       <a href="/v1/release?workspace=fluent-interview">Question release ↗</a>
+      <a href="/browse">Question browser ↗</a>
       <a href="/metrics">Metrics ↗</a>
       <a href="http://localhost:56686/" target="_blank" rel="noreferrer">Jaeger UI ↗</a>
     </div>

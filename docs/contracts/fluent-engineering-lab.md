@@ -23,8 +23,10 @@ deterministic `release_id`. It intentionally does not return answer bodies;
 the Lab follows a selected `stable_key` with `GET /v1/questions/{stable_key}`.
 The response contract is `question-brain.catalog.v1`, and `total`/`offset`/
 `limit` make the index safe to page or cache without guessing whether a card
-exists. A `topic_key` query parameter narrows the same release index to one
-topic.
+exists. Optional `topic_key`, `track`, `level`, and `company` query parameters
+narrow the same release index without changing its release identity. These
+dimensions come from canonical card metadata; they are filters, not a second
+taxonomy.
 
 The catalog defaults to the learner-safe production release. Development
 records are classified explicitly with `content_kind=fixture` and are excluded

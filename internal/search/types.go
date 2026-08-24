@@ -21,6 +21,7 @@ type Result struct {
 	RevisionID    string          `json:"revision_id"`
 	StableKey     string          `json:"stable_key"`
 	Slug          string          `json:"slug"`
+	Company       string          `json:"company,omitempty"`
 	Locale        string          `json:"locale"`
 	Prompt        string          `json:"prompt"`
 	ShortAnswer   string          `json:"short_answer,omitempty"`
@@ -96,6 +97,7 @@ type CatalogMetadata struct {
 	Title         string `json:"title,omitempty"`
 	Topic         string `json:"topic,omitempty"`
 	Track         string `json:"track,omitempty"`
+	Company       string `json:"company,omitempty"`
 	Priority      string `json:"priority,omitempty"`
 	Lang          string `json:"lang,omitempty"`
 	Runtime       string `json:"runtime,omitempty"`
