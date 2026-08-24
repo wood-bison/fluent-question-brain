@@ -1,0 +1,349 @@
+{
+  "source_system": "fluent-question-vault",
+  "source_root": "/vault/Question Cards",
+  "workspace_key": "fluent-interview",
+  "dry_run": true,
+  "started_at": "2026-08-24T11:52:11.872895383Z",
+  "finished_at": "2026-08-24T11:52:11.890155883Z",
+  "totals": {
+    "files": 51,
+    "warnings": 9,
+    "would_create": 51
+  },
+  "archived": 0,
+  "items": [
+    {
+      "source_ref": "/vault/Question Cards/AV-101 — Указатели.md",
+      "stable_key": "question.av-101",
+      "content_hash": "21990bab4a6e397eae04d9f303e65a75e7a80c138a4fbcaa63c35c630ebaf877",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-102 — Горутины в цикле.md",
+      "stable_key": "question.av-102",
+      "content_hash": "f9888f03dd3771bf869a26d3bcda455903aa74f016ee3bd16c2105da42c48cdd",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-103 — Сборка сниппета.md",
+      "stable_key": "question.av-103",
+      "content_hash": "34ee98e5f45be092a2ccb6b6d919945d4c12be169607819f7097a6fd69c321f4",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-104 — Прогноз погоды.md",
+      "stable_key": "question.av-104",
+      "content_hash": "74fb6d8e10cdc98212d1897d65bbe8ff8e2237aaf03f6e5ed51bf4852c1f5c39",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-105 — Сетевые запросы.md",
+      "stable_key": "question.av-105",
+      "content_hash": "7e6258758fd06043248c074acc0f31800e175f8662661894d1491c911b12f5c4",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-106 — Параллельный запрос URL адресов.md",
+      "stable_key": "question.av-106",
+      "content_hash": "7396646d290b8237b8ebbda87ddd3a59bd6826549ae62416f9ec5efdfd02745f",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-107 — Неблокирующий вызов функции.md",
+      "stable_key": "question.av-107",
+      "content_hash": "b868f3ec07d3e90db4f3c2cb89c31ebe21d2bc0e97d5e872bff22331cc44ea69",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-108 — Что такое горутины в Go и как они соотносятся с потоками операционной.md",
+      "stable_key": "question.av-108",
+      "content_hash": "2a313d5f26976614ef54f2a3d5fccbcc2e1cc65811c3f8573b3a408290d28381",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-109 — Чем занимается runtime в Go.md",
+      "stable_key": "question.av-109",
+      "content_hash": "633119f303601c24e9e7d8698aa071ca2ad77daa74b8c23d3d42aef20c0a9a1c",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-110 — За счет чего Go позволяет работать с большим количеством сетевых соеди.md",
+      "stable_key": "question.av-110",
+      "content_hash": "4009eb4e7fadac50085f2b597d392339358ee46e37a112e0372902cfa2a41f88",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-111 — Что такое каналы.md",
+      "stable_key": "question.av-111",
+      "content_hash": "19d530d5a3b460508cffcdf0d5fda8c4d201653e7cf44c074614add417ed6e93",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-112 — Расскажите о примитивах синхронизации и зачем они нужны.md",
+      "stable_key": "question.av-112",
+      "content_hash": "4244fa98d908e9cbf2fae4613d2d407051cc6e9cdd6b52eba82a0f43ec8fe51f",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-113 — Что такое интерфейс.md",
+      "stable_key": "question.av-113",
+      "content_hash": "403c26afb2dd5761e46f588fa86f704495d7898bf951c09d9a53d547ea6d8547",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-114 — Использование памяти.md",
+      "stable_key": "question.av-114",
+      "content_hash": "eda61b119f6873012bb3b2a6e56e0dc3320a47fc8a567a6cecdbb157389d3a1e",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-115 — Написание тестов.md",
+      "stable_key": "question.av-115",
+      "content_hash": "66b00f7449a1b741589c22e32963c045d133ed96be84d2fdbb22501e7bb33314",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-116 — Профилирование.md",
+      "stable_key": "question.av-116",
+      "content_hash": "ae5cc3b4d5ab3038b33b2b6eb301d51e035f98d2fc868d46fafd3c0cd9886b6a",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-117 — Autoboxing and unboxing.md",
+      "stable_key": "question.av-117",
+      "content_hash": "ed37be63b64de44088ad48fbb96b207d5d2a3142e4b00d17da0755dd32d021b6",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-118 — Java Streams.md",
+      "stable_key": "question.av-118",
+      "content_hash": "89e186696da5f9cf8e23155e7f27aefdc91ca7ec85289549b0ae42f2b1ad6372",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-119 — Функциональные интерфейсы.md",
+      "stable_key": "question.av-119",
+      "content_hash": "bfa957acddf06f69c2917a0ebb4c5bec89686c7aee35622c1e8131c443879a4c",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-120 — Double brace инициализация.md",
+      "stable_key": "question.av-120",
+      "content_hash": "6c5f4bc955e89a5f4933aa6de29c5cfb856394d84beadde443f7aacb8f5e3fd6",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-121 — Serialization.md",
+      "stable_key": "question.av-121",
+      "content_hash": "0567380cfea6acee7a3f57fb2798e8a83f9ca11c80909796a7e1d3b9bd248958",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-122 — Garbage collector.md",
+      "stable_key": "question.av-122",
+      "content_hash": "2554294c6bf162f5b473089838fecbf88014455c81abce42c0338ead17cd72c1",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-123 — Java Concurrency.md",
+      "stable_key": "question.av-123",
+      "content_hash": "3061e29bfe47c3ed0965b74b5e8858fd0b0f66bc89d331bf2b524957cd174389",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-124 — данных.md",
+      "stable_key": "question.av-124",
+      "content_hash": "519947e38e449d4efc6e18a6ace4e641024c6d63e085d1c8290d3e217c7d2520",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-125 — Other tasks.md",
+      "stable_key": "question.av-125",
+      "content_hash": "852a79e656b786267dd2d0045ba6cda44218adc9e242aac1d1f45a2c83cef778",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-126 — SQL практика.md",
+      "stable_key": "question.av-126",
+      "content_hash": "6f82d86532a71cc0a32ba9f80a0029fe671630f0756ebb71d8d5eed593f206a5",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-127 — Исключить один список из другого.md",
+      "stable_key": "question.av-127",
+      "content_hash": "7f52704011cdbfc8ee0330aa68974759782da0d62bc371f0fe8fe54d30d82583",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-128 — Классы в python.md",
+      "stable_key": "question.av-128",
+      "content_hash": "c88fc96a28b680725e440bc728bc76ed815292d280e7f25448e19ee95e087c0e",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-129 — Итераторы и генераторы.md",
+      "stable_key": "question.av-129",
+      "content_hash": "c92258d519ba7783caa35c265321721fce6fd0ad2428f855b229d3b6a5b49813",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-130 — Опрос сервиса.md",
+      "stable_key": "question.av-130",
+      "content_hash": "b788ed111721eeaf9c748ea40b05906e307bd6030656241d2936f7d176597499",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-131 — Параметризованный декоратор.md",
+      "stable_key": "question.av-131",
+      "content_hash": "8724ab75067fe4d8ffc421fbe62453b5357ef0aff56287a07bd264c476a2a390",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-132 — Распараллелить cpu bound функцию.md",
+      "stable_key": "question.av-132",
+      "content_hash": "1b1e237a1281d871192c2f05e0774602ae524c2b1cf367a06e946b9b4f2b3334",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-133 — network overall (http, tcp, dns).md",
+      "stable_key": "question.av-133",
+      "content_hash": "0d2a33ee9301b86afe52e96adc54bfb6d7eed4370e7844b8ccd26989c16c667a",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-134 — транспортный уровень.md",
+      "stable_key": "question.av-134",
+      "content_hash": "fd593bc5670a44cc6970eef229c931fe7d1dbef983c9663ea735bce5c5ad0481",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-135 — Замыкание   Область видимости.md",
+      "stable_key": "question.av-135",
+      "content_hash": "7f9505fe064923dfd3618b332d5e606b3079a3fe3677038b8ef42a359b0e94bd",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-136 — (OLD) Event Loop.md",
+      "stable_key": "question.av-136",
+      "content_hash": "e236213d8974c7453990c6de8e4974ccdc6d5de83ab1a3c8acb5b96a41e90dc3",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-137 — Event Loop.md",
+      "stable_key": "question.av-137",
+      "content_hash": "47bc6f73610c23fb7ab5bcd018f48be47aefddbd6cf70b1ce042d6bf00cbb55f",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-138 — Области видимости.md",
+      "stable_key": "question.av-138",
+      "content_hash": "a2aaca6e3cefbd620973a0e16d737a348c1af7ade2c4abe7928a339e62f577c2",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-139 — Области видимости.md",
+      "stable_key": "question.av-139",
+      "content_hash": "58c14dc532d30c84474173b52b269be1c60014c2eab94c0d4ea7251705cd98fd",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-140 — Jquery.md",
+      "stable_key": "question.av-140",
+      "content_hash": "96a8d1ec5a0205d8e97349bde85bce6f89e489c9919e5ec17cc3b074c0dbdff4",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-141 — Работа браузера.md",
+      "stable_key": "question.av-141",
+      "content_hash": "cf5473a5f46cddc1db661a7346738cc44a0943505f3c851eb589c15bd50ec200",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-142 — Сеть - Клиент для получения фича-тогглов.md",
+      "stable_key": "question.av-142",
+      "content_hash": "bd9f4c548ba2bd4281fab31c9798a89e529e3fd378b6747a827a41115bb384a4",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-143 — Сеть - Клиент для отправки аналитики.md",
+      "stable_key": "question.av-143",
+      "content_hash": "3515de2c43fce359a9dde3e44538a19f9acd1291970a6ebb0a66ef3821a6192c",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-144 — Оптимизация.md",
+      "stable_key": "question.av-144",
+      "content_hash": "fdaf198921f51a1c6a62d821a85c085b1602c9e9f6ac47ee25e673242dfe5462",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-145 — Работа с DOM – Изображения.md",
+      "stable_key": "question.av-145",
+      "content_hash": "b72113a367c04166f68e3e78e710e4d2124964acf34cf6eedaf6c74aa7619633",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-146 — Работа с DOM – Саджесты.md",
+      "stable_key": "question.av-146",
+      "content_hash": "94f74724e7f1139afcc4afad9a4e43f6c0badfcc39e08bca2ec3b176c3b1b815",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-147 — Поиск популярных IP (программирование).md",
+      "stable_key": "question.av-147",
+      "content_hash": "49ac3adde2de1ae5ed141af0be19e58aac56a8def0687705250977682cecbc2e",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-152 — Чемпионат по шагам.md",
+      "stable_key": "question.av-152",
+      "content_hash": "b89ee39e8ffd805d87036353f4df5769ab383528080e76dc945a012e53e217e8",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-153 — Суммарная неудовлетворённость покупателей.md",
+      "stable_key": "question.av-153",
+      "content_hash": "69693f1a98a9428227a5d6e7bb27476523368205ad19792c114b740c2fe84e54",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-154 — Отказоустойчивая архитектура LAMP-приложения.md",
+      "stable_key": "question.av-154",
+      "content_hash": "72bb90b93d3d42c9e4be8fef6bdd90d452a658ac1f03344c4dcaca269e791e32",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/AV-155 — Проектирование Messenger (frontend).md",
+      "stable_key": "question.av-155",
+      "content_hash": "62fe0a2ced56988277a7563ae5b837c26148744f32f71fb8dbb6902791863493",
+      "action": "would_create"
+    }
+  ]
+}
