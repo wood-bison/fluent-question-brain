@@ -21,19 +21,20 @@ rejects any embedded `solution`. Use `--strict-task-boundary` on both
 ## Live production inventory
 
 The rebuilt Question Brain API was checked at `http://127.0.0.1:48127` on
-2026-08-25 against release `question-release-d550846f4743c4d3` (1591
+2026-08-25 against release `question-release-d00a14931e607336` (1591
 production cards):
 
 | Counter | Value | Meaning |
 | --- | ---: | --- |
-| `task_blocks` | 47 | historical/practical blocks currently visible in published cards |
-| `embedded_solutions` | 43 | legacy blocks retaining source material for immutable provenance |
-| `task_family_references` | 0 | no published card has opted into TaskBrief v1 yet |
+| `task_blocks` | 48 | 47 migrated historical briefs plus one reviewed runtime brief |
+| `embedded_solutions` | 0 | current learner projection has no Runtime-owned solutions |
+| `task_family_references` | 1 | `question.q315` → `task-family.rate-limiter` |
 | `task_boundary_violations` | 0 | no v1 card embeds a Runtime-owned solution |
 
-The non-zero legacy counters are intentionally visible debt, not silently
-rewritten data. The next content batch must convert a card to TaskBrief v1 and
-join it to a released TaskFamily before it is published.
+The 47 previous blocks were migrated to new current revisions with
+`historical_content`; their old revisions remain immutable and auditable. The
+rate-limiter conceptual card now demonstrates the complete join: one theory
+question → one TaskBrief → one released TaskFamily with language revisions.
 
 ## Verification
 
@@ -41,6 +42,9 @@ join it to a released TaskFamily before it is published.
 - Compose API/indexer images rebuilt and containers restarted successfully.
 - `/health/ready` returned `200` with `database=reachable`.
 - `/v1/quality` returned the release and the four task-boundary counters above.
+- `/v1/questions/question.q315?locale=en` returned the safe TaskBrief with
+  `task-family.rate-limiter`; no solution or hidden-test material crossed the
+  API boundary.
 - Strict unit tests prove an embedded solution is rejected, a runtime brief
   without a family is rejected, and a legacy unversioned block remains
   readable.
@@ -51,3 +55,5 @@ Contracts:
 
 - `docs/contracts/task-brief.v1.md`
 - `docs/contracts/question-revision.md`
+- `scripts/migrate_task_blocks_to_taskbrief_v1.sql`
+- `scripts/link_rate_limiter_taskbrief.sql`
