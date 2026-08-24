@@ -166,6 +166,11 @@ export interface Question {
   priority?: string | null;
   group?: string | null;
   level?: string | null;
+  programKey?: string | null;
+  pathKey?: string | null;
+  domainKey?: string | null;
+  capabilityKey?: string | null;
+  mappingState?: ('proposed' | 'accepted' | 'rejected') | null;
   question: string;
   shortAnswer?: string | null;
   explanation?: string | null;
@@ -328,6 +333,11 @@ export interface QuestionsSelect<T extends boolean = true> {
   priority?: T;
   group?: T;
   level?: T;
+  programKey?: T;
+  pathKey?: T;
+  domainKey?: T;
+  capabilityKey?: T;
+  mappingState?: T;
   question?: T;
   shortAnswer?: T;
   explanation?: T;

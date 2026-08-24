@@ -20,6 +20,7 @@ func main() {
 	workspaceName := flag.String("workspace-name", "Fluent Interview", "workspace display name")
 	dryRun := flag.Bool("dry-run", false, "parse and report without changing Postgres")
 	reportPath := flag.String("report", "", "write a machine-readable JSON report to this path")
+	strictTaxonomy := flag.Bool("strict-taxonomy", false, "reject cards whose legacy Topic is not in the controlled taxonomy registry")
 	flag.Parse()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
@@ -42,7 +43,7 @@ func main() {
 	report, err := ingest.Run(ctx, ingest.Options{
 		Root: *root, Files: files, DatabaseURL: *databaseURL,
 		WorkspaceKey: *workspaceKey, WorkspaceName: *workspaceName,
-		DryRun: *dryRun, ReportPath: *reportPath,
+		DryRun: *dryRun, ReportPath: *reportPath, StrictTaxonomy: *strictTaxonomy,
 	})
 	if err != nil {
 		logger.Error("import run failed", "error", err)

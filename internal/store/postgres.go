@@ -16,6 +16,7 @@ import (
 	"github.com/wood-bison/fluent-question-brain/internal/embedding"
 	"github.com/wood-bison/fluent-question-brain/internal/normalize"
 	"github.com/wood-bison/fluent-question-brain/internal/search"
+	"github.com/wood-bison/fluent-question-brain/internal/taxonomy"
 )
 
 type Postgres struct {
@@ -431,13 +432,22 @@ func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspac
 	}
 
 	if topicKey := normalize.TopicStableKey(card.Topic); topicKey != "" {
+		topicTitle := strings.TrimSpace(card.Topic)
+		if canonicalTitle, ok := taxonomy.CanonicalTopicTitle(card.Topic); ok {
+			topicTitle = canonicalTitle
+		}
 		var topicID string
 		err = tx.QueryRow(ctx, `
-			insert into content.topic (workspace_id, stable_key, title)
-			values ($1::uuid, $2, $3)
-			on conflict (workspace_id, stable_key) do update set title = excluded.title
-			returning id::text
-		`, workspaceID, topicKey, card.Topic).Scan(&topicID)
+				insert into content.topic (workspace_id, stable_key, title)
+				values ($1::uuid, $2, $3)
+				on conflict (workspace_id, stable_key) do nothing
+				returning id::text
+			`, workspaceID, topicKey, topicTitle).Scan(&topicID)
+		if err == pgx.ErrNoRows {
+			err = tx.QueryRow(ctx, `
+					select id::text from content.topic where workspace_id = $1::uuid and stable_key = $2
+				`, workspaceID, topicKey).Scan(&topicID)
+		}
 		if err != nil {
 			return StoredRevision{}, fmt.Errorf("upsert source topic: %w", err)
 		}
@@ -1488,7 +1498,6 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 			return search.QualityResponse{}, fmt.Errorf("decode quality metadata for %s: %w", stableKey, err)
 		}
 		tracks[qualityBucketValue(value, "track")]++
-		topics[qualityBucketValue(value, "topic")]++
 		levels[nullableBucketValue(level)]++
 		companies[nullableBucketValue(company)]++
 		prompt := normalizeQualityPrompt(qualityBucketValue(value, "question"))
@@ -1499,6 +1508,41 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	if err := rows.Err(); err != nil {
 		return search.QualityResponse{}, fmt.Errorf("iterate quality metadata: %w", err)
 	}
+	// Topic is a legacy content-graph placement.  Use the canonical topic
+	// registry and question_topic bindings as the source of truth rather than
+	// counting raw payload labels; this collapses reviewed aliases and keeps
+	// zero-card registry entries visible for auditability.
+	topics = make(map[string]int)
+	topicRows, err := p.pool.Query(ctx, `
+		select t.title, count(distinct q.id)::int
+		from content.workspace w
+		join content.topic t on t.workspace_id = w.id
+		left join content.question_topic qt on qt.topic_id = t.id
+		left join content.question q on q.id = qt.question_id
+			and q.workspace_id = w.id
+			and q.status = 'published'
+			and ($2 or q.content_kind = 'production')
+		where w.stable_key = $1
+		group by t.title
+		order by t.title
+	`, strings.TrimSpace(request.WorkspaceKey), request.IncludeFixtures)
+	if err != nil {
+		return search.QualityResponse{}, fmt.Errorf("query canonical topic registry: %w", err)
+	}
+	for topicRows.Next() {
+		var title string
+		var count int
+		if err := topicRows.Scan(&title, &count); err != nil {
+			topicRows.Close()
+			return search.QualityResponse{}, fmt.Errorf("scan canonical topic registry: %w", err)
+		}
+		topics[title] = count
+	}
+	if err := topicRows.Err(); err != nil {
+		topicRows.Close()
+		return search.QualityResponse{}, fmt.Errorf("iterate canonical topic registry: %w", err)
+	}
+	topicRows.Close()
 
 	duplicateGroups := make([]search.QualityDuplicateGroup, 0)
 	for prompt, stableKeys := range duplicatePrompts {
@@ -1716,20 +1760,31 @@ func qualityWarnings(checks search.ReleaseChecks, duplicateGroups int) []string 
 
 func catalogMetadata(payload map[string]any) search.CatalogMetadata {
 	metadata := search.CatalogMetadata{
-		Group:         stringField(payload, "group"),
-		Level:         stringField(payload, "level"),
-		Scope:         stringField(payload, "scope"),
-		Title:         stringField(payload, "title"),
-		Topic:         stringField(payload, "topic"),
-		Track:         stringField(payload, "track"),
-		Company:       stringField(payload, "company"),
-		Priority:      stringField(payload, "priority"),
-		Lang:          stringField(payload, "lang"),
-		Runtime:       stringField(payload, "runtime"),
-		ExecutionMode: stringField(payload, "execution_mode"),
-		OrderKey:      stringField(payload, "order_key"),
-		StageKey:      stringField(payload, "stage_key"),
-		CapabilityKey: stringField(payload, "capability_key"),
+		Group:          stringField(payload, "group"),
+		Level:          stringField(payload, "level"),
+		Scope:          stringField(payload, "scope"),
+		Title:          stringField(payload, "title"),
+		Topic:          stringField(payload, "topic"),
+		Track:          stringField(payload, "track"),
+		Company:        stringField(payload, "company"),
+		Priority:       stringField(payload, "priority"),
+		Lang:           stringField(payload, "lang"),
+		Runtime:        stringField(payload, "runtime"),
+		ExecutionMode:  stringField(payload, "execution_mode"),
+		OrderKey:       stringField(payload, "order_key"),
+		StageKey:       stringField(payload, "stage_key"),
+		ProgramKey:     stringField(payload, "program_key"),
+		PathKey:        stringField(payload, "path_key"),
+		DomainKey:      stringField(payload, "domain_key"),
+		CapabilityKey:  stringField(payload, "capability_key"),
+		MappingState:   stringField(payload, "mapping_state"),
+		MappingVersion: stringField(payload, "mapping_version"),
+	}
+	// stage_key was the first Lab bridge and is now a deprecated alias for the
+	// shared Domain level. Preserve it for existing consumers while making the
+	// canonical field explicit for new clients.
+	if metadata.StageKey == "" && metadata.DomainKey != "" {
+		metadata.StageKey = metadata.DomainKey
 	}
 	if value, ok := payload["depth"].(float64); ok {
 		metadata.Depth = int(value)

@@ -2,9 +2,63 @@
 
 Generated from the live database on 2026-08-24.
 
-## The placement model
+## Curriculum taxonomy v1 (Lab cross-system model)
 
-A card is placed by three header fields. Nothing else places it.
+Question Brain has two intentionally separate placement vocabularies:
+
+1. The legacy content graph below (`Track`, `Group`, `Topic`) describes where a
+   source card was authored and what kind of card it is.
+2. The explicit curriculum crosswalk (`Program`, `Path`, `Domain`,
+   `Capability`) describes how a reviewed card may be projected into Fluent
+   Engineering Lab.
+
+`Group` is never a `Domain`, and `Topic` is never a `Capability`. A Lab binding
+   is valid only when these fields are authored explicitly; the importer does
+   not infer a path or capability from a track, group, topic, title, or task
+   `breadcrumb`.
+
+The machine-readable key space is versioned as
+`question-brain.taxonomy.v1`:
+
+| Level | Canonical key | Values |
+|---|---|---|
+| Program | `program.backend-engineer` | Backend Engineer |
+| Path | `path.<slug>` | `nodejs-typescript`, `java-spring`, `dotnet-csharp`, `go`, `frontend`, `system-design`, `algorithms`, `behavioral` |
+| Shared domain | `domain.<slug>` | `runtime`, `http-api`, `data-postgresql`, `distributed-systems`, `os-networking`, `testing`, `delivery-observability` |
+| Capability | `capability.<domain-slug>.<slug>` | reviewed Lab station; not generated from a Topic |
+
+The optional canonical payload fields are `program_key`, `path_key`,
+`domain_key`, `capability_key`, `mapping_state`, and `mapping_version`.
+`mapping_state` is `proposed`, `accepted`, or `rejected`; an omitted mapping
+means `unmapped`. A capability requires an explicit path and domain. The
+revision-scoped `content.question_capability` table is many-to-many and is
+empty until a reviewed capability registry exists; this is deliberate and
+prevents a mass import from manufacturing learner stations.
+
+`stage_key` remains a read-only compatibility projection for older Lab clients.
+When a new mapping has `domain_key`, the catalog may expose the same value as
+`stage_key`; new clients must prefer `domain_key` and `path_key`.
+
+### Controlled legacy Topic aliases
+
+`content.topic` and `question_topic` remain the source of truth for legacy
+content placement. The controlled registry has exactly three reviewed aliases:
+
+| Raw payload label | Canonical Topic | Reason |
+|---|---|---|
+| `Distributed Systems / Resilience` | `Distributed Systems & Resilience` | separator drift |
+| `Go / Channels & Select` | `Go / Channels & select` | capitalization drift |
+| `Go / Sync Patterns` | `Go / Sync & Patterns` | conjunction drift |
+
+Strict imports (`qb-import --strict-taxonomy`) reject an unknown legacy Topic;
+the default importer remains warning-only for compatibility with historical
+vaults. Aliases never rewrite an existing revision payload or its hash.
+
+## Legacy content placement model
+
+A legacy card is placed in the content graph by three header fields. Nothing
+else places it in that graph; a curriculum binding is a separate, explicit
+cross-system projection described above.
 
 | Field | Meaning | Values |
 |---|---|---|
@@ -12,10 +66,13 @@ A card is placed by three header fields. Nothing else places it.
 | `Group` | kind of card | see below |
 | `Topic` | subject | one entry from this file |
 
-`Topic` is free text: the importer slugifies it to `topic.<slug>` and creates the
-topic when it does not exist. There is no dictionary check. A typo silently
-becomes a new topic and a synonym silently splits a subject in two — which is
-why this file exists and why it is worth keeping current.
+Historically `Topic` was free text: the importer slugified it to `topic.<slug>`
+and created the topic when it did not exist. That compatibility behavior is
+still warning-only by default, so old vaults can be audited without being
+blocked. New batches must run `qb-import --strict-taxonomy`: an unknown Topic
+is rejected before a database write, while the three explicit aliases above
+are accepted with a canonical-topic warning. Strict Topic validation does not
+validate or infer the separate v1 Path/Domain/Capability mapping.
 
 ## An executable task has no topic of its own
 
@@ -327,4 +384,12 @@ The other values below are historical drift, not a menu to pick from.
 
 ---
 
-**132 topics, 1392 placements.**
+**Legacy registry snapshot: 132 topic rows, 1392 production placements.**
+
+The authoritative count is the live `content.topic` registry joined to
+`question_topic`; it includes the zero-card historical row `systems`. The
+answer-free `/v1/quality.topics` projection is now built from that registry,
+not from raw payload labels. Before taxonomy v1, the endpoint exposed 134 raw
+labels: 131 active canonical topics plus the three aliases listed above. Thus
+`132` and `134` were measuring different things, not two competing canonical
+registries.

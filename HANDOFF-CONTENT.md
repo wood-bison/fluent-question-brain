@@ -39,12 +39,12 @@ Vault: `~/developer/fluent-question-vault/Question Cards/`.
 # XX-000 — Короткий заголовок
 
 ID: XX-000
-Track: Backend | Frontend | Fullstack | Algorithms
+Track: Backend | Frontend | Fullstack | Algorithms | Angular | PL/SQL
 Topic: <тема из существующей таксономии или новая>
 Scope: <источник>
 Lang:
 Priority: common
-Group: Practical Tasks | Common Questions | System Design | System Design Screening
+Group: Practical Tasks | Common Questions | System Design | Behavioral
 Level: Junior | Middle | Middle+ | Senior
 Company: Ozon | Avito | Yandex | Kaspersky | Ostrovok | KupiBilet
 Difficulty: EASY | MEDIUM | HARD
@@ -60,25 +60,59 @@ Question: <вопрос по-английски>
 ## Core Idea (RU)
 ```
 
+`Track`, `Group` и `Topic` в этом шаблоне — legacy-поля, совместимые с
+существующим графом Question Brain. Для новых карточек `Group` выбирается
+только из четырёх значений выше. `System Design Screening` — историческое
+значение у восьми существующих карточек с вариантами ответа; новые карточки
+его не используют. `Angular` и `PL/SQL` остаются допустимыми legacy-Track,
+даже хотя это не Paths Fluent Lab.
+
+Если карточка уже прошла редакторское сопоставление с Fluent Lab, добавляются
+отдельные явные поля (они не заменяют legacy-поля и не должны вычисляться из
+них):
+
+```text
+Program-Key: program.backend-engineer
+Path-Key: path.nodejs-typescript
+Domain-Key: domain.runtime
+Capability-Key: capability.runtime.event-loop
+Mapping-State: proposed
+```
+
+`Program-Key`/`Path-Key`/`Domain-Key`/`Capability-Key` — стабильные v1-ключи.
+`Capability-Key` требует одновременно Path и Shared Domain. Допустимые
+`Mapping-State`: `proposed`, `accepted`, `rejected`; отсутствие значения при
+явной v1-привязке означает `proposed`. Для старых карточек все v1-поля
+остаются пустыми. Импортёр принимает также `Program`, `Path`, `Domain`,
+`Capability`, `Mapping_State` как короткие варианты, но в нормализованный
+payload записывает только `*_key`.
+
 Префиксы ID по источникам (продолжают существующие O-1xx, SD-2xx, G-3xx):
 `OZ-` Ozon · `AV-` Avito · `YA-` Yandex · `KS-` Kaspersky · `NT-` Notion · `OS-` Ostrovok
 
 ### Как определяется тема — читать до первой карточки
 
-Полный справочник: **`docs/contracts/taxonomy.md`** (132 темы, сгенерирован из базы).
+Полный справочник legacy Topic: **`docs/contracts/taxonomy.md`** (132 строки,
+сгенерирован из базы). Это не каталог Paths/Shared Domains/Capabilities.
 
 Карточку размещают три поля заголовка, больше ничего:
 
 | Поле | Что это | Значения |
 |---|---|---|
-| `Track` | крупная ось | Backend, Frontend, Fullstack, Algorithms, Angular, PL/SQL |
-| `Group` | тип карточки | Common Questions, Practical Tasks, System Design, Behavioral |
+| `Track` | legacy крупная ось | Backend, Frontend, Fullstack, Algorithms, Angular, PL/SQL |
+| `Group` | legacy тип карточки | Common Questions, Practical Tasks, System Design, Behavioral; `System Design Screening` только исторически |
 | `Topic` | тема | строка из справочника |
 
-`Topic` — **свободный текст**. Импортёр приводит его к `topic.<slug>` и заводит
-тему, если такой нет. Проверки по словарю нет: опечатка молча создаёт новую
-тему, синоним молча разделяет предмет надвое. При 300+ карточках это главный
-риск задания.
+Исторически `Topic` был **свободным текстом**: импортёр приводил его к
+`topic.<slug>` и заводил тему, если такой не было. Это объясняет старые
+раздвоения и не является правилом для новых загрузок. Теперь действует
+контролируемый словарь: три проверенных написательных alias-а описаны в
+`docs/contracts/taxonomy.md` и сходятся в каноническую Topic. Обычный импорт
+остаётся warning-only ради совместимости старых vault-ов; приёмка новой
+партии должна запускаться с `qb-import --strict-taxonomy`, который отклоняет
+неизвестный Topic до записи в базу. Strict taxonomy проверяет только legacy
+Topic: она не создаёт v1 Path/Domain/Capability и не выводит их из Track,
+Group, Topic или `breadcrumb`.
 
 **Правила:**
 1. Брать существующую тему из справочника, если она подходит. Написание точное,

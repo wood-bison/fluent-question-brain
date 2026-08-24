@@ -331,6 +331,11 @@ type promoteRequest struct {
 	Priority      string              `json:"priority"`
 	Group         string              `json:"group"`
 	Level         string              `json:"level"`
+	ProgramKey    string              `json:"program_key"`
+	PathKey       string              `json:"path_key"`
+	DomainKey     string              `json:"domain_key"`
+	CapabilityKey string              `json:"capability_key"`
+	MappingState  string              `json:"mapping_state"`
 	Question      string              `json:"question"`
 	Sections      []normalize.Section `json:"sections"`
 }
@@ -359,7 +364,7 @@ func (s *Server) promote(w http.ResponseWriter, r *http.Request) {
 	if strings.TrimSpace(request.SourceRef) == "" {
 		request.SourceRef = "payload://question/" + strings.TrimSpace(request.StableKey)
 	}
-	canonical, err := json.Marshal(map[string]any{
+	canonicalFields := map[string]any{
 		"stable_key": request.StableKey,
 		"slug":       request.Slug,
 		"title":      request.Title,
@@ -372,7 +377,25 @@ func (s *Server) promote(w http.ResponseWriter, r *http.Request) {
 		"level":      request.Level,
 		"question":   request.Question,
 		"sections":   request.Sections,
-	})
+	}
+	// Optional curriculum fields are omitted when empty so an older CMS client
+	// continues to produce the exact legacy payload/hash shape.
+	if request.ProgramKey != "" {
+		canonicalFields["program_key"] = request.ProgramKey
+	}
+	if request.PathKey != "" {
+		canonicalFields["path_key"] = request.PathKey
+	}
+	if request.DomainKey != "" {
+		canonicalFields["domain_key"] = request.DomainKey
+	}
+	if request.CapabilityKey != "" {
+		canonicalFields["capability_key"] = request.CapabilityKey
+	}
+	if request.MappingState != "" {
+		canonicalFields["mapping_state"] = request.MappingState
+	}
+	canonical, err := json.Marshal(canonicalFields)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "encode_promote_payload"})
 		return

@@ -104,8 +104,15 @@ type CatalogMetadata struct {
 	ExecutionMode string `json:"execution_mode,omitempty"`
 	Depth         int    `json:"depth,omitempty"`
 	OrderKey      string `json:"order_key,omitempty"`
-	StageKey      string `json:"stage_key,omitempty"`
-	CapabilityKey string `json:"capability_key,omitempty"`
+	// StageKey is a compatibility projection for older Lab clients. New
+	// clients must read DomainKey and PathKey; stage is not a second taxonomy.
+	StageKey       string `json:"stage_key,omitempty"`
+	ProgramKey     string `json:"program_key,omitempty"`
+	PathKey        string `json:"path_key,omitempty"`
+	DomainKey      string `json:"domain_key,omitempty"`
+	CapabilityKey  string `json:"capability_key,omitempty"`
+	MappingState   string `json:"mapping_state,omitempty"`
+	MappingVersion string `json:"mapping_version,omitempty"`
 }
 
 type CatalogResponse struct {

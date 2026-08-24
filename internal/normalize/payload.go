@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/wood-bison/fluent-question-brain/internal/taxonomy"
 )
 
 // CardFromPayload converts the canonical JSON shape used by the CMS promote
@@ -29,26 +31,92 @@ func CardFromPayload(sourceRef string, payload []byte) (Card, error) {
 	if sourceRef == "" {
 		sourceRef = "payload://question/" + value.StableKey
 	}
-	card := Card{
-		SourceRef: sourceRef,
-		ID:        value.StableKey,
-		StableKey: value.StableKey,
-		Slug:      value.Slug,
-		Title:     value.Title,
-		Track:     value.Track,
-		Topic:     value.Topic,
-		Scope:     value.Scope,
-		Lang:      value.Lang,
-		Priority:  value.Priority,
-		Group:     value.Group,
-		Level:     value.Level,
-		Question:  value.Question,
-		Sections:  append([]Section(nil), value.Sections...),
+	// A legacy promote payload may contain fields owned by another projection
+	// (for example stage_key or runtime metadata) that this package does not
+	// model. Preserve its canonical bytes and hash exactly; taxonomy v1 is an
+	// opt-in additive contract, not a reason to rewrite old revisions.
+	if !hasExplicitTaxonomy(value) {
+		card := Card{
+			SourceRef: sourceRef,
+			ID:        value.StableKey,
+			StableKey: value.StableKey,
+			Slug:      value.Slug,
+			Title:     value.Title,
+			Track:     value.Track,
+			Topic:     value.Topic,
+			Scope:     value.Scope,
+			Lang:      value.Lang,
+			Priority:  value.Priority,
+			Group:     value.Group,
+			Level:     value.Level,
+			Company:   value.Company,
+			Question:  value.Question,
+			Sections:  append([]Section(nil), value.Sections...),
+			Task:      value.Task,
+			Rubric:    append([]RubricLevel(nil), value.Rubric...),
+			Choices:   value.Choices,
+			Payload:   canonical,
+		}
+		card.Hash = HashCanonicalJSON(card.Payload)
+		return card, nil
 	}
-	card.Payload, err = CanonicalJSON(canonical)
+	placement, err := taxonomyPlacementFromPayload(value)
+	if err != nil {
+		return Card{}, fmt.Errorf("taxonomy placement: %w", err)
+	}
+	card := Card{
+		SourceRef:      sourceRef,
+		ID:             value.StableKey,
+		StableKey:      value.StableKey,
+		Slug:           value.Slug,
+		Title:          value.Title,
+		Track:          value.Track,
+		Topic:          value.Topic,
+		Scope:          value.Scope,
+		Lang:           value.Lang,
+		Priority:       value.Priority,
+		Group:          value.Group,
+		Level:          value.Level,
+		Company:        value.Company,
+		ProgramKey:     placement.ProgramKey,
+		PathKey:        placement.PathKey,
+		DomainKey:      placement.DomainKey,
+		CapabilityKey:  placement.CapabilityKey,
+		MappingState:   placement.MappingState,
+		MappingVersion: placement.MappingVersion,
+		Question:       value.Question,
+		Sections:       append([]Section(nil), value.Sections...),
+		Task:           value.Task,
+		Rubric:         append([]RubricLevel(nil), value.Rubric...),
+		Choices:        value.Choices,
+	}
+	rawPayload, err := canonicalPayload(card)
+	if err != nil {
+		return Card{}, fmt.Errorf("encode canonical payload: %w", err)
+	}
+	card.Payload, err = CanonicalJSON(rawPayload)
 	if err != nil {
 		return Card{}, fmt.Errorf("canonicalize payload: %w", err)
 	}
 	card.Hash = HashCanonicalJSON(card.Payload)
 	return card, nil
+}
+
+func taxonomyPlacementFromPayload(value canonicalCard) (taxonomy.Placement, error) {
+	domain := value.DomainKey
+	if domain == "" {
+		domain = value.StageKey
+	}
+	return taxonomy.ResolvePlacement(
+		value.ProgramKey,
+		value.PathKey,
+		domain,
+		value.CapabilityKey,
+		value.MappingState,
+	)
+}
+
+func hasExplicitTaxonomy(value canonicalCard) bool {
+	return value.ProgramKey != "" || value.PathKey != "" || value.DomainKey != "" ||
+		value.CapabilityKey != "" || value.MappingState != "" || value.MappingVersion != ""
 }

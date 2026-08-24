@@ -92,6 +92,32 @@ on `content.question` (`level` backfilled from the current revision;
 cards have no company and must not inherit one. Both are exposed as search
 filters and quality-audit cuts.
 
+## Optional Fluent Lab curriculum mapping
+
+The legacy `track`, `group`, and `topic` fields remain in the normalized
+payload for content compatibility. They must not be interpreted as a Lab
+curriculum assignment. A reviewed cross-system mapping may add this optional
+metadata:
+
+```json
+{
+  "program_key": "program.backend-engineer",
+  "path_key": "path.nodejs-typescript",
+  "domain_key": "domain.runtime",
+  "capability_key": "capability.runtime.event-loop",
+  "mapping_state": "proposed",
+  "mapping_version": "question-brain.taxonomy.v1"
+}
+```
+
+`path_key` and `domain_key` are explicit stable keys. `capability_key` is a
+reviewed Lab station and requires both. `mapping_state` is never inferred from
+the old `Topic`, `Group`, `Track`, task concepts, or a UI breadcrumb. The
+catalog exposes a deprecated `stage_key` compatibility projection of
+`domain_key` for older Lab clients; new clients use `path_key` and
+`domain_key`. The revision-scoped `content.question_capability` relation is
+many-to-many and release-aware; no legacy card is backfilled by this contract.
+
 Normalization is deterministic: trim Unicode whitespace, normalize line
 endings to LF, canonicalize JSON key order, normalize locale tags, and remove
 editor-only metadata. The SHA-256 of that normalized payload is the
@@ -100,4 +126,3 @@ editor-only metadata. The SHA-256 of that normalized payload is the
 The contract is intentionally independent of Payload blocks and of any one
 embedding vendor. A renderer may add fields, but a published revision cannot
 change without a new revision number and a new hash.
-

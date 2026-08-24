@@ -12,6 +12,7 @@ import (
 
 	"github.com/wood-bison/fluent-question-brain/internal/normalize"
 	"github.com/wood-bison/fluent-question-brain/internal/store"
+	"github.com/wood-bison/fluent-question-brain/internal/taxonomy"
 )
 
 const SourceSystem = "fluent-question-vault"
@@ -24,13 +25,14 @@ var cardDirectories = map[string]bool{
 }
 
 type Options struct {
-	Root          string
-	Files         []string
-	DatabaseURL   string
-	WorkspaceKey  string
-	WorkspaceName string
-	DryRun        bool
-	ReportPath    string
+	Root           string
+	Files          []string
+	DatabaseURL    string
+	WorkspaceKey   string
+	WorkspaceName  string
+	DryRun         bool
+	ReportPath     string
+	StrictTaxonomy bool
 }
 
 type Item struct {
@@ -138,6 +140,23 @@ func Run(ctx context.Context, options Options) (Report, error) {
 		}
 		if strings.TrimSpace(card.Topic) == "" {
 			item.Warnings = append(item.Warnings, "missing Topic metadata: card will stay unplaced in the topic tree")
+		} else if canonicalTopic, ok := taxonomy.CanonicalTopicTitle(card.Topic); !ok {
+			warning := fmt.Sprintf("Topic %q is outside the controlled legacy taxonomy registry", card.Topic)
+			item.Warnings = append(item.Warnings, warning)
+			if options.StrictTaxonomy {
+				item.Action = "invalid"
+				item.Error = warning
+				report.Totals[item.Action]++
+				report.Items = append(report.Items, item)
+				if db != nil {
+					if err := db.RecordImportItem(ctx, store.ImportItem{RunID: report.RunID, SourceRef: item.SourceRef, StableKey: item.StableKey, ContentHash: item.ContentHash, Action: item.Action, Error: item.Error}); err != nil {
+						return finishWithError(ctx, db, report, err)
+					}
+				}
+				continue
+			}
+		} else if canonicalTopic != card.Topic {
+			item.Warnings = append(item.Warnings, fmt.Sprintf("Topic alias resolves to canonical legacy topic %q", canonicalTopic))
 		}
 		if strings.TrimSpace(card.Level) == "" {
 			item.Warnings = append(item.Warnings, "missing Level metadata")

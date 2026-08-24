@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/wood-bison/fluent-question-brain/internal/taxonomy"
 )
 
 type Section struct {
@@ -53,45 +55,58 @@ type TaskBlock struct {
 // The original markdown remains in the source mirror; the canonical payload
 // stores normalized sections so no editor-only syntax becomes runtime truth.
 type Card struct {
-	SourceRef string
-	ID        string
-	StableKey string
-	Slug      string
-	Title     string
-	Track     string
-	Topic     string
-	Scope     string
-	Lang      string
-	Priority  string
-	Group     string
-	Level     string
-	Company   string
-	Question  string
-	Sections  []Section
-	Task      *TaskBlock
-	Rubric    []RubricLevel
-	Choices   *ChoicesBlock
-	Payload   []byte
-	Hash      string
+	SourceRef      string
+	ID             string
+	StableKey      string
+	Slug           string
+	Title          string
+	Track          string
+	Topic          string
+	Scope          string
+	Lang           string
+	Priority       string
+	Group          string
+	Level          string
+	Company        string
+	ProgramKey     string
+	PathKey        string
+	DomainKey      string
+	CapabilityKey  string
+	MappingState   string
+	MappingVersion string
+	Question       string
+	Sections       []Section
+	Task           *TaskBlock
+	Rubric         []RubricLevel
+	Choices        *ChoicesBlock
+	Payload        []byte
+	Hash           string
 }
 
 type canonicalCard struct {
-	StableKey string        `json:"stable_key"`
-	Slug      string        `json:"slug"`
-	Title     string        `json:"title"`
-	Track     string        `json:"track,omitempty"`
-	Topic     string        `json:"topic,omitempty"`
-	Scope     string        `json:"scope,omitempty"`
-	Lang      string        `json:"lang,omitempty"`
-	Priority  string        `json:"priority,omitempty"`
-	Group     string        `json:"group,omitempty"`
-	Level     string        `json:"level,omitempty"`
-	Company   string        `json:"company,omitempty"`
-	Question  string        `json:"question"`
-	Sections  []Section     `json:"sections"`
-	Task      *TaskBlock    `json:"task,omitempty"`
-	Rubric    []RubricLevel `json:"rubric,omitempty"`
-	Choices   *ChoicesBlock `json:"choices,omitempty"`
+	StableKey      string        `json:"stable_key"`
+	Slug           string        `json:"slug"`
+	Title          string        `json:"title"`
+	Track          string        `json:"track,omitempty"`
+	Topic          string        `json:"topic,omitempty"`
+	Scope          string        `json:"scope,omitempty"`
+	Lang           string        `json:"lang,omitempty"`
+	Priority       string        `json:"priority,omitempty"`
+	Group          string        `json:"group,omitempty"`
+	Level          string        `json:"level,omitempty"`
+	Company        string        `json:"company,omitempty"`
+	ProgramKey     string        `json:"program_key,omitempty"`
+	PathKey        string        `json:"path_key,omitempty"`
+	DomainKey      string        `json:"domain_key,omitempty"`
+	CapabilityKey  string        `json:"capability_key,omitempty"`
+	MappingState   string        `json:"mapping_state,omitempty"`
+	MappingVersion string        `json:"mapping_version,omitempty"`
+	StageKey       string        `json:"stage_key,omitempty"`
+	Question       string        `json:"question"`
+	Sections       []Section     `json:"sections"`
+	Task           *TaskBlock    `json:"task,omitempty"`
+	Rubric         []RubricLevel `json:"rubric,omitempty"`
+	Choices        *ChoicesBlock `json:"choices,omitempty"`
 }
 
 var headingPattern = regexp.MustCompile(`^#\s+(.+?)\s*$`)
@@ -153,22 +168,32 @@ func ParseMarkdown(sourceRef string, input []byte) (Card, error) {
 	}
 	question := firstNonEmpty(meta["question"], title)
 	stableKey := "question." + strings.ToLower(strings.TrimSpace(id))
+	placement, err := placementFromMetadata(meta)
+	if err != nil {
+		return Card{}, fmt.Errorf("%s: taxonomy placement: %w", sourceRef, err)
+	}
 	card := Card{
-		SourceRef: sourceRef,
-		ID:        id,
-		StableKey: stableKey,
-		Slug:      slugify(id),
-		Title:     title,
-		Track:     meta["track"],
-		Topic:     meta["topic"],
-		Scope:     meta["scope"],
-		Lang:      meta["lang"],
-		Priority:  meta["priority"],
-		Group:     meta["group"],
-		Level:     meta["level"],
-		Company:   firstNonEmpty(meta["company"], meta["организация"]),
-		Question:  question,
-		Sections:  sections,
+		SourceRef:      sourceRef,
+		ID:             id,
+		StableKey:      stableKey,
+		Slug:           slugify(id),
+		Title:          title,
+		Track:          meta["track"],
+		Topic:          meta["topic"],
+		Scope:          meta["scope"],
+		Lang:           meta["lang"],
+		Priority:       meta["priority"],
+		Group:          meta["group"],
+		Level:          meta["level"],
+		Company:        firstNonEmpty(meta["company"], meta["организация"]),
+		ProgramKey:     placement.ProgramKey,
+		PathKey:        placement.PathKey,
+		DomainKey:      placement.DomainKey,
+		CapabilityKey:  placement.CapabilityKey,
+		MappingState:   placement.MappingState,
+		MappingVersion: placement.MappingVersion,
+		Question:       question,
+		Sections:       sections,
 	}
 	card.Task = taskBlock(card, meta["difficulty"])
 	card.Rubric = rubricBlock(card)
@@ -215,22 +240,28 @@ func HashCanonicalJSON(raw []byte) string {
 
 func canonicalPayload(card Card) ([]byte, error) {
 	payload := canonicalCard{
-		StableKey: card.StableKey,
-		Slug:      card.Slug,
-		Title:     card.Title,
-		Track:     card.Track,
-		Topic:     card.Topic,
-		Scope:     card.Scope,
-		Lang:      card.Lang,
-		Priority:  card.Priority,
-		Group:     card.Group,
-		Level:     card.Level,
-		Company:   card.Company,
-		Question:  card.Question,
-		Sections:  append([]Section(nil), card.Sections...),
-		Task:      card.Task,
-		Rubric:    append([]RubricLevel(nil), card.Rubric...),
-		Choices:   card.Choices,
+		StableKey:      card.StableKey,
+		Slug:           card.Slug,
+		Title:          card.Title,
+		Track:          card.Track,
+		Topic:          card.Topic,
+		Scope:          card.Scope,
+		Lang:           card.Lang,
+		Priority:       card.Priority,
+		Group:          card.Group,
+		Level:          card.Level,
+		Company:        card.Company,
+		ProgramKey:     card.ProgramKey,
+		PathKey:        card.PathKey,
+		DomainKey:      card.DomainKey,
+		CapabilityKey:  card.CapabilityKey,
+		MappingState:   card.MappingState,
+		MappingVersion: card.MappingVersion,
+		Question:       card.Question,
+		Sections:       append([]Section(nil), card.Sections...),
+		Task:           card.Task,
+		Rubric:         append([]RubricLevel(nil), card.Rubric...),
+		Choices:        card.Choices,
 	}
 	return json.Marshal(payload)
 }
@@ -469,5 +500,36 @@ func TopicStableKey(topic string) string {
 	if strings.TrimSpace(topic) == "" {
 		return ""
 	}
+	if canonical, ok := taxonomy.CanonicalTopicKey(topic); ok {
+		return canonical
+	}
 	return "topic." + slugify(topic)
+}
+
+// placementFromMetadata is intentionally opt-in.  Legacy cards have no
+// curriculum fields and therefore produce the exact same canonical payload
+// and content hash as before taxonomy v1 was introduced.
+func placementFromMetadata(meta map[string]string) (taxonomy.Placement, error) {
+	domain := firstNonEmpty(meta["domain_key"], meta["domain-key"], meta["domain"])
+	stage := firstNonEmpty(meta["stage_key"], meta["stage-key"], meta["stage"])
+	if domain != "" && stage != "" {
+		domainPlacement, err := taxonomy.ResolvePlacement("", "", domain, "", "")
+		if err != nil {
+			return taxonomy.Placement{}, err
+		}
+		stagePlacement, err := taxonomy.ResolvePlacement("", "", stage, "", "")
+		if err != nil {
+			return taxonomy.Placement{}, err
+		}
+		if domainPlacement.DomainKey != stagePlacement.DomainKey {
+			return taxonomy.Placement{}, fmt.Errorf("domain_key %q conflicts with deprecated stage_key %q", domain, stage)
+		}
+	}
+	return taxonomy.ResolvePlacement(
+		firstNonEmpty(meta["program_key"], meta["program-key"], meta["program"]),
+		firstNonEmpty(meta["path_key"], meta["path-key"], meta["path"]),
+		firstNonEmpty(domain, stage),
+		firstNonEmpty(meta["capability_key"], meta["capability-key"], meta["capability"]),
+		firstNonEmpty(meta["mapping_state"], meta["mapping-state"], meta["mapping state"]),
+	)
 }

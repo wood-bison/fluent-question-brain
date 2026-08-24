@@ -31,6 +31,7 @@ services:
       - ../../db/migrations/0007_canonical_identity.sql:/docker-entrypoint-initdb.d/007_canonical_identity.sql:ro
       - ../../db/migrations/0009_semantic_v1_profile.sql:/docker-entrypoint-initdb.d/009_semantic_v1_profile.sql:ro
       - ../../db/migrations/0010_level_company_dimensions.sql:/docker-entrypoint-initdb.d/010_level_company_dimensions.sql:ro
+      - ../../db/migrations/0011_path_domain_capability_taxonomy.sql:/docker-entrypoint-initdb.d/011_path_domain_capability_taxonomy.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U question_brain -d question_brain"]
       interval: 5s

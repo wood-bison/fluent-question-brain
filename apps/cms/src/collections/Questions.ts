@@ -87,6 +87,44 @@ export const Questions: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'programKey',
+      type: 'text',
+      admin: {
+        description: 'Optional curriculum program key, for example program.backend-engineer.',
+      },
+    },
+    {
+      name: 'pathKey',
+      type: 'text',
+      admin: {
+        description: 'Optional explicit Lab path key. Do not infer it from Track.',
+      },
+    },
+    {
+      name: 'domainKey',
+      type: 'text',
+      admin: {
+        description: 'Optional shared Lab domain key. Deprecated stage_key maps here.',
+      },
+    },
+    {
+      name: 'capabilityKey',
+      type: 'text',
+      admin: {
+        description: 'Optional reviewed Lab capability key; Topic is not a capability.',
+      },
+    },
+    {
+      name: 'mappingState',
+      type: 'select',
+      defaultValue: 'proposed',
+      options: [
+        { label: 'Proposed', value: 'proposed' },
+        { label: 'Accepted', value: 'accepted' },
+        { label: 'Rejected', value: 'rejected' },
+      ],
+    },
+    {
       name: 'question',
       type: 'textarea',
       localized: true,

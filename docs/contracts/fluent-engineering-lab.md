@@ -36,6 +36,29 @@ the boundary was applied. A diagnostic request may opt in with
 `include_fixtures=true`; the Lab never sends that flag and must not use the
 resulting release for learner projections.
 
+Each catalog item's optional `metadata` may carry the explicit curriculum
+crosswalk from `question-brain.taxonomy.v1`:
+
+```json
+{
+  "program_key": "program.backend-engineer",
+  "path_key": "path.nodejs-typescript",
+  "domain_key": "domain.runtime",
+  "capability_key": "capability.runtime.event-loop",
+  "mapping_state": "accepted",
+  "mapping_version": "question-brain.taxonomy.v1"
+}
+```
+
+The Lab must only project rows with an explicit `path_key`/`domain_key` (and,
+for station-level work, `capability_key`) into its curriculum graph. Missing
+keys mean `unmapped`; `proposed` is review debt, not learner readiness. The
+legacy `stage_key` field is retained as a compatibility projection of
+`domain_key` for older Lab clients and is not a second taxonomy. `Track`,
+`Group`, and legacy `Topic` are content metadata only and must never be used as
+an inferred path, domain, or capability. The revision-scoped
+`content.question_capability` relation is many-to-many and release-aware.
+
 `GET /v1/release` is the complete machine-readable `QuestionRelease` manifest
 (`question-brain.release.v1`). It pins every stable key to its current
 revision/content hash, available locales, source system, quality state, and
