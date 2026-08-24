@@ -8,6 +8,13 @@ RUN npm ci
 
 COPY . .
 RUN npm run build
+
+# `output: standalone` emits a minimal server that resolves /_next/static and
+# /public relative to itself. Next does not copy those into the standalone tree,
+# so without this step every chunk 404s and the admin renders a blank page.
+RUN cp -r .next/static .next/standalone/.next/static \
+ && if [ -d public ]; then cp -r public .next/standalone/public; fi
+
 RUN chmod +x scripts/start.sh
 
 EXPOSE 3000
