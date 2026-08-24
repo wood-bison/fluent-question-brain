@@ -188,7 +188,7 @@ func (p *Postgres) stageExactCandidates(ctx context.Context, workspaceID string,
 		join content.question_revision qr on qr.id = q.current_revision_id
 		where q.workspace_id = $1::uuid and q.status = 'published'
 		  and q.content_kind = 'production' and q.stable_key <> $2
-		  and (qr.normalized_payload - 'stable_key' - 'slug') = ($3::jsonb - 'stable_key' - 'slug')
+		  and (qr.normalized_payload - 'stable_key' - 'slug' - 'title') = ($3::jsonb - 'stable_key' - 'slug' - 'title')
 	`, workspaceID, card.StableKey, card.Payload)
 	if err != nil {
 		return 0, fmt.Errorf("query exact import candidates: %w", err)

@@ -34,7 +34,7 @@ against current published production revisions:
 
 | Candidate | Evidence | Default decision |
 | --- | --- | --- |
-| `exact_duplicate` | canonical payload equality after removing stable identity fields | review required |
+| `exact_duplicate` | canonical payload equality after removing stable identity fields (`stable_key`, `slug`, and display `title`) | review required |
 | `lexical_neighbor` | PostgreSQL `pg_trgm` prompt similarity | review required |
 | `semantic_neighbor` | active `pgvector` embedding profile | review required |
 

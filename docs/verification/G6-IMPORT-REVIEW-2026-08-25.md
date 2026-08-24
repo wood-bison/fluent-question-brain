@@ -1,6 +1,6 @@
 # G6 import review evidence — 2026-08-25
 
-Status: **implementation slice verified; mandatory +500 acceptance remains open**.
+Status: **implementation and mandatory +500 acceptance verified**.
 
 ## What is now implemented
 
@@ -17,6 +17,9 @@ Status: **implementation slice verified; mandatory +500 acceptance remains open*
   accepted automatically.
 - Authenticated review APIs expose the complete stage and require an explicit
   decision actor/rationale.
+- `cmd/qb-g6-batch` and `scripts/g6-batch-smoke.sh` provide an isolated,
+  deterministic acceptance fixture. The harness uses a local test-only
+  embedding server, never the learner API or a hosted model.
 
 ## Live verification
 
@@ -41,14 +44,29 @@ fail-closed boundary. The live local machine currently has no Ollama listener
 on `127.0.0.1:11434`, so semantic candidates were intentionally not claimed as
 passing in this evidence.
 
-## Remaining acceptance work
+## Mandatory +500 result
 
-The plan's mandatory batch remains unchecked until a reproducible 500-card
-fixture runs with a live `semantic-v1` provider and records:
+The local machine currently has no Ollama listener on `127.0.0.1:11434`; that
+outage was intentionally tested as a fail-closed staged state. The acceptance
+fixture uses only a deterministic test provider.
 
-1. exact duplicates blocked;
-2. semantic duplicates entering review;
-3. related/new cards remaining separate;
-4. malformed cards rejected;
-5. a retry producing no duplicate revisions or proposals; and
-6. candidate precision/recall and bounded resource measurements.
+Command: `G6_WORKSPACE_KEY=g6-batch-smoke-20260825-final make g6-batch-smoke`
+
+```text
+valid=500 malformed=10 stages=551 exact=1 semantic=499 open=500
+retry_unchanged=551 precision=1.000 recall=1.000 embed_requests=551
+```
+
+The fixture publishes 51 isolated anchors, imports 500 valid cards, and adds
+10 malformed files. The exact copy is blocked, 499 semantic neighbors enter
+review, and every generated neighbor remains an unaccepted `related` proposal.
+The second import reports all 551 valid source cards as `unchanged`, proving no
+duplicate revisions or proposals were created by retry. The fixture workspace
+is archived as `content_kind=fixture` after the run and is never part of the
+`fluent-interview` learner release.
+
+Precision/recall are measured against the harness's explicit labels (one
+semantic anchor per non-exact valid card). This is a deterministic pipeline
+acceptance check, not a claim about real-world model quality; a separately
+reviewed calibration set remains required before changing production
+thresholds.
