@@ -67,6 +67,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /health/live", s.live)
 	mux.HandleFunc("GET /health/ready", s.ready)
 	mux.HandleFunc("POST /v1/search", s.search)
+	mux.HandleFunc("GET /browse", s.browse)
 	mux.HandleFunc("GET /v1/catalog", s.catalog)
 	mux.HandleFunc("GET /v1/release", s.release)
 	mux.HandleFunc("GET /v1/quality", s.quality)
@@ -225,6 +226,9 @@ func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
 		WorkspaceKey:    r.URL.Query().Get("workspace"),
 		Locale:          r.URL.Query().Get("locale"),
 		TopicKey:        r.URL.Query().Get("topic_key"),
+		Track:           r.URL.Query().Get("track"),
+		Level:           r.URL.Query().Get("level"),
+		Company:         r.URL.Query().Get("company"),
 		Offset:          parseInt("offset", 0),
 		Limit:           parseInt("limit", 100),
 		IncludeFixtures: parseBool(r.URL.Query().Get("include_fixtures")),

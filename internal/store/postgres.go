@@ -1055,6 +1055,9 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 		limit = 2_000
 	}
 	topicKey := strings.TrimSpace(request.TopicKey)
+	track := strings.TrimSpace(request.Track)
+	level := strings.TrimSpace(request.Level)
+	company := strings.TrimSpace(request.Company)
 	includeFixtures := request.IncludeFixtures
 
 	var total int
@@ -1062,6 +1065,7 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 		select count(*)
 		from content.workspace w
 		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		join content.question_revision qr on qr.id = q.current_revision_id
 		where w.stable_key = $1
 		  and ($3 or q.content_kind = 'production')
 		  and ($2 = '' or exists (
@@ -1070,7 +1074,10 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 			join content.topic t on t.id = qt.topic_id
 			where qt.question_id = q.id and t.stable_key = $2
 		  ))
-	`, workspaceKey, topicKey, includeFixtures).Scan(&total); err != nil {
+		  and ($4 = '' or lower(coalesce(qr.normalized_payload->>'track', '')) = lower($4))
+		  and ($5 = '' or lower(coalesce(q.level, '')) = lower($5))
+		  and ($6 = '' or lower(coalesce(q.company, '')) = lower($6))
+	`, workspaceKey, topicKey, includeFixtures, track, level, company).Scan(&total); err != nil {
 		return search.CatalogResponse{}, fmt.Errorf("count catalog questions: %w", err)
 	}
 	var excludedFixtures int
@@ -1146,6 +1153,9 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 				join content.topic t_filter on t_filter.id = qt_filter.topic_id
 				where qt_filter.question_id = q.id and t_filter.stable_key = $3
 			  ))
+			  and ($7 = '' or lower(coalesce(qr.normalized_payload->>'track', '')) = lower($7))
+			  and ($8 = '' or lower(coalesce(q.level, '')) = lower($8))
+			  and ($9 = '' or lower(coalesce(q.company, '')) = lower($9))
 		)
 		select
 			current.question_id,
@@ -1172,7 +1182,7 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 			current.prompt, current.short_answer, current.explanation, current.normalized_payload
 		order by current.stable_key
 		offset $5 limit $6
-	`, workspaceKey, locale, topicKey, includeFixtures, offset, limit)
+	`, workspaceKey, locale, topicKey, includeFixtures, offset, limit, track, level, company)
 	if err != nil {
 		return search.CatalogResponse{}, fmt.Errorf("query catalog questions: %w", err)
 	}

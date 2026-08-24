@@ -62,6 +62,9 @@ type CatalogRequest struct {
 	WorkspaceKey    string
 	Locale          string
 	TopicKey        string
+	Track           string
+	Level           string
+	Company         string
 	Offset          int
 	Limit           int
 	IncludeFixtures bool
