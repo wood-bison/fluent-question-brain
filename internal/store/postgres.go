@@ -406,6 +406,27 @@ func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspac
 		}{locale: "ru", prompt: ruPrompt, shortAnswer: ruShortAnswer, explanation: ruExplanation})
 	}
 	for _, locale := range locales {
+		if locale.locale == "ru" && degenerateRussianPrompt(locale.prompt, locale.shortAnswer) {
+			// A card without an explicit "## Question (RU)" section parses
+			// with the answer text standing in for the question (both fall
+			// back to Core Idea (RU)). Re-publishing such a card must never
+			// clobber a translated question that was written onto this
+			// revision by the translation flow or a repair.
+			var existingPrompt string
+			err := tx.QueryRow(ctx, `
+				select prompt from content.question_locale
+				where revision_id = $1::uuid and locale = 'ru'
+			`, revisionID).Scan(&existingPrompt)
+			switch {
+			case err == nil:
+				if strings.TrimSpace(existingPrompt) != "" &&
+					strings.TrimSpace(existingPrompt) != strings.TrimSpace(locale.prompt) {
+					continue
+				}
+			case !errors.Is(err, pgx.ErrNoRows):
+				return StoredRevision{}, fmt.Errorf("read existing ru locale: %w", err)
+			}
+		}
 		_, err = tx.Exec(ctx, `
 			insert into content.question_locale (revision_id, locale, prompt, short_answer, explanation, body)
 			values ($1::uuid, $2, $3, $4, $5, $6::jsonb)
@@ -1685,6 +1706,17 @@ func jsonRawOrNull(raw json.RawMessage) json.RawMessage {
 		return nil
 	}
 	return raw
+}
+
+// degenerateRussianPrompt reports whether a parsed Russian locale degrades
+// the question to the answer text: empty, or identical to the short answer
+// because both fell back to Core Idea (RU) in a card without Question (RU).
+func degenerateRussianPrompt(prompt, shortAnswer string) bool {
+	prompt = strings.TrimSpace(prompt)
+	if prompt == "" {
+		return true
+	}
+	return prompt == strings.TrimSpace(shortAnswer)
 }
 
 func qualityBucketValue(value map[string]any, key string) string {
