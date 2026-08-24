@@ -35,6 +35,19 @@ type qualityReader interface {
 	Quality(context.Context, search.QualityRequest) (search.QualityResponse, error)
 }
 
+// graphService is deliberately a narrow interface. The HTTP layer exposes
+// the reviewed graph lifecycle, while all endpoint resolution, revision
+// pinning, cycle checks, and release materialisation stay in store.Postgres.
+type graphService interface {
+	CreateEdgeProposal(context.Context, store.EdgeProposalRequest, string) (store.EdgeProposal, error)
+	ListEdgeProposals(context.Context, string, string) ([]store.EdgeProposal, error)
+	DecideEdgeProposal(context.Context, string, string, string, string) (store.EdgeProposal, error)
+	ReleaseQuestionGraph(context.Context, store.GraphReleaseRequest) (store.GraphReleaseReport, error)
+	RollbackQuestionGraph(context.Context, string, string) (store.GraphRelease, error)
+	GetGraphRelease(context.Context, string) (store.GraphRelease, error)
+	GraphNeighborhood(context.Context, string, string) (store.GraphNeighborhood, error)
+}
+
 type Server struct {
 	databaseURL   string
 	searchService search.Service
@@ -74,6 +87,16 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/questions/{stableKey}", s.question)
 	mux.HandleFunc("POST /v1/questions/{stableKey}/rollback", s.rollback)
 	mux.HandleFunc("POST /v1/promote", s.promote)
+	mux.HandleFunc("GET /v1/graph/proposals", s.graphProposals)
+	mux.HandleFunc("POST /v1/graph/proposals", s.graphProposal)
+	mux.HandleFunc("POST /v1/graph/proposals/{proposalID}/decision", s.graphDecision)
+	mux.HandleFunc("POST /v1/graph/releases", s.graphRelease)
+	mux.HandleFunc("GET /v1/graph/releases/{releaseID}", s.graphReleaseGet)
+	mux.HandleFunc("POST /v1/graph/releases/{releaseID}/rollback", s.graphRollback)
+	mux.HandleFunc("GET /v1/graph/neighborhood/{stableKey}", s.graphNeighborhood)
+	mux.HandleFunc("GET /v1/graph/prerequisites/{stableKey}", s.graphPrerequisites)
+	mux.HandleFunc("GET /v1/graph/contrasts/{stableKey}", s.graphContrasts)
+	mux.HandleFunc("GET /v1/graph/variants/{stableKey}", s.graphVariants)
 	return requestID(mux)
 }
 
@@ -460,6 +483,234 @@ func (s *Server) rollback(w http.ResponseWriter, r *http.Request) {
 		"content_hash": stored.Hash,
 		"source":       "question-brain-rollback",
 	})
+}
+
+func (s *Server) graphBackend() (graphService, bool) {
+	backend, ok := s.searchService.(graphService)
+	return backend, ok
+}
+
+func (s *Server) graphProposals(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.graphBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "graph_service_unavailable"})
+		return
+	}
+	workspace := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspace == "" {
+		workspace = "fluent-interview"
+	}
+	proposals, err := backend.ListEdgeProposals(r.Context(), workspace, strings.TrimSpace(r.URL.Query().Get("status")))
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": store.QuestionGraphContractVersion,
+		"workspace_key":    workspace,
+		"proposals":        proposals,
+	})
+}
+
+func (s *Server) graphProposal(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.graphBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "graph_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var request store.EdgeProposalRequest
+	if err := json.NewDecoder(io.LimitReader(r.Body, 128<<10)).Decode(&request); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_graph_proposal_request"})
+		return
+	}
+	proposal, err := backend.CreateEdgeProposal(r.Context(), request, graphActor(r, "question-brain-editorial"))
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]any{
+		"contract_version": store.QuestionGraphContractVersion,
+		"proposal":         proposal,
+	})
+}
+
+func (s *Server) graphDecision(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.graphBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "graph_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var request store.EdgeDecisionRequest
+	if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&request); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_graph_decision_request"})
+		return
+	}
+	proposal, err := backend.DecideEdgeProposal(r.Context(), r.PathValue("proposalID"), request.Decision, graphActor(r, "question-brain-reviewer"), request.Rationale)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": store.QuestionGraphContractVersion,
+		"proposal":         proposal,
+	})
+}
+
+func (s *Server) graphRelease(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.graphBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "graph_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var body struct {
+		WorkspaceKey string `json:"workspace_key"`
+		Approve      bool   `json:"approve"`
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 32<<10)).Decode(&body); err != nil && !errors.Is(err, io.EOF) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_graph_release_request"})
+		return
+	}
+	if strings.TrimSpace(body.WorkspaceKey) == "" {
+		body.WorkspaceKey = strings.TrimSpace(r.URL.Query().Get("workspace"))
+	}
+	if body.WorkspaceKey == "" {
+		body.WorkspaceKey = "fluent-interview"
+	}
+	report, err := backend.ReleaseQuestionGraph(r.Context(), store.GraphReleaseRequest{
+		WorkspaceKey: body.WorkspaceKey,
+		Actor:        graphActor(r, "question-brain-graph-release"),
+		Approve:      body.Approve,
+	})
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	status := http.StatusOK
+	if report.Blocked {
+		status = http.StatusConflict
+	}
+	writeJSON(w, status, report)
+}
+
+func (s *Server) graphReleaseGet(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.graphBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "graph_service_unavailable"})
+		return
+	}
+	release, err := backend.GetGraphRelease(r.Context(), r.PathValue("releaseID"))
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, release)
+}
+
+func (s *Server) graphRollback(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.graphBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "graph_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	release, err := backend.RollbackQuestionGraph(r.Context(), r.PathValue("releaseID"), graphActor(r, "question-brain-graph-rollback"))
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, release)
+}
+
+func (s *Server) graphNeighborhood(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.graphBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "graph_service_unavailable"})
+		return
+	}
+	workspace := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspace == "" {
+		workspace = "fluent-interview"
+	}
+	neighborhood, err := backend.GraphNeighborhood(r.Context(), r.PathValue("stableKey"), workspace)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, neighborhood)
+}
+
+func (s *Server) graphPrerequisites(w http.ResponseWriter, r *http.Request) {
+	s.graphNeighborhoodKind(w, r, "prerequisite")
+}
+
+func (s *Server) graphContrasts(w http.ResponseWriter, r *http.Request) {
+	s.graphNeighborhoodKind(w, r, "contrast")
+}
+
+func (s *Server) graphVariants(w http.ResponseWriter, r *http.Request) {
+	s.graphNeighborhoodKind(w, r, "variant")
+}
+
+func (s *Server) graphNeighborhoodKind(w http.ResponseWriter, r *http.Request, kind string) {
+	backend, ok := s.graphBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "graph_service_unavailable"})
+		return
+	}
+	workspace := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspace == "" {
+		workspace = "fluent-interview"
+	}
+	neighborhood, err := backend.GraphNeighborhood(r.Context(), r.PathValue("stableKey"), workspace)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	filtered := neighborhood
+	filtered.Edges = make([]store.GraphEdge, 0)
+	for _, edge := range neighborhood.Edges {
+		if edge.Kind == kind {
+			filtered.Edges = append(filtered.Edges, edge)
+		}
+	}
+	writeJSON(w, http.StatusOK, filtered)
+}
+
+func (s *Server) authorizedInternalRequest(r *http.Request) bool {
+	return s.internalToken != "" && r.Header.Get("X-Question-Brain-Token") == s.internalToken
+}
+
+func graphActor(r *http.Request, fallback string) string {
+	actor := strings.TrimSpace(r.Header.Get("X-Question-Brain-Actor"))
+	if actor == "" {
+		return fallback
+	}
+	return actor
+}
+
+func writeGraphError(w http.ResponseWriter, err error) {
+	status := http.StatusBadRequest
+	if errors.Is(err, pgx.ErrNoRows) {
+		status = http.StatusNotFound
+	} else if strings.Contains(strings.ToLower(err.Error()), "cycle") || strings.Contains(strings.ToLower(err.Error()), "already active") || strings.Contains(strings.ToLower(err.Error()), "cannot be reused") {
+		status = http.StatusConflict
+	}
+	writeJSON(w, status, map[string]string{"error": err.Error()})
 }
 
 func requestID(next http.Handler) http.Handler {

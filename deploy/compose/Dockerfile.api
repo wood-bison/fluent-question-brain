@@ -6,9 +6,11 @@ COPY cmd ./cmd
 COPY internal ./internal
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags='-s -w' -o /out/question-brain ./cmd/question-brain
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags='-s -w' -o /out/qb-map-release ./cmd/qb-map-release
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags='-s -w' -o /out/qb-graph-edges ./cmd/qb-graph-edges
 
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /out/question-brain /question-brain
 COPY --from=build /out/qb-map-release /qb-map-release
+COPY --from=build /out/qb-graph-edges /qb-graph-edges
 EXPOSE 8080
 ENTRYPOINT ["/question-brain"]

@@ -1,4 +1,4 @@
-.PHONY: check test contract smoke g4-smoke g5-smoke compose-up compose-down
+.PHONY: check test contract smoke g4-smoke g5-smoke graph-smoke compose-up compose-down
 
 check: contract test
 
@@ -10,6 +10,9 @@ g4-smoke:
 
 g5-smoke:
 	bash scripts/g5-smoke.sh
+
+graph-smoke:
+	bash scripts/graph-smoke.sh
 
 contract:
 	bash scripts/check-contract.sh
