@@ -1,0 +1,79 @@
+{
+  "source_system": "fluent-question-vault",
+  "source_root": "/vault/Question Cards",
+  "workspace_key": "fluent-interview",
+  "dry_run": true,
+  "started_at": "2026-08-24T10:49:03.037989462Z",
+  "finished_at": "2026-08-24T10:49:03.040562671Z",
+  "totals": {
+    "files": 9,
+    "warnings": 3,
+    "would_create": 9
+  },
+  "archived": 0,
+  "items": [
+    {
+      "source_ref": "/vault/Question Cards/KS-501 — String mapping check.md",
+      "stable_key": "question.ks-501",
+      "content_hash": "88383f7d95f8ec0c31ce470638187fea1ddf9d1d0dae02caffd4f43405170e36",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/KS-502 — Infinite Fibonacci generator.md",
+      "stable_key": "question.ks-502",
+      "content_hash": "e284a933c0684d35f863419f5ea0743ed9c195f1cf0ecd9fd846e8e6a87247a6",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/KS-503 — Count valid list partitions.md",
+      "stable_key": "question.ks-503",
+      "content_hash": "f57bfc063f6fd61c347ff712cdb9858642d3d8bd0bd8908cb3e3a8e98d2e22c1",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/KS-504 — Flatten a nested list with depth.md",
+      "stable_key": "question.ks-504",
+      "content_hash": "f8029be4e7ea3a32236e432e983ff991552162de7c12e82abdcce486c162f953",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/KS-505 — Compute a PIN from a JSON string.md",
+      "stable_key": "question.ks-505",
+      "content_hash": "3b0a8c66042e8a7d6366248d15c90e8b64df19b43c75926e2df3f95919d77d21",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/KS-506 — Client balances from a text file.md",
+      "stable_key": "question.ks-506",
+      "content_hash": "2052ba3d3b48d8b99081bfea857f5864320f30a482b6fa7647b54351dcf9a729",
+      "action": "would_create",
+      "warnings": [
+        "missing Track metadata: card will have no track bucket"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/KS-507 — Vending machine (OOP design).md",
+      "stable_key": "question.ks-507",
+      "content_hash": "e3866aabc30b6036024d8dff8e4dd2f54cc6c640e4ac0b896c79cd119520775d",
+      "action": "would_create",
+      "warnings": [
+        "missing Track metadata: card will have no track bucket"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/KS-508 — Detect when all 10 channels are busy.md",
+      "stable_key": "question.ks-508",
+      "content_hash": "df2ef5c5b1e3504438ce0ad0a3eb142ec852f3c0960c90f4f66e4bb678f1ac4d",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/KS-509 — SSH failed-login monitoring app.md",
+      "stable_key": "question.ks-509",
+      "content_hash": "4e0661dfc9cf2ac32e4be3e330bc592fd94df4b6149d5fff59d3f7d5824dab0b",
+      "action": "would_create",
+      "warnings": [
+        "missing Track metadata: card will have no track bucket"
+      ]
+    }
+  ]
+}
