@@ -29,8 +29,10 @@ The machine-readable key space is versioned as
 
 The optional canonical payload fields are `program_key`, `path_key`,
 `domain_key`, `capability_key`, `mapping_state`, and `mapping_version`.
-`mapping_state` is `proposed`, `accepted`, or `rejected`; an omitted mapping
-means `unmapped`. A capability requires an explicit path and domain. The
+`mapping_state` is `proposed`, `accepted`, or `rejected`: when any v1 key is
+present but `mapping_state` is omitted, it defaults to `proposed`; a card with
+no v1 keys at all carries no mapping fields and reads as `unmapped`. A
+capability requires an explicit path and domain. The
 revision-scoped `content.question_capability` table is many-to-many and is
 empty until a reviewed capability registry exists; this is deliberate and
 prevents a mass import from manufacturing learner stations.
