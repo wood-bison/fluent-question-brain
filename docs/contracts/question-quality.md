@@ -43,6 +43,14 @@ The response is deliberately answer-free. It contains:
   duplicate groups, or a lagging embedding index (`outbox_pending` /
   `locales_without_embedding` above zero).
 
+Curriculum mapping audit counters are also revision-scoped and answer-free:
+`curriculum_mapped`, `curriculum_unmapped`, `curriculum_proposed`,
+`curriculum_accepted`, `curriculum_rejected`, and `curriculum_capabilities`.
+`curriculum_unmapped` includes current production revisions without a mapping
+row and rows explicitly marked `mapping_state=unmapped`. These counters are
+review debt, not an inference signal: the quality endpoint never derives a
+Path, Domain, or Capability from Track, Group, Topic, title, or task hints.
+
 The endpoint is an audit surface, not a publisher. A proposed placement or a
 duplicate group never becomes accepted because it was counted here. A group is
 reported under `resolved_duplicate_groups` only after every pair has an

@@ -13,12 +13,16 @@ func TestCatalogMetadataExposesCurriculumMappingWithoutConfusingLegacyFields(t *
 		"capability_key":  "capability.runtime.event-loop",
 		"mapping_state":   "accepted",
 		"mapping_version": "question-brain.taxonomy.v1",
+		"mapping_source":  "editorial-manifest",
 	})
 	if metadata.ProgramKey != "program.backend-engineer" || metadata.PathKey != "path.nodejs-typescript" || metadata.DomainKey != "domain.runtime" || metadata.CapabilityKey != "capability.runtime.event-loop" {
 		t.Fatalf("curriculum metadata = %#v", metadata)
 	}
 	if metadata.StageKey != "domain.runtime" {
 		t.Fatalf("stage compatibility projection = %q", metadata.StageKey)
+	}
+	if metadata.MappingSource != "editorial-manifest" {
+		t.Fatalf("mapping source = %q", metadata.MappingSource)
 	}
 	if metadata.Group != "Common Questions" || metadata.Topic != "Node / Event Loop & Scheduling" || metadata.DomainKey == metadata.Group || metadata.CapabilityKey == metadata.Topic {
 		t.Fatalf("legacy fields were confused with curriculum fields = %#v", metadata)

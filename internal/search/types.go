@@ -113,6 +113,7 @@ type CatalogMetadata struct {
 	CapabilityKey  string `json:"capability_key,omitempty"`
 	MappingState   string `json:"mapping_state,omitempty"`
 	MappingVersion string `json:"mapping_version,omitempty"`
+	MappingSource  string `json:"mapping_source,omitempty"`
 }
 
 type CatalogResponse struct {
@@ -193,6 +194,15 @@ type QualityChecks struct {
 	// prompt/title shape is malformed. PDF control/layout debris is counted by
 	// DegeneratePrompts but intentionally not repeated here.
 	SemanticShapeIssues int `json:"semantic_shape_issues"`
+	// Curriculum mapping counters are revision-scoped and never inferred from
+	// the legacy content graph. Unmapped includes current revisions with no
+	// explicit mapping row or an explicit mapping_state=unmapped row.
+	CurriculumMapped       int `json:"curriculum_mapped"`
+	CurriculumUnmapped     int `json:"curriculum_unmapped"`
+	CurriculumProposed     int `json:"curriculum_proposed"`
+	CurriculumAccepted     int `json:"curriculum_accepted"`
+	CurriculumRejected     int `json:"curriculum_rejected"`
+	CurriculumCapabilities int `json:"curriculum_capabilities"`
 }
 
 type ReleaseResponse struct {

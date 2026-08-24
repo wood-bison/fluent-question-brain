@@ -59,6 +59,16 @@ legacy `stage_key` field is retained as a compatibility projection of
 an inferred path, domain, or capability. The revision-scoped
 `content.question_capability` relation is many-to-many and release-aware.
 
+Question Brain publishes explicit curriculum decisions through the additive
+`content.question_curriculum_mapping` release seam (the Lab never connects to
+that table directly). The `qb-map-release` command requires a complete,
+revision/content-hash-pinned manifest and is dry-run by default. A current
+revision without an editorial decision may be recorded as
+`mapping_state=unmapped`; this is an auditable review state, not an inferred
+Path or Domain. The command does not read Track, Group, Topic, title, or task
+breadcrumbs. Until a reviewed Capability inventory exists, no capability rows
+are materialized and station coverage remains zero.
+
 `GET /v1/release` is the complete machine-readable `QuestionRelease` manifest
 (`question-brain.release.v1`). It pins every stable key to its current
 revision/content hash, available locales, source system, quality state, and

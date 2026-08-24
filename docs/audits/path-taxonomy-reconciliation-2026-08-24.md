@@ -1,6 +1,7 @@
 # Path taxonomy reconciliation audit — 2026-08-24
 
-Status: read-only audit plus additive Question Brain implementation.
+Status: read-only audit plus additive Question Brain implementation. I1 adds
+an explicit mapping release seam; it does not infer or rewrite legacy cards.
 
 This audit was performed against the complete `HANDOFF-CONTENT.md`,
 `docs/contracts/taxonomy.md`, `docs/contracts/fluent-engineering-lab.md`, the
@@ -115,6 +116,7 @@ released through the existing content graph.
 | `internal/normalize/card.go`, `payload.go` | optional explicit curriculum fields; canonicalization and validation; old payloads omit them |
 | `internal/ingest/importer.go`, `cmd/qb-import/main.go` | warning-only compatibility mode plus `--strict-taxonomy` for new controlled imports |
 | `db/migrations/0011_path_domain_capability_taxonomy.sql` | additive registry, alias, and revision-scoped mapping tables; no content backfill |
+| `db/migrations/0012_curriculum_mapping_release.sql` | one-row-per-revision explicit Program/Path/Domain release decisions; `unmapped` is an audit state and keys remain nullable until editorial review |
 | `apps/cms/...` | optional editorial fields passed through the existing Payload → Go promote seam |
 | `internal/search/types.go`, `internal/store/postgres.go` | catalog metadata fields and canonical topic quality buckets; `stage_key` compatibility projection |
 | `docs/contracts/taxonomy.md`, `question-revision.md`, `fluent-engineering-lab.md` | source-of-truth, payload, and Lab boundary contracts |
@@ -154,4 +156,18 @@ compose mount.
 3. Existing Compose volumes need the new SQL migration applied once by the
    operator; a fresh database receives it through the added initdb mount.
 4. Mapping legacy cards to Paths/Domains/Capabilities is a separate reviewed
-   migration, not an inference or a bulk source import.
+   migration, not an inference or a bulk source import. `qb-map-release
+   --unmapped-current --approve` records a no-inference baseline for every
+   current production revision; the 2026-08-24 I1 audit recorded 1,591
+   `unmapped` rows, zero proposed/accepted/rejected rows, and zero capability
+   rows. A reviewed manifest must be complete and pin each mapped row to its
+   current revision/content hash before any Path/Domain/Capability values are
+   materialized. The machine-readable release audit is
+   `docs/verification/i1-curriculum-mapping-2026-08-24.json`.
+
+I1 verification also re-ran the content boundaries after the mapping change:
+the source-vault release dry-run validated 1,591/1,591 files, the importer
+dry-run planned 1,591 creates with no invalid cards (the existing 49
+warning-only compatibility findings and one unrecognized file remain), and
+the live API quality audit stayed at `semantic_shape_issues=0`,
+`degenerate_prompts=0`, and no warnings.

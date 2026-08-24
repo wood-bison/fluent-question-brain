@@ -41,6 +41,51 @@ prevents a mass import from manufacturing learner stations.
 When a new mapping has `domain_key`, the catalog may expose the same value as
 `stage_key`; new clients must prefer `domain_key` and `path_key`.
 
+### Explicit mapping release
+
+The revision-scoped `content.question_curriculum_mapping` table is the
+release seam for this cross-system contract. It stores at most one
+Program/Path/Domain decision for each current revision, with an optional
+reviewed Capability. Its `mapping_state` is one of `unmapped`, `proposed`,
+`accepted`, or `rejected`; `unmapped` rows have no v1 keys and are an explicit
+audit result, not a guessed placement. The many-to-many
+`content.question_capability` relation remains the station-level relation and
+is not replaced by this table.
+
+`cmd/qb-map-release` accepts a complete JSON manifest with stable keys,
+revision/content-hash pins, and explicit canonical fields. A mapped row must
+pin both the current `revision_id` and `content_hash`; a capability must exist
+in the reviewed capability inventory. The command is dry-run by default and
+requires `--approve` to write rows. `--unmapped-current` is the safe baseline
+for a release with no reviewed inventory: it records every current production
+revision as `unmapped` without reading or inferring from Track, Group, Topic,
+title, or task hints. Missing or extra stable keys block approval, and the
+report's `mapping_release_id` is deterministic for the pinned manifest.
+
+Example of a mapped manifest row (the file must cover the complete release):
+
+```json
+{
+  "stable_key": "question.oz-101",
+  "revision_id": "00000000-0000-0000-0000-000000000001",
+  "content_hash": "<sha256-of-current-normalized-payload>",
+  "program_key": "program.backend-engineer",
+  "path_key": "path.go",
+  "domain_key": "domain.runtime",
+  "mapping_state": "proposed"
+}
+```
+
+The manifest is the only place where an editorial mapping decision is made;
+the importer and API never reconstruct it from legacy fields. Use
+`--unmapped-current --approve --report <file>` to establish an auditable
+no-inference baseline before the reviewed manifest exists.
+
+For an existing Compose PostgreSQL volume, initdb mounts are not replayed.
+Run `scripts/apply-curriculum-mapping-migration.sh` once, verify the migration
+with `scripts/migration-smoke.sh`, and only then rebuild/restart the API. The
+SQL is idempotent (`if not exists`) and does not rewrite question revisions.
+
 ### Controlled legacy Topic aliases
 
 `content.topic` and `question_topic` remain the source of truth for legacy

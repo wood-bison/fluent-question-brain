@@ -1301,16 +1301,27 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 			current.short_answer,
 			current.explanation,
 			current.normalized_payload,
+			(mapping.revision_id is not null) as has_curriculum_mapping,
+			coalesce(mapping.program_key, '') as mapping_program_key,
+			coalesce(mapping.path_key, '') as mapping_path_key,
+			coalesce(mapping.domain_key, '') as mapping_domain_key,
+			coalesce(mapping.capability_key, '') as mapping_capability_key,
+			coalesce(mapping.mapping_state, '') as mapping_state,
+			coalesce(mapping.mapping_version, '') as mapping_version,
+			coalesce(mapping.source, '') as mapping_source,
 			coalesce(jsonb_agg(
 				jsonb_build_object('stable_key', topic.stable_key, 'title', topic.title, 'relation', qt.relation)
 				order by case when qt.relation = 'primary' then 0 else 1 end, topic.stable_key
 			) filter (where topic.stable_key is not null), '[]'::jsonb) as topics
 		from current
+		left join content.question_curriculum_mapping mapping on mapping.revision_id = current.revision_id::uuid
 		left join content.question_topic qt on qt.question_id = current.question_id::uuid
 		left join content.topic topic on topic.id = qt.topic_id
 		group by current.question_id, current.revision_id, current.stable_key, current.slug,
 			current.status, current.content_hash, current.locale, current.available_locales,
-			current.prompt, current.short_answer, current.explanation, current.normalized_payload
+			current.prompt, current.short_answer, current.explanation, current.normalized_payload,
+			mapping.revision_id, mapping.program_key, mapping.path_key, mapping.domain_key,
+			mapping.capability_key, mapping.mapping_state, mapping.mapping_version, mapping.source
 		order by current.stable_key
 		offset $5 limit $6
 	`, workspaceKey, locale, topicKey, includeFixtures, offset, limit, track, level, company)
@@ -1323,10 +1334,16 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 		var item search.CatalogItem
 		var payload []byte
 		var topicsJSON []byte
+		var hasCurriculumMapping bool
+		var mappingProgramKey, mappingPathKey, mappingDomainKey, mappingCapabilityKey string
+		var mappingState, mappingVersion, mappingSource string
 		if err := rows.Scan(
 			&item.QuestionID, &item.RevisionID, &item.StableKey, &item.Slug,
 			&item.Status, &item.ContentHash, &item.Locale, &item.AvailableLocales,
-			&item.Prompt, &item.ShortAnswer, &item.Explanation, &payload, &topicsJSON,
+			&item.Prompt, &item.ShortAnswer, &item.Explanation, &payload,
+			&hasCurriculumMapping, &mappingProgramKey, &mappingPathKey,
+			&mappingDomainKey, &mappingCapabilityKey, &mappingState,
+			&mappingVersion, &mappingSource, &topicsJSON,
 		); err != nil {
 			return search.CatalogResponse{}, fmt.Errorf("scan catalog question: %w", err)
 		}
@@ -1335,6 +1352,16 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 			return search.CatalogResponse{}, fmt.Errorf("decode catalog metadata: %w", err)
 		}
 		item.Metadata = catalogMetadata(normalized)
+		if hasCurriculumMapping {
+			item.Metadata.ProgramKey = mappingProgramKey
+			item.Metadata.PathKey = mappingPathKey
+			item.Metadata.DomainKey = mappingDomainKey
+			item.Metadata.StageKey = mappingDomainKey
+			item.Metadata.CapabilityKey = mappingCapabilityKey
+			item.Metadata.MappingState = mappingState
+			item.Metadata.MappingVersion = mappingVersion
+			item.Metadata.MappingSource = mappingSource
+		}
 		if err := json.Unmarshal(topicsJSON, &item.Topics); err != nil {
 			return search.CatalogResponse{}, fmt.Errorf("decode catalog topics: %w", err)
 		}
@@ -1645,6 +1672,30 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	}
 	checks.DegeneratePrompts = degenerate
 	checks.SemanticShapeIssues = semanticShape
+	if err := p.pool.QueryRow(ctx, `
+		select
+			count(*) filter (where m.revision_id is null or m.mapping_state = 'unmapped')::int,
+			count(*) filter (where m.mapping_state = 'proposed')::int,
+			count(*) filter (where m.mapping_state = 'accepted')::int,
+			count(*) filter (where m.mapping_state = 'rejected')::int,
+			count(*) filter (where m.revision_id is not null and m.mapping_state <> 'unmapped')::int,
+			count(*) filter (where m.capability_key is not null)::int
+		from content.workspace w
+		join content.question q on q.workspace_id = w.id and q.status = 'published'
+		join content.question_revision qr on qr.id = q.current_revision_id
+		left join content.question_curriculum_mapping m on m.revision_id = qr.id
+		where w.stable_key = $1
+		  and ($2 or q.content_kind = 'production')
+	`, strings.TrimSpace(request.WorkspaceKey), request.IncludeFixtures).Scan(
+		&checks.CurriculumUnmapped,
+		&checks.CurriculumProposed,
+		&checks.CurriculumAccepted,
+		&checks.CurriculumRejected,
+		&checks.CurriculumMapped,
+		&checks.CurriculumCapabilities,
+	); err != nil {
+		return search.QualityResponse{}, fmt.Errorf("count curriculum mappings: %w", err)
+	}
 
 	tracks := make(map[string]int)
 	topics := make(map[string]int)
@@ -1984,6 +2035,7 @@ func catalogMetadata(payload map[string]any) search.CatalogMetadata {
 		CapabilityKey:  stringField(payload, "capability_key"),
 		MappingState:   stringField(payload, "mapping_state"),
 		MappingVersion: stringField(payload, "mapping_version"),
+		MappingSource:  stringField(payload, "mapping_source"),
 	}
 	// stage_key was the first Lab bridge and is now a deprecated alias for the
 	// shared Domain level. Preserve it for existing consumers while making the

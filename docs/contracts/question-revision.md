@@ -117,6 +117,12 @@ catalog exposes a deprecated `stage_key` compatibility projection of
 `domain_key` for older Lab clients; new clients use `path_key` and
 `domain_key`. The revision-scoped `content.question_capability` relation is
 many-to-many and release-aware; no legacy card is backfilled by this contract.
+The additive `content.question_curriculum_mapping` table is the one-row-per-
+revision release seam for Program/Path/Domain decisions. Its explicit
+`mapping_state=unmapped` row records review coverage without adding keys. The
+`qb-map-release` command requires a complete manifest pinned to current
+`revision_id` and `content_hash`; it never infers v1 fields from legacy
+metadata.
 
 Normalization is deterministic: trim Unicode whitespace, normalize line
 endings to LF, canonicalize JSON key order, normalize locale tags, and remove
