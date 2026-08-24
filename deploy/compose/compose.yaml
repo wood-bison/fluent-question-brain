@@ -33,6 +33,7 @@ services:
       - ../../db/migrations/0010_level_company_dimensions.sql:/docker-entrypoint-initdb.d/010_level_company_dimensions.sql:ro
       - ../../db/migrations/0011_path_domain_capability_taxonomy.sql:/docker-entrypoint-initdb.d/011_path_domain_capability_taxonomy.sql:ro
       - ../../db/migrations/0012_curriculum_mapping_release.sql:/docker-entrypoint-initdb.d/012_curriculum_mapping_release.sql:ro
+      - ../../db/migrations/0013_runtime_station_capabilities.sql:/docker-entrypoint-initdb.d/013_runtime_station_capabilities.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U question_brain -d question_brain"]
       interval: 5s
@@ -59,6 +60,8 @@ services:
       - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:${QB_HTTP_PORT:-48127}:8080"
+    volumes:
+      - ../../releases/curriculum-mapping-2026-08-24-runtime-crosswalk.json:/opt/releases/curriculum-mapping-2026-08-24-runtime-crosswalk.json:ro
     logging: *json-logging
     depends_on:
       postgres:

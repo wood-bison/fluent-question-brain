@@ -25,15 +25,15 @@ allowing two writers to silently diverge.
 ## Current milestone
 
 G0–G5 cover the repository, import, retrieval, authoring, integration, and
-hardening contracts. The current production snapshot contains `1368/1368`
+hardening contracts. The current production snapshot contains `1591/1591`
 published production cards and the deterministic source-topic graph release
-has materialized `1368/1368` primary edges. Per the graph contract, a primary
+has materialized `1591/1591` primary edges. Per the graph contract, a primary
 edge is the binding of a question to its topic (`question_topic` rows);
 typed edges *between* questions (`prerequisite`, `related`, `contrast`, … in
 `question_edge`) are a planned authoring extension and are intentionally
 absent — an empty `question_edge` table is the expected state, not a defect.
 The approved translation audit now
-reports `1368/1368` production cards with a Russian locale; fixture records
+reports `1591/1591` production cards with a Russian locale; fixture records
 remain excluded from that denominator. One exact
 prompt group is already resolved as `not_duplicate` and is retained as a
 resolved audit record rather than an open warning.
@@ -43,6 +43,13 @@ through a token-protected Go API boundary, and metrics/logs, backup restore,
 failure recovery, and immutable revision rollback are covered by repeatable
 smoke scripts. Fluent Engineering Lab remains the learner product; its
 published-only Question Brain read path is the sole learner content source.
+
+The first reviewed curriculum crosswalk is now pinned at
+`releases/curriculum-mapping-2026-08-24-runtime-crosswalk.json`. It binds only
+the 19 questions already exercised by released runtime stations; the remaining
+1,572 production cards are deliberately recorded as `unmapped` until an
+editorial decision exists. The release is applied idempotently by the workspace
+launcher and never inferred from legacy Track/Group/Topic fields.
 
 See:
 
