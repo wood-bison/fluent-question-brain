@@ -63,6 +63,7 @@ services:
       - "127.0.0.1:${QB_HTTP_PORT:-48127}:8080"
     volumes:
       - ../../releases/curriculum-mapping-2026-08-24-runtime-crosswalk.json:/opt/releases/curriculum-mapping-2026-08-24-runtime-crosswalk.json:ro
+      - ../../releases/curriculum-mapping-2026-08-24-editorial-approved.json:/opt/releases/curriculum-mapping-2026-08-24-editorial-approved.json:ro
     logging: *json-logging
     depends_on:
       postgres:

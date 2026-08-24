@@ -99,10 +99,13 @@ stack would make path counts look complete while hiding content.
 
 The generated
 `releases/curriculum-mapping-2026-08-24-editorial-proposal.json` is complete and
-revision-pinned, but it must not be mounted by the learner stack until the
-editorial review changes each accepted row explicitly and the dry-run has zero
-pin/coverage errors. Proposed rows are visible review debt and do not create
-Lab stations, runtime buttons, mastery, or prerequisite edges.
+revision-pinned. The explicit exact-topic review produced
+`releases/curriculum-mapping-2026-08-24-editorial-approved.json` with
+`1,591/1,591` accepted Program/Path/Domain rows and zero unknown topics. This
+release makes every card discoverable under a named path and shared domain; it
+does **not** create Lab stations, runtime buttons, mastery, or prerequisite
+edges. Those require a separate reviewed `capability_key` release. The prior
+19-station runtime crosswalk remains the rollback baseline.
 
 For an existing Compose PostgreSQL volume, initdb mounts are not replayed.
 Run `scripts/apply-curriculum-mapping-migration.sh` once, verify the migration

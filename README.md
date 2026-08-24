@@ -44,24 +44,23 @@ failure recovery, and immutable revision rollback are covered by repeatable
 smoke scripts. Fluent Engineering Lab remains the learner product; its
 published-only Question Brain read path is the sole learner content source.
 
-The first reviewed curriculum crosswalk is now pinned at
-`releases/curriculum-mapping-2026-08-24-runtime-crosswalk.json`. It binds only
-the 19 questions already exercised by released runtime stations; the remaining
-1,572 production cards are deliberately recorded as `unmapped` until an
-editorial decision exists. The release is applied idempotently by the workspace
-launcher and never inferred from legacy Track/Group/Topic fields.
+The first runtime crosswalk remains pinned at
+`releases/curriculum-mapping-2026-08-24-runtime-crosswalk.json` as the rollback
+baseline. The exact-topic editorial review is now explicitly accepted in
+`releases/curriculum-mapping-2026-08-24-editorial-approved.json`: all `1,591`
+current production cards have a revision-pinned Program/Path/Domain decision,
+with `0` unmapped. This is a path/domain projection, not a claim that every
+card is a Lab station: only cards with an explicit reviewed `capability_key`
+count as station bindings. The acceptance evidence is
+`docs/verification/curriculum-topic-acceptance-2026-08-24.json` and the prior
+19-station release remains available for rollback. Neither release infers
+placement from legacy Track/Group/Topic fields.
 
-The next editorial slice is prepared, but deliberately not promoted: the exact
-topic registry at
-`docs/manifests/curriculum-topic-registry-2026-08-24.json` produces the complete
-revision-pinned proposal at
-`releases/curriculum-mapping-2026-08-24-editorial-proposal.json`. Its dry-run
-currently contains **1,572 proposed**, **19 accepted**, and **0 unmapped**
-cards. The Python path was added explicitly in migration `0014_python_path.sql`
-because the current corpus contains Python cards. This is a review queue, not
-a hidden classifier:
-the checked-in registry lists every exact topic decision, unknown topics stay
-unmapped, and `--approve` is intentionally not run for this proposal.
+The exact topic registry at
+`docs/manifests/curriculum-topic-registry-2026-08-24.json` is still the source
+of the decision. Its complete proposal is retained at
+`releases/curriculum-mapping-2026-08-24-editorial-proposal.json` for audit and
+reproducibility. The explicit acceptance command is:
 
 Regenerate the proposal and its answer-free audit after a new Question Brain
 release with:
@@ -71,11 +70,19 @@ python3 scripts/mapping/generate-editorial-crosswalk.py \
   --preserve releases/curriculum-mapping-2026-08-24-runtime-crosswalk.json \
   --manifest releases/curriculum-mapping-2026-08-24-editorial-proposal.json \
   --report docs/verification/curriculum-topic-review-2026-08-24.json
+
+python3 scripts/mapping/approve-editorial-crosswalk.py \
+  --proposal releases/curriculum-mapping-2026-08-24-editorial-proposal.json \
+  --registry docs/manifests/curriculum-topic-registry-2026-08-24.json \
+  --manifest releases/curriculum-mapping-2026-08-24-editorial-approved.json \
+  --report docs/verification/curriculum-topic-acceptance-2026-08-24.json \
+  --accept-exact-topic-registry
 ```
 
-Review the report and edit the manifest's `mapping_state`/keys explicitly before
-running `qb-map-release --approve`; the workspace launcher continues to apply
-only the released runtime crosswalk until that editorial review is complete.
+The acceptance command accepts only exact primary-topic rows and leaves unknown
+topics unmapped. The workspace launcher applies the accepted path/domain
+release; capability/station bindings remain a separate reviewed release and are
+never manufactured from topic names.
 
 See:
 

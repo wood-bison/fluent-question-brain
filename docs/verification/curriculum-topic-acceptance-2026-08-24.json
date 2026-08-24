@@ -1,0 +1,38 @@
+{
+  "contract_version": "question-brain.curriculum-topic-acceptance.v1",
+  "taxonomy_version": "question-brain.taxonomy.v1",
+  "workspace_key": "fluent-interview",
+  "question_release_id": "question-release-d550846f4743c4d3",
+  "reviewer": "codex-editorial-review-2026-08-24",
+  "review_method": "exact-primary-topic-registry-v1",
+  "registry_sha256": "4dd8c08f56fbc02e996363f1136d76d3f1fa1e168e37046c9c969ca86481e5d3",
+  "proposal_entries": 1591,
+  "catalog_questions": 1591,
+  "preserved_accepted": 19,
+  "accepted_from_registry": 1572,
+  "accepted_total": 1591,
+  "unmapped": 0,
+  "missing_catalog": 0,
+  "accepted_by_path": {
+    "path.algorithms": 52,
+    "path.behavioral": 103,
+    "path.dotnet-csharp": 74,
+    "path.frontend": 161,
+    "path.go": 130,
+    "path.java-spring": 191,
+    "path.nodejs-typescript": 282,
+    "path.python": 17,
+    "path.system-design": 562
+  },
+  "accepted_by_domain": {
+    "domain.data-postgresql": 168,
+    "domain.delivery-observability": 61,
+    "domain.distributed-systems": 272,
+    "domain.http-api": 163,
+    "domain.os-networking": 33,
+    "domain.runtime": 724,
+    "domain.testing": 151
+  },
+  "unknown_topics": [],
+  "decision_policy": "accept only exact primary-topic registry rows; no fuzzy or legacy-field inference"
+}
