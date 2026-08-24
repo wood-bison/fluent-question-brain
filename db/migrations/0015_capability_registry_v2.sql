@@ -74,6 +74,37 @@ create table if not exists content.taxonomy_capability_supersedes (
   check (length(trim(reason)) > 0)
 );
 
+-- A supersedes edge must point forward to a terminal canonical key. Foreign
+-- keys reject dangling rows; this trigger rejects a cycle before it can make
+-- historical resolution ambiguous.
+create or replace function content.reject_capability_supersedes_cycle()
+returns trigger
+language plpgsql
+as $$
+declare
+  has_cycle boolean;
+begin
+  with recursive chain(key) as (
+    select new.canonical_key
+    union
+    select s.canonical_key
+    from content.taxonomy_capability_supersedes s
+    join chain c on s.superseded_key = c.key
+  )
+  select exists (select 1 from chain where key = new.superseded_key)
+    into has_cycle;
+  if has_cycle then
+    raise exception 'capability supersedes cycle: % -> %', new.superseded_key, new.canonical_key;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists taxonomy_capability_supersedes_cycle on content.taxonomy_capability_supersedes;
+create trigger taxonomy_capability_supersedes_cycle
+before insert or update on content.taxonomy_capability_supersedes
+for each row execute function content.reject_capability_supersedes_cycle();
+
 -- The reviewed registry preserves stable old rows for historical evidence and
 -- introduces task-sequence-free canonical identities for new releases.
 insert into content.taxonomy_capability

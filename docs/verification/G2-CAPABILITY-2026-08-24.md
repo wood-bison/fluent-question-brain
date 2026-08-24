@@ -50,6 +50,10 @@ card placement is a separate reviewed operation in G7.
   `unresolved: []`, and records 18 Task Runtime task references.
 - Alias resolution is explicit in the Go taxonomy registry; no fuzzy title,
   prefix, embedding, breadcrumb, or task inference is used.
+- New release manifests reject deprecated alias keys; historical ingest still
+  resolves them to the canonical key for backwards-compatible evidence reads.
+- Alias and supersedes rows have foreign-key protection, and the database
+  trigger `taxonomy_capability_supersedes_cycle` rejects cyclic provenance.
 - The compatibility `domain_key` column remains available for older clients;
   new consumers must use `taxonomy_capability_domain`.
 
@@ -61,6 +65,8 @@ make contract                                      PASS
 docker Go 1.24: go test ./...                      PASS
 python3 scripts/g2-capability-dry-run.py ...       PASS (unresolved=[])
 isolated migration applied twice                   PASS (idempotent)
+deprecated release key validator                  PASS
+alias/supersedes integrity smoke                  PASS
 Question Brain /health/ready                       PASS
 ```
 

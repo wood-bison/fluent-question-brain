@@ -45,6 +45,7 @@ grep -q "013_runtime_station_capabilities.sql" "${repo_root}/deploy/compose/comp
 grep -q "015_capability_registry_v2.sql" "${repo_root}/deploy/compose/compose.yaml"
 grep -q "create table if not exists content.taxonomy_capability_domain" "${repo_root}/db/migrations/0015_capability_registry_v2.sql"
 grep -q "taxonomy_capability_supersedes" "${repo_root}/db/migrations/0015_capability_registry_v2.sql"
+grep -q "reject_capability_supersedes_cycle" "${repo_root}/db/migrations/0015_capability_registry_v2.sql"
 grep -q "QB_CMS_PORT" "${repo_root}/deploy/compose/compose.yaml"
 grep -q "schemaName: 'cms'" "${repo_root}/apps/cms/payload.config.ts"
 grep -q 'GET /metrics' "${repo_root}/cmd/question-brain/main.go"
