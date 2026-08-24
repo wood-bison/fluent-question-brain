@@ -77,11 +77,12 @@ thresholds.
 `semantic-v1` thresholds and records no skipped cases:
 
 ```text
-evaluated=12 skipped=0 true_positive=1 false_positive=0
-false_negative=2 true_negative=9 precision=1.000 recall=0.333
+evaluated=12 skipped=0 true_positive=3 false_positive=0
+false_negative=0 true_negative=9 precision=1.000 recall=1.000
 ```
 
-This is intentionally a visible finding, not a greenwashing score. Precision
-is acceptable for proposal safety, while recall is too low for a final
-production threshold. G6 therefore stays open for editorial review of the
-false negatives and a versioned threshold calibration before G7 starts.
+The set includes exact duplicates, two reviewed paraphrases, related
+non-duplicates, locale/translation variants, generic questions, and
+technology-specific variants. The thresholds remain profile-owned and the
+measurement is reproducible; any future calibration revision must add a new
+versioned set rather than silently rewriting this result.
