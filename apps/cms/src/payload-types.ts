@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     questions: Question;
+    'published-questions': PublishedQuestion;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +79,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
+    'published-questions': PublishedQuestionsSelect<false> | PublishedQuestionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -86,7 +88,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: false;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'ru') | ('en' | 'ru')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'ru';
@@ -184,6 +186,33 @@ export interface Question {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Живой срез канонического банка (только чтение). Данные принадлежат Go-сервису; правки делаются в разделе Questions и публикуются через промоушен.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "published-questions".
+ */
+export interface PublishedQuestion {
+  id: string;
+  promptRu?: string | null;
+  promptEn?: string | null;
+  track?: string | null;
+  level?: string | null;
+  company?: string | null;
+  group?: string | null;
+  topic?: string | null;
+  title?: string | null;
+  shortAnswerRu?: string | null;
+  shortAnswerEn?: string | null;
+  explanationRu?: string | null;
+  explanationEn?: string | null;
+  slug?: string | null;
+  status?: string | null;
+  revisionNo?: number | null;
+  contentHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -214,6 +243,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'questions';
         value: number | Question;
+      } | null)
+    | ({
+        relationTo: 'published-questions';
+        value: string | PublishedQuestion;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -302,6 +335,31 @@ export interface QuestionsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "published-questions_select".
+ */
+export interface PublishedQuestionsSelect<T extends boolean = true> {
+  id?: T;
+  promptRu?: T;
+  promptEn?: T;
+  track?: T;
+  level?: T;
+  company?: T;
+  group?: T;
+  topic?: T;
+  title?: T;
+  shortAnswerRu?: T;
+  shortAnswerEn?: T;
+  explanationRu?: T;
+  explanationEn?: T;
+  slug?: T;
+  status?: T;
+  revisionNo?: T;
+  contentHash?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

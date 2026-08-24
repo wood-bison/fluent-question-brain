@@ -5,6 +5,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 
+import { PublishedQuestions } from './src/collections/PublishedQuestions'
 import { Questions } from './src/collections/Questions'
 import { Users } from './src/collections/Users'
 
@@ -18,7 +19,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname, 'src'),
     },
   },
-  collections: [Users, Questions],
+  collections: [Users, Questions, PublishedQuestions],
   editor: lexicalEditor(),
   localization: {
     locales: ['en', 'ru'],
