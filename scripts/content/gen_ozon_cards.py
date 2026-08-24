@@ -2,6 +2,8 @@
 """Generate bilingual vault cards from parsed Ozon Go tasks (63)."""
 import json, os, re, sys
 
+from quality import require_clean_text, require_prompt
+
 TASKS = json.load(open('/tmp/qb/ozon_tasks.json', encoding='utf-8'))
 OUT = os.path.expanduser('~/developer/fluent-question-vault/Question Cards')
 
@@ -126,6 +128,11 @@ def main():
         oz_id = f'OZ-{101 + i}'
         ru_q = ru_title(t)
         cond = '\n\n'.join(b for b in t['condition'] if b and b != '-')
+        source = f'Ozon:{oz_id}'
+        topic = topic_of(t, i)
+        require_prompt(EN[i], source=source, field='Question (EN)', title=ru_q, topic=topic)
+        require_prompt(ru_q, source=source, field='Question (RU)', title=ru_q, topic=topic)
+        require_clean_text(cond, source=source, field='Task')
         rubric_lines = []
         for r in t['rubric']:
             label, text = r['label'], (r['text'] or '').strip()
@@ -142,7 +149,7 @@ def main():
         timing = t.get('timing') or ''
         usage = t.get('usage') or ''
         meta = [
-            f'ID: {oz_id}', 'Track: Backend', f'Topic: {topic_of(t, i)}',
+            f'ID: {oz_id}', 'Track: Backend', f'Topic: {topic}',
             'Scope: Ozon', 'Lang:', 'Priority: common', f'Group: {group_of(t, i)}',
             f'Level: {level_of(t)}', 'Company: Ozon',
         ]

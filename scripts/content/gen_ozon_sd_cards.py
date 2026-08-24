@@ -2,6 +2,8 @@
 """Generate System Design cards from system_design_ozon 23.docx extraction."""
 import json, os, re
 
+from quality import require_clean_text, require_prompt
+
 lines = open('/tmp/qb/ozon_sd.txt', encoding='utf-8').read().split('\n')
 OUT = os.path.expanduser('~/developer/fluent-question-vault/Question Cards')
 num_re = re.compile(r'^(\d{1,2})\.$')
@@ -89,6 +91,11 @@ def main():
     for idx, t in enumerate(tasks):
         oz_id = f'OZ-{164 + idx}'
         ru_q = re.sub(r'\s+', ' ', t['title'])
+        source = f'Ozon:{oz_id}'
+        english_prompt = EN[int(oz_id.split('-')[1]) - 163]
+        require_prompt(english_prompt, source=source, field='Question (EN)', title=ru_q, topic='System Design')
+        require_prompt(ru_q, source=source, field='Question (RU)', title=ru_q, topic='System Design')
+        require_clean_text(t['condition'], source=source, field='Task')
         level = ''
         lvmap = {'17':'Junior','18':'Middle','19':'Middle+','20':'Senior','21':'Senior'}
         grades = [r['label'].split()[0] for r in t['rubric']]
@@ -102,7 +109,7 @@ def main():
             if rest: rub_lines.append(rest)
         meta = [f'ID: {oz_id}', 'Track: Backend', 'Topic: System Design',
                 'Scope: Ozon', 'Lang:', 'Priority: common', 'Group: System Design',
-                f'Level: {level}', 'Company: Ozon', f'Question: {EN[oz_id.split("-")[1] and int(oz_id.split("-")[1]) - 163]}']
+                f'Level: {level}', 'Company: Ozon', f'Question: {english_prompt}']
         parts = [f'# {oz_id} — {ru_q[:80]}', '\n'.join(meta),
                  '## Question (RU)', '', ru_q, '']
         if t['graded']:

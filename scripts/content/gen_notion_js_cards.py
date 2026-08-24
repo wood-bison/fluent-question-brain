@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os, re, html, glob
 
+from quality import require_clean_text, require_prompt
+
 NB = "/Users/sergeyzhechko/Downloads/Банк вопросов/Желтый Банк/Секции/Секции по языкам платформам/JavaScript/Вопросы — JS"
 V = os.path.expanduser('~/developer/fluent-question-vault/Question Cards')
 
@@ -84,6 +86,12 @@ for path in files:
     solution = '\n'.join(sec.get('Решение', []))
     key = re.sub(r'^\[[^\]]+\]\s*', '', title)
     en = EN.get(key) or EN.get(title) or key
+    source = f'Notion:NT-{n}'
+    topic = TOPIC.get(key, 'Node / JS Fundamentals')
+    require_prompt(en, source=source, field='Question (EN)', title=key, topic=topic)
+    require_prompt(key, source=source, field='Question (RU)', title=key, topic=topic)
+    require_clean_text(task, source=source, field='Task')
+    require_clean_text(solution, source=source, field='Solution')
     meta = [f'ID: NT-{n}', 'Track: Frontend', f'Topic: {TOPIC.get(key, "Node / JS Fundamentals")}',
             'Scope: Notion', 'Lang:', 'Priority: common', 'Group: Practical Tasks',
             f'Level: {level}', 'Company: Avito', f'Difficulty: {diff or ""}',

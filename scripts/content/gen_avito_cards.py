@@ -2,6 +2,8 @@
 """Generate cards from Avito interviewer PDFs (pdftotext -layout output)."""
 import os, re, sys
 
+from quality import require_clean_text, require_prompt
+
 V = os.path.expanduser('~/developer/fluent-question-vault/Question Cards')
 TASK_HEAD = re.compile(r'^(.{3,80}?)\s*\((easy|medium|hard)\)\s*$')
 QNUM = re.compile(r'^Вопрос №(\d+)\s+(.*)$')
@@ -75,6 +77,13 @@ def rubric_from(lines):
     return [{'label': r['label'], 'text': '\n'.join(r['text'])} for r in rub]
 
 def emit(oz_id, track, topic, group, level, diff, company, q_en, q_ru, task, rubric, solution=None, scope='Avito', with_task=True):
+    source = f'{scope}:{oz_id}'
+    require_prompt(q_en, source=source, field='Question (EN)', title=q_ru, topic=topic)
+    require_prompt(q_ru, source=source, field='Question (RU)', title=q_ru, topic=topic)
+    if task:
+        require_clean_text(task, source=source, field='Task')
+    if solution:
+        require_clean_text(solution, source=source, field='Solution')
     meta = [f'ID: {oz_id}', f'Track: {track}', f'Topic: {topic}', f'Scope: {scope}',
             'Lang:', 'Priority: common', f'Group: {group}', f'Level: {level}',
             f'Company: {company}']
