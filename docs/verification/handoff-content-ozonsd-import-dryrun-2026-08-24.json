@@ -1,0 +1,271 @@
+{
+  "source_system": "fluent-question-vault",
+  "source_root": "/vault/Question Cards",
+  "workspace_key": "fluent-interview",
+  "dry_run": true,
+  "started_at": "2026-08-24T10:04:03.037684421Z",
+  "finished_at": "2026-08-24T10:04:03.048446504Z",
+  "totals": {
+    "files": 33,
+    "warnings": 19,
+    "would_create": 33
+  },
+  "archived": 0,
+  "items": [
+    {
+      "source_ref": "/vault/Question Cards/OZ-164 — Design phone number classifier.md",
+      "stable_key": "question.oz-164",
+      "content_hash": "e5e149cae077b5d29718cd586a51f6b88c6734da49208742afb76a0a9baa352c",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-165 — Design scalability strategy for Telephony Platform.md",
+      "stable_key": "question.oz-165",
+      "content_hash": "8ce49e4428f236bc6651bc90a9a455bb87584901cb2d294b988e55cce895a410",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-166 — Design Compute Platform.md",
+      "stable_key": "question.oz-166",
+      "content_hash": "fc2fc4756725ae24c1855ee65750e9f95e25235176ee39ac3556a20e2a25a7ad",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-167 — Репликация в хранилищах данных.md",
+      "stable_key": "question.oz-167",
+      "content_hash": "39f64d54eb9704500495258fcdcd8c58bbad47dff831ca238a8e58b2a7d5cee7",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-168 — Domain-Driven Design.md",
+      "stable_key": "question.oz-168",
+      "content_hash": "e1aa42e5f1f08961ef0c05e62873159c300e1ab62a33b0e3c363443529a873ee",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-169 — Колоночные БД.md",
+      "stable_key": "question.oz-169",
+      "content_hash": "ac1e30d9873cd3b7a13c9da2dd9584446ce12b62f5a32a5f0acbaee21fa6818e",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-170 — Нереляционные БД.md",
+      "stable_key": "question.oz-170",
+      "content_hash": "f9d32bef513c747a9835ba695445bdf0d95c50ab0701c711bad74dd7a569bab3",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-171 — Distributed Locking.md",
+      "stable_key": "question.oz-171",
+      "content_hash": "f9cb3b2043ba8bdb206cb315b4c2811f60e0454babbc3868ef62abb2d823f546",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-172 — CAP теорема.md",
+      "stable_key": "question.oz-172",
+      "content_hash": "870589e33d08f034930608f9ca637fe14eea820c96b056d63bdf6ce6680bea01",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-173 — Инвалидация кеша.md",
+      "stable_key": "question.oz-173",
+      "content_hash": "0c9ed25bca80f3843c7bf57ffd946485a952047c4cf5b7a5a3405995da659db9",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-174 — Стратегии кеширования.md",
+      "stable_key": "question.oz-174",
+      "content_hash": "f3c34392475ebefb3f29e2c70e66a15bb94f496d9aa07c79850e25496cdf6c6d",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-175 — Service Discovery.md",
+      "stable_key": "question.oz-175",
+      "content_hash": "1308e681813f64fae1f5db1a07b7d9a1996a697aa53a53e92bab51de7d38531f",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-176 — Гарантии доставки сообщений.md",
+      "stable_key": "question.oz-176",
+      "content_hash": "b2e56de0a693d43ea60fa9f3dcc3b3a60b88b254444feac3e487fb98bb382527",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-177 — Идемпотентность.md",
+      "stable_key": "question.oz-177",
+      "content_hash": "d46b40dd98795b48f879218cd1edeac681c1ebf65d4158d34a6cc778e0cc763a",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-178 — Алгоритмы балансировки.md",
+      "stable_key": "question.oz-178",
+      "content_hash": "c2e7aeefa6e7eadd3f0ded93f94de6c8dc912c395b2d0464c941042e6a3d5fd0",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-179 — Sticky Sessions.md",
+      "stable_key": "question.oz-179",
+      "content_hash": "fde5708be3c5a472103a42d5b65e41ec60ffd6cdf727674e6e900778fbd14105",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-180 — Клиентская vs Серверная балансировка.md",
+      "stable_key": "question.oz-180",
+      "content_hash": "d10f0e398c0f6537ac3cc063906feeb3b8d2cc1570a7f9d7071e14824ab2d8e2",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-181 — Design Messenger.md",
+      "stable_key": "question.oz-181",
+      "content_hash": "a108fc37b869e52a5411287454f3a564ee877fb46c4e1e0ad9e3684f45e200eb",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-182 — Design Web Search.md",
+      "stable_key": "question.oz-182",
+      "content_hash": "1be39d75a6e0dcabbb29815fbac38aa842f9498c468d2c3868f93e234135eadd",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-183 — Design Instagram.md",
+      "stable_key": "question.oz-183",
+      "content_hash": "65293068b5a096c6581209f671fd7cca75418d70cf459d72915dbf360bf2f4e7",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-184 — Как гарантированно записать событие в базу данных и очередь (Transacti.md",
+      "stable_key": "question.oz-184",
+      "content_hash": "2e19f4d360c634dc83d4c3768cb22bab38c1b9c5e94f874f6c2bee9f7e48a34d",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-185 — Какие два подхода существует при реализации Саги (про оркестровку и хо.md",
+      "stable_key": "question.oz-185",
+      "content_hash": "3b47ba0a9eb6670915f17d9cadb93dd9be7abcd4f556c8f86b2ba89f5ed3badb",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-186 — Что такое консистентное хэширование и для чего оно применимо.md",
+      "stable_key": "question.oz-186",
+      "content_hash": "643c5ac8e72fb5e6fc2f2ba8cf800e12b8e609e3a715783f7fc0f5e4dd7b6f6d",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-187 — Как может быть реализована распределенная транзакция методом 2PC(двухф.md",
+      "stable_key": "question.oz-187",
+      "content_hash": "91f7eee0a6ddee941a28d89fa178c37f356388437362fc3c210b6326a34d8273",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-188 — Что такое Сага.md",
+      "stable_key": "question.oz-188",
+      "content_hash": "bd379a70d5303a3ee5865f56944ba16b40a0ead3df24368f45ded7c5a561fe53",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-189 — Выбор формата межсервисного взаимодействия.md",
+      "stable_key": "question.oz-189",
+      "content_hash": "d6ea735d6ef5164316a6ed5d49d9d54366dd0951292396ed8061e88bb87d9e3c",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-190 — Что такое Event sourcing.md",
+      "stable_key": "question.oz-190",
+      "content_hash": "dff09671c1eba8e812ab9d30dd02c90652131f9e5aa42b8cdd47ebad3a5e9899",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-191 — Command Query Responsibility Segregation (CQRS).md",
+      "stable_key": "question.oz-191",
+      "content_hash": "c95c0f168c6d1f63c095e2063f75b468ae4f135fac247b37e81686a452343060",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-192 — Рассказать про пример нарушения 1-2 принципов(по выбору интервьюера) S.md",
+      "stable_key": "question.oz-192",
+      "content_hash": "2de15bc1254d1a34207dd05421f3b01b0a5ca8fc921a11f7cf704eb13285555a",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-193 — Рассказать про отличия трехслойная, гексагональной и луковой архитекту.md",
+      "stable_key": "question.oz-193",
+      "content_hash": "f75d0f631f4797213eed0304a337c378b75654649fd2ff76537fe023d37b9da0",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-194 — Рассказать про 1-2 простых паттерна(синглтон, стратегия, адаптер и т.д.md",
+      "stable_key": "question.oz-194",
+      "content_hash": "2c50899bed1d71fbd2d2b6970b0e402dd70b09517f15a4ac3dcf5a083b013935",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-195 — Дать определение(можно своими словами) 1-2 принципа SOLID (по выбору и.md",
+      "stable_key": "question.oz-195",
+      "content_hash": "db2ed41caac85c026747c608068465beff2b24fc6518601aa198c200e968832f",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-196 — Чем отличия монолитной сервисной микросервисной архитектур.md",
+      "stable_key": "question.oz-196",
+      "content_hash": "102d3a62117a38a1ff03c8da835cd1abaa8cac939ee6f357bc4b0ffeabb788c4",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    }
+  ]
+}
