@@ -98,6 +98,7 @@ func Run(ctx context.Context, options Options) (Report, error) {
 		if err != nil {
 			return Report{}, err
 		}
+		store.ConfigureEmbeddingFromEnv(db)
 		defer db.Close()
 		report.RunID, err = db.StartImportRun(ctx, options.WorkspaceKey, options.WorkspaceName, SourceSystem, root, mode)
 		if err != nil {

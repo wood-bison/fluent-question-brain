@@ -37,6 +37,7 @@ services:
       - ../../db/migrations/0014_python_path.sql:/docker-entrypoint-initdb.d/014_python_path.sql:ro
       - ../../db/migrations/0015_capability_registry_v2.sql:/docker-entrypoint-initdb.d/015_capability_registry_v2.sql:ro
       - ../../db/migrations/0016_question_graph_edges.sql:/docker-entrypoint-initdb.d/016_question_graph_edges.sql:ro
+      - ../../db/migrations/0017_import_review_staging.sql:/docker-entrypoint-initdb.d/017_import_review_staging.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U question_brain -d question_brain"]
       interval: 5s

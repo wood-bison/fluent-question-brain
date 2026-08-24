@@ -173,6 +173,7 @@ func main() {
 		if openErr != nil {
 			failReport(&report, "open database: %v", openErr)
 		}
+		store.ConfigureEmbeddingFromEnv(db)
 		defer db.Close()
 		for index, card := range cards {
 			stored, publishErr := db.PublishImportedCard(context.Background(), card, *workspaceKey, *workspaceName, *actor)

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -56,6 +57,29 @@ func (p *Postgres) UseEmbedding(provider embedding.Provider, profileKey string) 
 	if strings.TrimSpace(profileKey) != "" {
 		p.embeddingProfile = strings.TrimSpace(profileKey)
 	}
+}
+
+// ConfigureEmbeddingFromEnv selects the configured local embedding provider
+// for import/release commands. Keeping this in the store package makes the
+// CLI and HTTP paths use the same profile contract without copying provider
+// setup or silently falling back to a different semantic profile.
+func ConfigureEmbeddingFromEnv(p *Postgres) {
+	if p == nil {
+		return
+	}
+	endpoint := strings.TrimSpace(os.Getenv("EMBEDDING_PROVIDER_ENDPOINT"))
+	if endpoint == "" {
+		return
+	}
+	model := strings.TrimSpace(os.Getenv("EMBEDDING_MODEL"))
+	if model == "" {
+		model = "bge-m3"
+	}
+	profile := strings.TrimSpace(os.Getenv("EMBEDDING_PROFILE"))
+	if profile == "" {
+		profile = "semantic-v1"
+	}
+	p.UseEmbedding(embedding.NewOllamaProvider(endpoint, model), profile)
 }
 
 type StoredRevision struct {
@@ -368,7 +392,19 @@ func (p *Postgres) Close() {
 }
 
 func (p *Postgres) UpsertCard(ctx context.Context, card normalize.Card, workspaceKey, workspaceName string) (StoredRevision, error) {
-	return p.upsertCard(ctx, card, workspaceKey, workspaceName, "fluent-question-vault", "vault-importer", false)
+	if _, err := p.StageImportCard(ctx, card, workspaceKey, "", "vault-importer"); err != nil {
+		return StoredRevision{}, err
+	}
+	stored, err := p.upsertCard(ctx, card, workspaceKey, workspaceName, "fluent-question-vault", "vault-importer", false)
+	if err != nil {
+		return StoredRevision{}, err
+	}
+	if stored.RevisionCreated {
+		if err := p.MaterializeImportEdgeProposals(ctx, card, workspaceKey, stored.RevisionID, "vault-importer"); err != nil {
+			return StoredRevision{}, err
+		}
+	}
+	return stored, nil
 }
 
 // PromoteCard is the only write path exposed to an authoring surface. Payload
@@ -389,7 +425,25 @@ func (p *Postgres) PublishImportedCard(ctx context.Context, card normalize.Card,
 	if strings.TrimSpace(actor) == "" {
 		actor = "vault-release"
 	}
-	return p.upsertCard(ctx, card, workspaceKey, workspaceName, "fluent-question-vault", actor, true)
+	if _, err := p.StageImportCard(ctx, card, workspaceKey, "", actor); err != nil {
+		return StoredRevision{}, err
+	}
+	if err := p.AssertImportReviewReady(ctx, card, workspaceKey); err != nil {
+		return StoredRevision{}, err
+	}
+	stored, err := p.upsertCard(ctx, card, workspaceKey, workspaceName, "fluent-question-vault", actor, true)
+	if err != nil {
+		return StoredRevision{}, err
+	}
+	if stored.RevisionCreated {
+		if err := p.MaterializeImportEdgeProposals(ctx, card, workspaceKey, stored.RevisionID, actor); err != nil {
+			return StoredRevision{}, err
+		}
+	}
+	if err := p.MarkImportStagePublished(ctx, card, workspaceKey); err != nil {
+		return StoredRevision{}, fmt.Errorf("mark import review published: %w", err)
+	}
+	return stored, nil
 }
 
 func (p *Postgres) upsertCard(ctx context.Context, card normalize.Card, workspaceKey, workspaceName, sourceSystem, actor string, publish bool) (StoredRevision, error) {

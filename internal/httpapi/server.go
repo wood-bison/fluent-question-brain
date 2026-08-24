@@ -48,6 +48,12 @@ type graphService interface {
 	GraphNeighborhood(context.Context, string, string) (store.GraphNeighborhood, error)
 }
 
+type importReviewService interface {
+	ListImportReviewStages(context.Context, string, string) ([]store.ImportReviewStage, error)
+	GetImportReviewStage(context.Context, string) (store.ImportReviewStage, error)
+	DecideImportReviewCandidate(context.Context, string, string, string, string) (store.ImportReviewStage, error)
+}
+
 type Server struct {
 	databaseURL   string
 	searchService search.Service
@@ -97,6 +103,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/graph/prerequisites/{stableKey}", s.graphPrerequisites)
 	mux.HandleFunc("GET /v1/graph/contrasts/{stableKey}", s.graphContrasts)
 	mux.HandleFunc("GET /v1/graph/variants/{stableKey}", s.graphVariants)
+	mux.HandleFunc("GET /v1/import/review", s.importReviewList)
+	mux.HandleFunc("GET /v1/import/review/{stageID}", s.importReviewGet)
+	mux.HandleFunc("POST /v1/import/review/candidates/{candidateID}/decision", s.importReviewDecision)
 	return requestID(mux)
 }
 
@@ -691,6 +700,73 @@ func (s *Server) graphNeighborhoodKind(w http.ResponseWriter, r *http.Request, k
 	writeJSON(w, http.StatusOK, filtered)
 }
 
+func (s *Server) importReviewBackend() (importReviewService, bool) {
+	backend, ok := s.searchService.(importReviewService)
+	return backend, ok
+}
+
+func (s *Server) importReviewList(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.importReviewBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "import_review_service_unavailable"})
+		return
+	}
+	workspace := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspace == "" {
+		workspace = "fluent-interview"
+	}
+	stages, err := backend.ListImportReviewStages(r.Context(), workspace, strings.TrimSpace(r.URL.Query().Get("status")))
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": store.ImportReviewContractVersion,
+		"workspace_key":    workspace,
+		"stages":           stages,
+	})
+}
+
+func (s *Server) importReviewGet(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.importReviewBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "import_review_service_unavailable"})
+		return
+	}
+	stage, err := backend.GetImportReviewStage(r.Context(), r.PathValue("stageID"))
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, stage)
+}
+
+func (s *Server) importReviewDecision(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.importReviewBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "import_review_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var body struct {
+		Decision  string `json:"decision"`
+		Rationale string `json:"rationale,omitempty"`
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&body); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_import_review_decision_request"})
+		return
+	}
+	stage, err := backend.DecideImportReviewCandidate(r.Context(), r.PathValue("candidateID"), body.Decision, graphActor(r, "question-brain-reviewer"), body.Rationale)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, stage)
+}
+
 func (s *Server) authorizedInternalRequest(r *http.Request) bool {
 	return s.internalToken != "" && r.Header.Get("X-Question-Brain-Token") == s.internalToken
 }
@@ -707,7 +783,7 @@ func writeGraphError(w http.ResponseWriter, err error) {
 	status := http.StatusBadRequest
 	if errors.Is(err, pgx.ErrNoRows) {
 		status = http.StatusNotFound
-	} else if strings.Contains(strings.ToLower(err.Error()), "cycle") || strings.Contains(strings.ToLower(err.Error()), "already active") || strings.Contains(strings.ToLower(err.Error()), "cannot be reused") {
+	} else if strings.Contains(strings.ToLower(err.Error()), "cycle") || strings.Contains(strings.ToLower(err.Error()), "already active") || strings.Contains(strings.ToLower(err.Error()), "cannot be reused") || strings.Contains(strings.ToLower(err.Error()), "open candidates") || strings.Contains(strings.ToLower(err.Error()), "blocked") {
 		status = http.StatusConflict
 	}
 	writeJSON(w, status, map[string]string{"error": err.Error()})
