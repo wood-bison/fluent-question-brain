@@ -32,12 +32,13 @@ Live Question Brain Postgres counts after the migration:
 | Supersedes rows | 11 |
 | Active canonical capabilities | 15 |
 | Deprecated historical capabilities | 11 |
-| Published cards | 1,596 |
+| Production cards | 1,591 |
+| Fixture cards (excluded from release) | 5 |
 | Embeddings | 10,653 |
 
 The 15 active capabilities are the reviewed station inventory. The 11
 deprecated rows are retained for history and migration diagnostics. The
-1,596 cards are intentionally **not** bulk-assigned to capabilities here;
+1,591 production cards (plus 5 non-release fixtures) are intentionally **not** bulk-assigned to capabilities here;
 card placement is a separate reviewed operation in G7.
 
 ## Safety properties proven
