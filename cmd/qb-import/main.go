@@ -22,6 +22,7 @@ func main() {
 	reportPath := flag.String("report", "", "write a machine-readable JSON report to this path")
 	strictTaxonomy := flag.Bool("strict-taxonomy", false, "reject cards whose legacy Topic is not in the controlled taxonomy registry")
 	strictTaskBoundary := flag.Bool("strict-task-boundary", false, "reject versioned TaskBrief cards that duplicate executable Runtime material")
+	batchSize := flag.Int("batch-size", 100, "progress checkpoint size for large imports (max 1000)")
 	flag.Parse()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
@@ -45,7 +46,10 @@ func main() {
 		Root: *root, Files: files, DatabaseURL: *databaseURL,
 		WorkspaceKey: *workspaceKey, WorkspaceName: *workspaceName,
 		DryRun: *dryRun, ReportPath: *reportPath, StrictTaxonomy: *strictTaxonomy,
-		StrictTaskBoundary: *strictTaskBoundary,
+		StrictTaskBoundary: *strictTaskBoundary, BatchSize: *batchSize,
+		OnProgress: func(progress ingest.Progress) {
+			logger.Info("import batch checkpoint", "processed", progress.Processed, "total", progress.Total, "batch", progress.Batch)
+		},
 	})
 	if err != nil {
 		logger.Error("import run failed", "error", err)

@@ -1,0 +1,20 @@
+{
+  "contract_version": "question-brain.import-review-calibration.v1",
+  "calibration_revision": "g6-calibration-baseline-2026-08-25",
+  "profile_key": "semantic-v1",
+  "description": "Reviewed pair labels for threshold measurement; identifiers only, no prompt or answer text.",
+  "cases": [
+    {"id": "exact-001", "left": "question.g6-rate-limiter-duplicate", "right": "question.q315", "label": "exact_or_duplicate"},
+    {"id": "paraphrase-001", "left": "question.q204", "right": "question.q205", "label": "semantic_duplicate"},
+    {"id": "paraphrase-002", "left": "question.q315", "right": "question.q316", "label": "semantic_duplicate"},
+    {"id": "related-001", "left": "question.q315", "right": "question.q204", "label": "related_non_duplicate"},
+    {"id": "related-002", "left": "question.q315", "right": "question.q195", "label": "related_non_duplicate"},
+    {"id": "translation-001", "left": "question.q315", "right": "legacy.q195", "label": "translation_or_locale_variant"},
+    {"id": "translation-002", "left": "question.q204", "right": "legacy.c010", "label": "translation_or_locale_variant"},
+    {"id": "generic-001", "left": "question.q001", "right": "question.q002", "label": "generic_non_duplicate"},
+    {"id": "generic-002", "left": "question.q003", "right": "question.q004", "label": "generic_non_duplicate"},
+    {"id": "technology-001", "left": "question.q315", "right": "question.nodejs.rate-limiter", "label": "technology_specific_variant"},
+    {"id": "technology-002", "left": "question.q204", "right": "question.postgres.rate-limiter", "label": "technology_specific_variant"},
+    {"id": "new-topic-001", "left": "question.q500", "right": "question.q501", "label": "new_topic_non_duplicate"}
+  ]
+}

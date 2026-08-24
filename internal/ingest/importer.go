@@ -35,6 +35,16 @@ type Options struct {
 	ReportPath         string
 	StrictTaxonomy     bool
 	StrictTaskBoundary bool
+	// BatchSize controls bounded progress checkpoints for large imports. Each
+	// card remains an independent transaction; no unbounded write batch exists.
+	BatchSize  int
+	OnProgress func(Progress)
+}
+
+type Progress struct {
+	Processed int
+	Total     int
+	Batch     int
 }
 
 type Item struct {
@@ -76,6 +86,15 @@ func Run(ctx context.Context, options Options) (Report, error) {
 		Totals:       map[string]int{"files": len(files)},
 		Items:        make([]Item, 0, len(files)),
 	}
+	batchSize := options.BatchSize
+	if batchSize <= 0 {
+		batchSize = 100
+	}
+	if batchSize > 1000 {
+		batchSize = 1000
+	}
+	report.Totals["batch_size"] = batchSize
+	report.Totals["batch_count"] = (len(files) + batchSize - 1) / batchSize
 	if len(unrecognized) > 0 {
 		// Markdown outside the four canonical directories used to disappear
 		// silently under --root; report it instead of quietly skipping.
@@ -106,7 +125,16 @@ func Run(ctx context.Context, options Options) (Report, error) {
 		}
 	}
 
-	for _, file := range files {
+	for index, file := range files {
+		if err := ctx.Err(); err != nil {
+			if db != nil {
+				return finishWithError(context.Background(), db, report, err)
+			}
+			return report, err
+		}
+		if options.OnProgress != nil && (index%batchSize == 0 || index == len(files)-1) {
+			options.OnProgress(Progress{Processed: index, Total: len(files), Batch: index/batchSize + 1})
+		}
 		item := Item{SourceRef: file}
 		content, readErr := os.ReadFile(file)
 		if readErr != nil {

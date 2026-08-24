@@ -82,3 +82,15 @@ This belongs in Task Runtime.
 		t.Fatalf("strict task boundary evidence missing = %#v", report)
 	}
 }
+
+func TestCancelledImportStopsBeforeReadingCards(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "T003.md")
+	if err := os.WriteFile(path, []byte(unknownTopicCard), 0o644); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := Run(ctx, Options{Files: []string{path}, DryRun: true, BatchSize: 1}); err != context.Canceled {
+		t.Fatalf("Run() error = %v, want context.Canceled", err)
+	}
+}
