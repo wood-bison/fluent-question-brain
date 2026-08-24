@@ -70,3 +70,18 @@ semantic anchor per non-exact valid card). This is a deterministic pipeline
 acceptance check, not a claim about real-world model quality; a separately
 reviewed calibration set remains required before changing production
 thresholds.
+
+## Reviewed calibration measurement
+
+`make calibration-smoke` evaluates all 12 identifier-only pairs with the active
+`semantic-v1` thresholds and records no skipped cases:
+
+```text
+evaluated=12 skipped=0 true_positive=1 false_positive=0
+false_negative=2 true_negative=9 precision=1.000 recall=0.333
+```
+
+This is intentionally a visible finding, not a greenwashing score. Precision
+is acceptable for proposal safety, while recall is too low for a final
+production threshold. G6 therefore stays open for editorial review of the
+false negatives and a versioned threshold calibration before G7 starts.
