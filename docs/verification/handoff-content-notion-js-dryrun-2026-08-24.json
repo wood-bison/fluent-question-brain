@@ -1,0 +1,151 @@
+{
+  "source_system": "fluent-question-vault",
+  "source_root": "/vault/Question Cards",
+  "workspace_key": "fluent-interview",
+  "dry_run": true,
+  "started_at": "2026-08-24T12:44:34.621071754Z",
+  "finished_at": "2026-08-24T12:44:34.640331879Z",
+  "totals": {
+    "files": 21,
+    "warnings": 3,
+    "would_create": 21
+  },
+  "archived": 0,
+  "items": [
+    {
+      "source_ref": "/vault/Question Cards/NT-601 — DeepCopy.md",
+      "stable_key": "question.nt-601",
+      "content_hash": "f8543a1207d4d91c1a4a321df43f11ffae2a13c0b6963683c0424f16339e7879",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-602 — EventEmitter.md",
+      "stable_key": "question.nt-602",
+      "content_hash": "6c4d45bdf798a37bdddd191543004d555fa7066d2fe4c26d234aff9cdbd97fe5",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-603 — promisify.md",
+      "stable_key": "question.nt-603",
+      "content_hash": "a5db1727d6cb28d7e49746287d08e12177790949746b62c123eda6cbe7b1bd16",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-604 — setTimeout в цикле.md",
+      "stable_key": "question.nt-604",
+      "content_hash": "9bd56e4d05feff28fca2366d1698dbb504d55ea70fe6303aea874936d25bd2d0",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-605 — Написать пример наследования.md",
+      "stable_key": "question.nt-605",
+      "content_hash": "ed22395418d859f866b54ad9d94b5948431d1f34955e828bab4c4f1fb34a4e90",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-606 — AbstractFactory.md",
+      "stable_key": "question.nt-606",
+      "content_hash": "a8fa6e0d879622052b6834bad0dc6511c8cef1524bd62b7655935be2ae2df506",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-607 — memoize.md",
+      "stable_key": "question.nt-607",
+      "content_hash": "c841033d7add6d32ca52f063d95395563380624261b0e01c982b64ae90c99945",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-608 — Освобождаемые события (Disposable).md",
+      "stable_key": "question.nt-608",
+      "content_hash": "d4624955cf99a56c51507b78bc2d1f5da235ce0bcb2ceb104cea6d090e31956b",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-609 — Decorator.md",
+      "stable_key": "question.nt-609",
+      "content_hash": "cbe5ab674a42ca69fab7fbac1acac8279593537921472e0d5927140c791de93a",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-610 — Drag and drop.md",
+      "stable_key": "question.nt-610",
+      "content_hash": "7d527af2e9004f4b5701414b3d09145da084eb18d0b7c71ba37d67923cdfa6df",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-611 — Draggble.md",
+      "stable_key": "question.nt-611",
+      "content_hash": "e5519099f460b52404b54312461dcf82562c9b511485152a84b23a43fa44980d",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-612 — Fetch Retry.md",
+      "stable_key": "question.nt-612",
+      "content_hash": "444502600a593bb3e41932dd5726e716b92d40707eff0dce6fe0764e44e6ab7f",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-613 — class properties.md",
+      "stable_key": "question.nt-613",
+      "content_hash": "811058eccc9542033333d1434a18aa8173cd0d7bbe760eb97a089e02da03b47d",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-614 — userService.md",
+      "stable_key": "question.nt-614",
+      "content_hash": "f5379c25ecb866183d889860d1beca1af52b1f49728757e09a405c8e3246e2cd",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-615 — Калькулятор.md",
+      "stable_key": "question.nt-615",
+      "content_hash": "6df269222a34230889fab35a7e385b35df609062353251d1b9a2d5facfe71521",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-616 — Порядок вызова console log.md",
+      "stable_key": "question.nt-616",
+      "content_hash": "afc46cac40f826897d053fbba89e2c304c56670fa46d02b665ec075477117bd2",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-617 — Порядок микротасок.md",
+      "stable_key": "question.nt-617",
+      "content_hash": "2c28633a3fd159379d6e957010f26eabe485d622ecb7e4b9fe6c10a600a54d51",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-618 — Реализовать Promise all.md",
+      "stable_key": "question.nt-618",
+      "content_hash": "75f7fd673dd7f7a016a309b9baef03928cd608edb0bb132669c5c68b5fd82f98",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-619 — Реализовать Promise any.md",
+      "stable_key": "question.nt-619",
+      "content_hash": "0ffb076fc4236857c81fd3b1a0c092f6a77bedd81b013fcc41e7f775bba791bc",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-620 — Скрининг 2025.md",
+      "stable_key": "question.nt-620",
+      "content_hash": "f9422730443c149703e7bdfc57ada7bce49badbf56284b176556a2f922454a80",
+      "action": "would_create",
+      "warnings": [
+        "missing Level metadata"
+      ]
+    },
+    {
+      "source_ref": "/vault/Question Cards/NT-621 — Создание counter.md",
+      "stable_key": "question.nt-621",
+      "content_hash": "5f900eeecb79a28c579040c5e8cc46e554771cd1bc1d4a1f3d430b112296b7bf",
+      "action": "would_create"
+    }
+  ]
+}
