@@ -72,6 +72,21 @@ func TestNormalizeRejectsMalformedRevisionPin(t *testing.T) {
 	}
 }
 
+func TestNormalizeRejectsDeprecatedCapabilityInNewRelease(t *testing.T) {
+	_, err := validManifest([]Entry{{
+		StableKey:     "question.a",
+		RevisionID:    "00000000-0000-0000-0000-000000000001",
+		ContentHash:   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		ProgramKey:    "program.backend-engineer",
+		PathKey:       "path.nodejs-typescript",
+		DomainKey:     "domain.runtime",
+		CapabilityKey: "capability.runtime.node-event-loop-001",
+	}}).Normalize()
+	if err == nil {
+		t.Fatal("deprecated capability key was accepted in a new release manifest")
+	}
+}
+
 func TestFingerprintIsDeterministicForEntryOrder(t *testing.T) {
 	left := []Entry{
 		{StableKey: "question.b", ContentHash: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", MappingState: "unmapped"},

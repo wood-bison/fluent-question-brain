@@ -91,6 +91,12 @@ func TestCanonicalCapabilityAliasesRemoveTaskSequence(t *testing.T) {
 	if placement.CapabilityKey != "capability.nodejs.event-loop-ordering" {
 		t.Fatalf("legacy key was not migrated: %#v", placement)
 	}
+	if !IsDeprecatedCapabilityKey("capability.runtime.node-event-loop-001") {
+		t.Fatal("historical capability alias was not marked deprecated")
+	}
+	if IsDeprecatedCapabilityKey("capability.nodejs.event-loop-ordering") {
+		t.Fatal("canonical capability key was incorrectly marked deprecated")
+	}
 }
 
 func TestCanonicalTechnologyCapabilityRequiresReviewedDomain(t *testing.T) {

@@ -272,6 +272,14 @@ func LegacyTopics() []string {
 	return result
 }
 
+// IsDeprecatedCapabilityKey reports whether input is a historical capability
+// alias. Historical ingest and evidence lookups may resolve these aliases,
+// but a new release manifest must spell the canonical key explicitly.
+func IsDeprecatedCapabilityKey(input string) bool {
+	_, ok := capabilityAliases[normalizeKey(input)]
+	return ok
+}
+
 func CanonicalTopicTitle(input string) (string, bool) {
 	label := normalizeLabel(input)
 	if canonical, ok := topicByLabel[label]; ok {

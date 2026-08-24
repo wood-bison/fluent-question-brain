@@ -141,6 +141,9 @@ func (m Manifest) Normalize() ([]Entry, error) {
 			if entry.MappingVersion != "" && entry.MappingVersion != taxonomy.Version {
 				return nil, fmt.Errorf("entries[%d].mapping_version must be %q", index, taxonomy.Version)
 			}
+			if taxonomy.IsDeprecatedCapabilityKey(entry.CapabilityKey) {
+				return nil, fmt.Errorf("entries[%d] capability_key %q is deprecated; use its canonical registry key in a new release", index, entry.CapabilityKey)
+			}
 			placement, err := taxonomy.ResolvePlacement(
 				entry.ProgramKey, entry.PathKey, entry.DomainKey,
 				entry.CapabilityKey, entry.MappingState,
