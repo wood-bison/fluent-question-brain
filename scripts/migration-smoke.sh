@@ -11,6 +11,9 @@ api_port="${QB_HTTP_PORT:-48127}"
   -c "select 1 from information_schema.schemata where schema_name = 'content';" \
   -c "select 1 from information_schema.schemata where schema_name = 'cms';" \
   -c "select 1 from information_schema.tables where table_schema = 'content' and table_name = 'question_curriculum_mapping';" \
+  -c "select 1 from information_schema.tables where table_schema = 'content' and table_name = 'taxonomy_capability_domain';" \
+  -c "select 1 from information_schema.tables where table_schema = 'content' and table_name = 'taxonomy_capability_alias';" \
+  -c "select 1 from information_schema.tables where table_schema = 'content' and table_name = 'taxonomy_capability_supersedes';" \
   -c "select 1 from content.taxonomy_path where stable_key = 'path.python';" \
   -c "select 1 from cms.payload_migrations where name = '20260822_101040_initial';" >/dev/null
 curl -fsS "http://127.0.0.1:${api_port}/health/ready" | grep -q '"migration":"compose-init"'

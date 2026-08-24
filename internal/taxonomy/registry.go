@@ -227,6 +227,39 @@ var topicByLabel = indexTopicTitles()
 
 var capabilityPattern = regexp.MustCompile(`^capability\.([a-z0-9]+(?:-[a-z0-9]+)*)\.([a-z0-9]+(?:-[a-z0-9]+|\.[a-z0-9]+)*)$`)
 
+// Capability aliases are explicit migrations, not fuzzy normalisation. Old
+// task-shaped keys remain readable for historical manifests while new writes
+// resolve to the stable observable-skill key.
+var capabilityAliases = map[string]string{
+	"capability.runtime.node-event-loop-001":              "capability.nodejs.event-loop-ordering",
+	"capability.runtime.node-cpu-bound-002":               "capability.nodejs.cpu-bound-work",
+	"capability.runtime.node-streams-003":                 "capability.nodejs.streams-backpressure",
+	"capability.runtime.node-memory-004":                  "capability.nodejs.memory-retention",
+	"capability.runtime.node-concurrency-012":             "capability.nodejs.bounded-concurrency",
+	"capability.runtime.dotnet-cancellation-001":          "capability.dotnet.cancellation-boundary",
+	"capability.http-api.node-auth-015":                   "capability.http-api.authentication-authorization",
+	"capability.data-postgresql.pg-indexes-008":           "capability.postgresql.query-planning",
+	"capability.data-postgresql.pg-locks-016":             "capability.postgresql.row-locks",
+	"capability.distributed-systems.node-idempotency-013": "capability.distributed-systems.idempotent-delivery",
+	"capability.delivery-observability.node-cache-014":    "capability.delivery-observability.cache-invalidation",
+}
+
+// Technology namespaces are valid only for reviewed canonical keys. Their
+// domain is explicit data, not inferred from the namespace by the caller.
+var canonicalCapabilityDomains = map[string]string{
+	"capability.nodejs.event-loop-ordering":                "domain.runtime",
+	"capability.nodejs.cpu-bound-work":                     "domain.runtime",
+	"capability.nodejs.streams-backpressure":               "domain.runtime",
+	"capability.nodejs.memory-retention":                   "domain.runtime",
+	"capability.nodejs.bounded-concurrency":                "domain.runtime",
+	"capability.dotnet.cancellation-boundary":              "domain.runtime",
+	"capability.http-api.authentication-authorization":     "domain.http-api",
+	"capability.postgresql.query-planning":                 "domain.data-postgresql",
+	"capability.postgresql.row-locks":                      "domain.data-postgresql",
+	"capability.distributed-systems.idempotent-delivery":   "domain.distributed-systems",
+	"capability.delivery-observability.cache-invalidation": "domain.delivery-observability",
+}
+
 func Programs() []Program { return append([]Program(nil), programs...) }
 
 func Paths() []Path { return append([]Path(nil), paths...) }
@@ -405,7 +438,14 @@ func canonicalCapability(input, domainKey string) (string, error) {
 	if len(match) != 3 {
 		return "", fmt.Errorf("invalid capability_key %q; use capability.<domain>.<slug>", input)
 	}
-	if "domain."+match[1] != domainKey {
+	if alias, ok := capabilityAliases[key]; ok {
+		key = alias
+	}
+	canonicalDomain := "domain." + match[1]
+	if mappedDomain, ok := canonicalCapabilityDomains[key]; ok {
+		canonicalDomain = mappedDomain
+	}
+	if canonicalDomain != domainKey {
 		return "", fmt.Errorf("capability_key %q is outside domain %q", input, domainKey)
 	}
 	return key, nil

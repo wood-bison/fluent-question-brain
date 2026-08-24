@@ -1,0 +1,28 @@
+{
+  "contractVersion": "question-brain.capability-registry.v2",
+  "registryReleaseId": "capability-registry-2026-08-24-v2",
+  "programKey": "program.backend-engineer",
+  "reviewedAt": "2026-08-24",
+  "policy": {
+    "newReleaseMayUse": "active canonicalKey only",
+    "historicalKeys": "resolvable through alias/supersedes but not selectable for new releases",
+    "rateLimiterDecision": "keep distributed-systems and http-api capabilities distinct pending semantic review"
+  },
+  "dispositions": [
+    { "oldKey": "capability.runtime.deferred", "disposition": "keep", "canonicalKey": "capability.runtime.deferred", "domains": ["domain.runtime"], "rationale": "Observable promise-settlement skill; key has no task sequence." },
+    { "oldKey": "capability.runtime.fluent-calculator", "disposition": "keep", "canonicalKey": "capability.runtime.fluent-calculator", "domains": ["domain.runtime"], "rationale": "Authored runtime skill; key has no task sequence." },
+    { "oldKey": "capability.distributed-systems.rate-limiter", "disposition": "keep", "canonicalKey": "capability.distributed-systems.rate-limiter", "domains": ["domain.distributed-systems"], "rationale": "Language-neutral bounded-state skill; do not merge with HTTP contract capability without review." },
+    { "oldKey": "capability.http-api.rate-limiter", "disposition": "keep", "canonicalKey": "capability.http-api.rate-limiter", "domains": ["domain.http-api"], "rationale": "HTTP/API contract skill; deliberately distinct from algorithm/distributed enforcement." },
+    { "oldKey": "capability.runtime.node-event-loop-001", "disposition": "rename", "canonicalKey": "capability.nodejs.event-loop-ordering", "domains": ["domain.runtime"], "rationale": "Remove task sequence; Node.js is intrinsic to the runtime behavior." },
+    { "oldKey": "capability.runtime.node-cpu-bound-002", "disposition": "rename", "canonicalKey": "capability.nodejs.cpu-bound-work", "domains": ["domain.runtime"], "rationale": "Remove task sequence; retain intrinsic Node.js worker/runtime scope." },
+    { "oldKey": "capability.runtime.node-streams-003", "disposition": "rename", "canonicalKey": "capability.nodejs.streams-backpressure", "domains": ["domain.runtime"], "rationale": "Remove task sequence and preserve the observable stream/backpressure skill." },
+    { "oldKey": "capability.runtime.node-memory-004", "disposition": "rename", "canonicalKey": "capability.nodejs.memory-retention", "domains": ["domain.runtime"], "rationale": "Remove task sequence; retain memory/GC behavior as the skill." },
+    { "oldKey": "capability.runtime.node-concurrency-012", "disposition": "rename", "canonicalKey": "capability.nodejs.bounded-concurrency", "domains": ["domain.runtime"], "rationale": "Remove task sequence; retain bounded concurrency as the skill." },
+    { "oldKey": "capability.runtime.dotnet-cancellation-001", "disposition": "rename", "canonicalKey": "capability.dotnet.cancellation-boundary", "domains": ["domain.runtime"], "rationale": "Remove task sequence; .NET cancellation semantics are intrinsic." },
+    { "oldKey": "capability.http-api.node-auth-015", "disposition": "rename", "canonicalKey": "capability.http-api.authentication-authorization", "domains": ["domain.http-api"], "rationale": "Remove implementation name and task sequence; capability is an API security contract." },
+    { "oldKey": "capability.data-postgresql.pg-indexes-008", "disposition": "rename", "canonicalKey": "capability.postgresql.query-planning", "domains": ["domain.data-postgresql"], "rationale": "Remove task sequence; PostgreSQL query planning is intrinsic." },
+    { "oldKey": "capability.data-postgresql.pg-locks-016", "disposition": "rename", "canonicalKey": "capability.postgresql.row-locks", "domains": ["domain.data-postgresql"], "rationale": "Remove task sequence; PostgreSQL row-lock semantics are intrinsic." },
+    { "oldKey": "capability.distributed-systems.node-idempotency-013", "disposition": "rename", "canonicalKey": "capability.distributed-systems.idempotent-delivery", "domains": ["domain.distributed-systems"], "rationale": "Remove Node implementation name and task sequence; retain delivery invariant." },
+    { "oldKey": "capability.delivery-observability.node-cache-014", "disposition": "rename", "canonicalKey": "capability.delivery-observability.cache-invalidation", "domains": ["domain.delivery-observability"], "rationale": "Remove Node implementation name and task sequence; retain cache invariant." }
+  ]
+}

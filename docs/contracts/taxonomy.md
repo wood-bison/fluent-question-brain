@@ -81,6 +81,42 @@ the importer and API never reconstruct it from legacy fields. Use
 `--unmapped-current --approve --report <file>` to establish an auditable
 no-inference baseline before the reviewed manifest exists.
 
+### Capability registry v2: canonical stations and historical aliases
+
+The reviewed capability registry is the only source of learner-facing station
+identity. A capability key is stable and immutable; its human title may be
+localized, but a rename never changes the key. The registry uses the
+`content.taxonomy_capability` lifecycle (`active`, `deprecated`, `retired`) and
+an explicit `display_slug`. Only `active` capabilities may be selected by a
+new curriculum release. A deprecated or retired key remains queryable for
+history, evidence, and migration diagnostics, but cannot silently create a
+new station.
+
+Capabilities and shared domains are many-to-many. The canonical relation is
+`content.taxonomy_capability_domain(capability_key, domain_key, role)`, where
+`role` is `primary` or `secondary`; the old `taxonomy_capability.domain_key`
+column is retained only as a compatibility display projection for older
+clients. A capability may therefore be reused by several paths while keeping
+one station identity and one evidence history.
+
+Renames are explicit and reversible. The registry records old names in
+`content.taxonomy_capability_alias` and the replacement relation in
+`content.taxonomy_capability_supersedes`. Imports and releases resolve an
+alias to its canonical active key, never by fuzzy matching or by title. The
+historical task-shaped keys (`capability.runtime.node-event-loop-001`, and
+the other v1 keys listed in the migration) are deprecated aliases; their
+existing mapping, task, and learner evidence remains readable until a later
+release migrates it deliberately.
+
+The additive migration is
+`db/migrations/0015_capability_registry_v2.sql`. Its reviewed disposition is
+`docs/manifests/capability-registry-2026-08-24.json`; the no-write proof is
+`docs/verification/g2-capability-migration-dry-run-2026-08-24.json`. The
+migration is idempotent and must be applied and smoke-tested before a release
+that writes capability bindings. It creates registry metadata only; it does
+not bulk-assign the current published cards or rewrite release hashes. Card-to-capability
+placement remains a separate reviewed operation in the later G7 gate.
+
 ### Topic registry proposal (review queue)
 
 For the next curriculum slice, the repository also carries an exact-topic

@@ -82,3 +82,22 @@ func TestCapabilityRequiresPathAndMatchingDomain(t *testing.T) {
 		t.Fatal("capability without domain accepted")
 	}
 }
+
+func TestCanonicalCapabilityAliasesRemoveTaskSequence(t *testing.T) {
+	placement, err := ResolvePlacement("", "Node.js", "Runtime", "capability.runtime.node-event-loop-001", "accepted")
+	if err != nil {
+		t.Fatalf("legacy capability alias rejected: %v", err)
+	}
+	if placement.CapabilityKey != "capability.nodejs.event-loop-ordering" {
+		t.Fatalf("legacy key was not migrated: %#v", placement)
+	}
+}
+
+func TestCanonicalTechnologyCapabilityRequiresReviewedDomain(t *testing.T) {
+	if _, err := ResolvePlacement("", "Node.js", "Runtime", "capability.nodejs.event-loop-ordering", "accepted"); err != nil {
+		t.Fatalf("reviewed technology capability rejected: %v", err)
+	}
+	if _, err := ResolvePlacement("", "Node.js", "HTTP/API", "capability.nodejs.event-loop-ordering", "accepted"); err == nil {
+		t.Fatal("technology capability was accepted in an unrelated domain")
+	}
+}

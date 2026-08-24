@@ -1,0 +1,192 @@
+{
+  "contractVersion": "question-brain.capability-migration-dry-run.v1",
+  "asOf": "2026-08-24",
+  "registryReleaseId": "capability-registry-2026-08-24-v2",
+  "writeMode": "none",
+  "source": {
+    "taskRuntimeTaskCount": 18,
+    "labAdapter": "fluent-engineering-lab/apps/learning-api/src/app/question-brain/question-brain-taxonomy.adapter.ts"
+  },
+  "currentCapabilityKeyCount": 15,
+  "dispositionCounts": {
+    "keep": 4,
+    "rename": 11,
+    "split": 0,
+    "merge": 0,
+    "retire": 0
+  },
+  "references": {
+    "capability.data-postgresql.pg-indexes-008": {
+      "disposition": "rename",
+      "canonicalKey": "capability.postgresql.query-planning",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 2,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:pg-indexes-008"
+      ]
+    },
+    "capability.data-postgresql.pg-locks-016": {
+      "disposition": "rename",
+      "canonicalKey": "capability.postgresql.row-locks",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:pg-locks-016"
+      ]
+    },
+    "capability.delivery-observability.node-cache-014": {
+      "disposition": "rename",
+      "canonicalKey": "capability.delivery-observability.cache-invalidation",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:node-cache-014"
+      ]
+    },
+    "capability.distributed-systems.node-idempotency-013": {
+      "disposition": "rename",
+      "canonicalKey": "capability.distributed-systems.idempotent-delivery",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:node-idempotency-013"
+      ]
+    },
+    "capability.distributed-systems.rate-limiter": {
+      "disposition": "keep",
+      "canonicalKey": "capability.distributed-systems.rate-limiter",
+      "taskRuntimeRefs": 4,
+      "questionCurriculumMappingRefs": 2,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:go-rate-limiter-001",
+        "task-runtime:java-rate-limiter-001",
+        "task-runtime:node-rate-limiter-001",
+        "task-runtime:pg-rate-limiter-001"
+      ]
+    },
+    "capability.http-api.node-auth-015": {
+      "disposition": "rename",
+      "canonicalKey": "capability.http-api.authentication-authorization",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 2,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:node-auth-015"
+      ]
+    },
+    "capability.http-api.rate-limiter": {
+      "disposition": "keep",
+      "canonicalKey": "capability.http-api.rate-limiter",
+      "taskRuntimeRefs": 0,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts"
+      ]
+    },
+    "capability.runtime.deferred": {
+      "disposition": "keep",
+      "canonicalKey": "capability.runtime.deferred",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 2,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:deferred"
+      ]
+    },
+    "capability.runtime.dotnet-cancellation-001": {
+      "disposition": "rename",
+      "canonicalKey": "capability.dotnet.cancellation-boundary",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:dotnet-cancellation-001"
+      ]
+    },
+    "capability.runtime.fluent-calculator": {
+      "disposition": "keep",
+      "canonicalKey": "capability.runtime.fluent-calculator",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:fluent-calculator"
+      ]
+    },
+    "capability.runtime.node-concurrency-012": {
+      "disposition": "rename",
+      "canonicalKey": "capability.nodejs.bounded-concurrency",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:node-concurrency-012"
+      ]
+    },
+    "capability.runtime.node-cpu-bound-002": {
+      "disposition": "rename",
+      "canonicalKey": "capability.nodejs.cpu-bound-work",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:node-cpu-bound-002"
+      ]
+    },
+    "capability.runtime.node-event-loop-001": {
+      "disposition": "rename",
+      "canonicalKey": "capability.nodejs.event-loop-ordering",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:node-event-loop-001"
+      ]
+    },
+    "capability.runtime.node-memory-004": {
+      "disposition": "rename",
+      "canonicalKey": "capability.nodejs.memory-retention",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:node-memory-004"
+      ]
+    },
+    "capability.runtime.node-streams-003": {
+      "disposition": "rename",
+      "canonicalKey": "capability.nodejs.streams-backpressure",
+      "taskRuntimeRefs": 1,
+      "questionCurriculumMappingRefs": 1,
+      "questionCapabilityRefs": 0,
+      "consumers": [
+        "lab:question-brain-taxonomy.adapter.ts",
+        "task-runtime:node-streams-003"
+      ]
+    }
+  },
+  "unresolved": [],
+  "acceptance": {
+    "allCurrentKeysHaveDisposition": true,
+    "noWritesPerformed": true
+  }
+}
