@@ -1739,6 +1739,21 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 		if err := json.Unmarshal(payload, &value); err != nil {
 			return search.QualityResponse{}, fmt.Errorf("decode quality metadata for %s: %w", stableKey, err)
 		}
+		if task, ok := value["task"].(map[string]any); ok {
+			checks.TaskBlocks++
+			familyKey, _ := task["task_family_key"].(string)
+			contractVersion, _ := task["contract_version"].(string)
+			solution, _ := task["solution"].(string)
+			if strings.TrimSpace(familyKey) != "" {
+				checks.TaskFamilyReferences++
+			}
+			if strings.TrimSpace(solution) != "" {
+				checks.EmbeddedSolutions++
+				if contractVersion == quality.TaskBriefContractVersion {
+					checks.TaskBoundaryViolations++
+				}
+			}
+		}
 		tracks[qualityBucketValue(value, "track")]++
 		levels[nullableBucketValue(level)]++
 		companies[nullableBucketValue(company)]++
@@ -1992,7 +2007,7 @@ func qualityBuckets(values map[string]int) []search.QualityBucket {
 }
 
 func qualityWarnings(checks search.QualityChecks, duplicateGroups int) []string {
-	warnings := make([]string, 0, 5)
+	warnings := make([]string, 0, 6)
 	if checks.GraphReleased < checks.Published {
 		warnings = append(warnings, "published questions still have graph placement review debt")
 	}
@@ -2010,6 +2025,9 @@ func qualityWarnings(checks search.QualityChecks, duplicateGroups int) []string 
 	}
 	if checks.LocalesWithoutEmbedding != nil && *checks.LocalesWithoutEmbedding > 0 {
 		warnings = append(warnings, fmt.Sprintf("embedding index is incomplete: %d current-revision locales have no vector under the active profile", *checks.LocalesWithoutEmbedding))
+	}
+	if checks.TaskBoundaryViolations > 0 {
+		warnings = append(warnings, fmt.Sprintf("%d versioned TaskBrief cards still embed Runtime-owned solutions", checks.TaskBoundaryViolations))
 	}
 	return warnings
 }

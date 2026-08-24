@@ -21,6 +21,7 @@ func main() {
 	dryRun := flag.Bool("dry-run", false, "parse and report without changing Postgres")
 	reportPath := flag.String("report", "", "write a machine-readable JSON report to this path")
 	strictTaxonomy := flag.Bool("strict-taxonomy", false, "reject cards whose legacy Topic is not in the controlled taxonomy registry")
+	strictTaskBoundary := flag.Bool("strict-task-boundary", false, "reject versioned TaskBrief cards that duplicate executable Runtime material")
 	flag.Parse()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
@@ -44,6 +45,7 @@ func main() {
 		Root: *root, Files: files, DatabaseURL: *databaseURL,
 		WorkspaceKey: *workspaceKey, WorkspaceName: *workspaceName,
 		DryRun: *dryRun, ReportPath: *reportPath, StrictTaxonomy: *strictTaxonomy,
+		StrictTaskBoundary: *strictTaskBoundary,
 	})
 	if err != nil {
 		logger.Error("import run failed", "error", err)

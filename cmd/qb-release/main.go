@@ -56,6 +56,7 @@ func main() {
 	actor := flag.String("actor", "vault-release", "audit actor")
 	reportPath := flag.String("report", "", "optional JSON report path")
 	approve := flag.Bool("approve-source-vault", false, "publish this immutable source snapshot; without this flag the command is dry-run only")
+	strictTaskBoundary := flag.Bool("strict-task-boundary", false, "reject versioned TaskBrief cards that duplicate executable Runtime material")
 	flag.Parse()
 
 	if strings.TrimSpace(*root) == "" {
@@ -125,6 +126,15 @@ func main() {
 			report.Items = append(report.Items, item)
 			report.Totals[item.Action]++
 			continue
+		}
+		if *strictTaskBoundary {
+			if issues := quality.TaskBoundaryIssues(card); len(issues) > 0 {
+				item.Action = "invalid"
+				item.Error = formatQualityIssues(issues)
+				report.Items = append(report.Items, item)
+				report.Totals[item.Action]++
+				continue
+			}
 		}
 		item.Action = "validated"
 		report.Items = append(report.Items, item)

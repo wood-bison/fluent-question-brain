@@ -26,14 +26,15 @@ var cardDirectories = map[string]bool{
 }
 
 type Options struct {
-	Root           string
-	Files          []string
-	DatabaseURL    string
-	WorkspaceKey   string
-	WorkspaceName  string
-	DryRun         bool
-	ReportPath     string
-	StrictTaxonomy bool
+	Root               string
+	Files              []string
+	DatabaseURL        string
+	WorkspaceKey       string
+	WorkspaceName      string
+	DryRun             bool
+	ReportPath         string
+	StrictTaxonomy     bool
+	StrictTaskBoundary bool
 }
 
 type Item struct {
@@ -145,6 +146,20 @@ func Run(ctx context.Context, options Options) (Report, error) {
 				}
 			}
 			continue
+		}
+		if options.StrictTaskBoundary {
+			if issues := quality.TaskBoundaryIssues(card); len(issues) > 0 {
+				item.Action = "invalid"
+				item.Error = formatQualityIssues(issues)
+				report.Totals[item.Action]++
+				report.Items = append(report.Items, item)
+				if db != nil {
+					if err := db.RecordImportItem(ctx, store.ImportItem{RunID: report.RunID, SourceRef: item.SourceRef, StableKey: item.StableKey, ContentHash: item.ContentHash, Action: item.Action, Error: item.Error}); err != nil {
+						return finishWithError(ctx, db, report, err)
+					}
+				}
+				continue
+			}
 		}
 		// Empty taxonomy used to pass silently, leaving a card with no place
 		// in the topic tree (QB-BUG-6). Surface it as an explicit warning.

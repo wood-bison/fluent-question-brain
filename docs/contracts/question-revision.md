@@ -37,9 +37,12 @@ The normalized payload may carry three additional optional blocks. All are
 absent (`omitempty`) unless the source card explicitly contains them, so
 adding them never changes existing `content_hash` values.
 
-### `task` — practical exercise
+### `task` — practical exercise / TaskBrief
 
 Stored as structured data instead of flattened prose:
+
+Historical revisions may contain the legacy shape below. It remains readable
+for provenance and is never rewritten in place:
 
 ```json
 {
@@ -57,6 +60,32 @@ Stored as structured data instead of flattened prose:
 A block is created only when a recognized condition section coexists with
 evidence the card is solvable (`solution`, `walkthrough`, or `starter`); a
 narrative section merely titled “Task” stays prose.
+
+New cards use the additive `question-brain.task-brief.v1` boundary. Question
+Brain owns the visible brief and the stable family reference; Task Runtime owns
+all executable source, reference solutions, hidden tests, harnesses, images,
+limits, and sandbox policy:
+
+```json
+{
+  "task": {
+    "contract_version": "question-brain.task-brief.v1",
+    "kind": "runtime_task_reference",
+    "task_family_key": "task-family.rate-limiter",
+    "condition": "Implement a token bucket.",
+    "starter": "function allow(clientId, timestamp)",
+    "walkthrough": "Explain the invariant and failure boundary.",
+    "difficulty": "MEDIUM",
+    "constraints": "State the observable correctness and complexity goals."
+  }
+}
+```
+
+Allowed `kind` values are `discussion_prompt`, `design_exercise`,
+`runtime_task_reference`, and `historical_content`. A runtime reference must
+name exactly one released TaskFamily. `solution` is forbidden in the v1 block;
+the strict import/release boundary rejects it. The family key is a join, not a
+copy of a task directory or a second execution manifest.
 
 ### `rubric` — ordered assessment levels
 

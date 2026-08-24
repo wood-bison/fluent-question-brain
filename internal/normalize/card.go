@@ -43,12 +43,15 @@ type ChoicesBlock struct {
 // the condition, optional starter schema/signature, the reference solution,
 // a walkthrough, difficulty and time/memory constraints where applicable.
 type TaskBlock struct {
-	Condition   string `json:"condition"`
-	Starter     string `json:"starter,omitempty"`
-	Solution    string `json:"solution,omitempty"`
-	Walkthrough string `json:"walkthrough,omitempty"`
-	Difficulty  string `json:"difficulty,omitempty"`
-	Constraints string `json:"constraints,omitempty"`
+	Condition       string `json:"condition"`
+	Starter         string `json:"starter,omitempty"`
+	Solution        string `json:"solution,omitempty"`
+	Walkthrough     string `json:"walkthrough,omitempty"`
+	Difficulty      string `json:"difficulty,omitempty"`
+	Constraints     string `json:"constraints,omitempty"`
+	ContractVersion string `json:"contract_version,omitempty"`
+	Kind            string `json:"kind,omitempty"`
+	TaskFamilyKey   string `json:"task_family_key,omitempty"`
 }
 
 // Card is the small, source-independent shape used by the first importer.
@@ -201,7 +204,7 @@ func ParseMarkdown(sourceRef string, input []byte) (Card, error) {
 		Question:       question,
 		Sections:       sections,
 	}
-	card.Task = taskBlock(card, meta["difficulty"])
+	card.Task = taskBlock(card, meta["difficulty"], firstNonEmpty(meta["task-contract-version"], meta["task_contract_version"]), firstNonEmpty(meta["task-kind"], meta["task_kind"]), firstNonEmpty(meta["task-family-key"], meta["task_family_key"], meta["task-family-ref"], meta["task_family_ref"]))
 	card.Rubric = rubricBlock(card)
 	card.Choices = choicesBlock(card)
 	// A file holding many standalone questions under one H1 used to collapse
@@ -304,8 +307,13 @@ var taskSectionTitles = []struct {
 // (QB-BUG-6 prerequisite for importing practical exercises). Cards without
 // any task section get nil, which serializes to nothing — existing payloads
 // and their content hashes stay byte-identical.
-func taskBlock(card Card, difficulty string) *TaskBlock {
-	block := &TaskBlock{Difficulty: strings.ToUpper(strings.TrimSpace(difficulty))}
+func taskBlock(card Card, difficulty, contractVersion, kind, taskFamilyKey string) *TaskBlock {
+	block := &TaskBlock{
+		Difficulty:      strings.ToUpper(strings.TrimSpace(difficulty)),
+		ContractVersion: strings.TrimSpace(contractVersion),
+		Kind:            strings.TrimSpace(kind),
+		TaskFamilyKey:   strings.TrimSpace(taskFamilyKey),
+	}
 	found := false
 	for _, section := range card.Sections {
 		for _, mapping := range taskSectionTitles {

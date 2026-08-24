@@ -5,12 +5,17 @@ package quality
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/wood-bison/fluent-question-brain/internal/normalize"
 )
+
+const TaskBriefContractVersion = "question-brain.task-brief.v1"
+
+var taskFamilyKeyPattern = regexp.MustCompile(`^task-family\.[a-z0-9][a-z0-9-]*$`)
 
 // PromptIssue is a stable, answer-free explanation of why a prompt cannot be
 // released. The message is suitable for dry-run reports; it never contains
@@ -75,6 +80,45 @@ func CardIssues(card normalize.Card) []PromptIssue {
 		}
 	}
 	return deduplicate(issues)
+}
+
+// TaskBoundaryIssues validates the additive TaskBrief boundary. Historical
+// cards may still contain the pre-G4 TaskBlock shape; only cards that opt in
+// to the versioned contract are rejected here. This lets old immutable
+// revisions remain readable while making every new executable reference
+// explicit and preventing a second solution/test source in Question Brain.
+func TaskBoundaryIssues(card normalize.Card) []PromptIssue {
+	if card.Task == nil || strings.TrimSpace(card.Task.ContractVersion) == "" {
+		return nil
+	}
+	issues := make([]PromptIssue, 0)
+	add := func(code, message string) { issues = append(issues, PromptIssue{Code: code, Message: message}) }
+	if card.Task.ContractVersion != TaskBriefContractVersion {
+		add("task_contract_version", fmt.Sprintf("unsupported TaskBrief contract %q", card.Task.ContractVersion))
+	}
+	validKinds := map[string]bool{
+		"discussion_prompt":      true,
+		"design_exercise":        true,
+		"runtime_task_reference": true,
+		"historical_content":     true,
+	}
+	if !validKinds[strings.TrimSpace(card.Task.Kind)] {
+		add("task_kind", "TaskBrief kind must be discussion_prompt, design_exercise, runtime_task_reference, or historical_content")
+	}
+	familyKey := strings.TrimSpace(card.Task.TaskFamilyKey)
+	if familyKey != "" && !taskFamilyKeyPattern.MatchString(familyKey) {
+		add("task_family_key", fmt.Sprintf("invalid TaskFamily key %q", familyKey))
+	}
+	if card.Task.Kind == "runtime_task_reference" && familyKey == "" {
+		add("task_family_required", "runtime_task_reference requires a released TaskFamily key")
+	}
+	if card.Task.Kind != "runtime_task_reference" && familyKey != "" {
+		add("task_family_unexpected", "only runtime_task_reference may carry a TaskFamily key")
+	}
+	if strings.TrimSpace(card.Task.Solution) != "" {
+		add("task_solution_forbidden", "reference solutions belong to Task Runtime, not Question Brain")
+	}
+	return issues
 }
 
 // PromptIssues checks one locale prompt without requiring a parsed card. It

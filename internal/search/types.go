@@ -203,6 +203,13 @@ type QualityChecks struct {
 	CurriculumAccepted     int `json:"curriculum_accepted"`
 	CurriculumRejected     int `json:"curriculum_rejected"`
 	CurriculumCapabilities int `json:"curriculum_capabilities"`
+	// Task boundary counters make historical duplication visible without
+	// exposing task bodies. New versioned TaskBrief cards must reference a
+	// TaskFamily; executable solutions remain Runtime-owned.
+	TaskBlocks             int `json:"task_blocks"`
+	TaskFamilyReferences   int `json:"task_family_references"`
+	EmbeddedSolutions      int `json:"embedded_solutions"`
+	TaskBoundaryViolations int `json:"task_boundary_violations"`
 }
 
 type ReleaseResponse struct {

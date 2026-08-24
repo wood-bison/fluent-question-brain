@@ -6,6 +6,79 @@ import (
 	"github.com/wood-bison/fluent-question-brain/internal/normalize"
 )
 
+func TestTaskBoundaryRejectsSolutionInVersionedRuntimeBrief(t *testing.T) {
+	card, err := normalize.ParseMarkdown("task.md", []byte(`# T-1 — Rate limiter
+
+ID: T-1
+Question: Implement a rate limiter.
+Task-Contract-Version: question-brain.task-brief.v1
+Task-Kind: runtime_task_reference
+Task-Family-Key: task-family.rate-limiter
+
+## Task
+
+Implement it.
+
+## Solution
+
+This must stay in Task Runtime.
+`))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	issues := TaskBoundaryIssues(card)
+	if len(issues) != 1 || issues[0].Code != "task_solution_forbidden" {
+		t.Fatalf("issues = %#v", issues)
+	}
+}
+
+func TestTaskBoundaryRequiresFamilyForRuntimeReference(t *testing.T) {
+	card, err := normalize.ParseMarkdown("task.md", []byte(`# T-2 — Runtime task
+
+ID: T-2
+Question: Implement it.
+Task-Contract-Version: question-brain.task-brief.v1
+Task-Kind: runtime_task_reference
+
+## Task
+
+Implement it.
+
+## Walkthrough
+
+Explain it.
+`))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	issues := TaskBoundaryIssues(card)
+	if len(issues) != 1 || issues[0].Code != "task_family_required" {
+		t.Fatalf("issues = %#v", issues)
+	}
+}
+
+func TestLegacyTaskBlockRemainsReadable(t *testing.T) {
+	card, err := normalize.ParseMarkdown("legacy.md", []byte(`# Legacy — exercise
+
+ID: Legacy
+Question: Explain the exercise.
+
+## Task
+
+Historical prose.
+
+## Solution
+
+Historical solution retained in the immutable revision.
+`))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if len(TaskBoundaryIssues(card)) != 0 {
+		t.Fatalf("legacy block should not be rewritten by additive validator")
+	}
+}
+
 func TestPromptIssuesRejectsPDFHeadings(t *testing.T) {
 	for _, prompt := range []string{"C", "SQL", "-", ".", "OZ-146 —", "Указатели", "Jquery", "DeepCopy"} {
 		if len(PromptIssues(prompt, "A useful answer", "Memory", "Runtime")) == 0 {

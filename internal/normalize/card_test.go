@@ -151,3 +151,37 @@ func TestParseMarkdownCapturesTimingAndUsage(t *testing.T) {
 		t.Fatalf("timing=%q usage=%q", card.Timing, card.Usage)
 	}
 }
+
+func TestParseMarkdownCapturesVersionedTaskBriefReference(t *testing.T) {
+	card, err := ParseMarkdown("Question Cards/T-1.md", []byte(`# T-1 — Rate limiter
+
+ID: T-1
+Track: Backend
+Topic: Node / Event Loop & Scheduling
+Task-Contract-Version: question-brain.task-brief.v1
+Task-Kind: runtime_task_reference
+Task-Family-Key: task-family.rate-limiter
+Question: Implement a bounded rate limiter.
+
+## Task
+
+Implement the token bucket contract.
+
+## Starter
+
+func Allow(clientID string) bool
+
+## Walkthrough
+
+Explain the invariant and failure boundary.
+`))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if card.Task == nil || card.Task.ContractVersion != "question-brain.task-brief.v1" || card.Task.Kind != "runtime_task_reference" || card.Task.TaskFamilyKey != "task-family.rate-limiter" {
+		t.Fatalf("task brief = %#v", card.Task)
+	}
+	if strings.Contains(string(card.Payload), `"solution"`) {
+		t.Fatalf("task brief unexpectedly contains a solution: %s", card.Payload)
+	}
+}
