@@ -117,6 +117,7 @@ func taxonomyPlacementFromPayload(value canonicalCard) (taxonomy.Placement, erro
 }
 
 func hasExplicitTaxonomy(value canonicalCard) bool {
-	return value.ProgramKey != "" || value.PathKey != "" || value.DomainKey != "" ||
-		value.CapabilityKey != "" || value.MappingState != "" || value.MappingVersion != ""
+	// A state/version without a placement is not a curriculum binding. Treat
+	// it as legacy metadata so an older writer cannot force a payload rewrite.
+	return value.ProgramKey != "" || value.PathKey != "" || value.DomainKey != "" || value.CapabilityKey != ""
 }

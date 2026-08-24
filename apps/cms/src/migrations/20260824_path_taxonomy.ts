@@ -8,13 +8,13 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       ADD COLUMN IF NOT EXISTS "path_key" varchar,
       ADD COLUMN IF NOT EXISTS "domain_key" varchar,
       ADD COLUMN IF NOT EXISTS "capability_key" varchar,
-      ADD COLUMN IF NOT EXISTS "mapping_state" varchar DEFAULT 'proposed';
+      ADD COLUMN IF NOT EXISTS "mapping_state" varchar;
     ALTER TABLE "cms"."_questions_v"
       ADD COLUMN IF NOT EXISTS "version_program_key" varchar,
       ADD COLUMN IF NOT EXISTS "version_path_key" varchar,
       ADD COLUMN IF NOT EXISTS "version_domain_key" varchar,
       ADD COLUMN IF NOT EXISTS "version_capability_key" varchar,
-      ADD COLUMN IF NOT EXISTS "version_mapping_state" varchar DEFAULT 'proposed';
+      ADD COLUMN IF NOT EXISTS "version_mapping_state" varchar;
   `)
 }
 

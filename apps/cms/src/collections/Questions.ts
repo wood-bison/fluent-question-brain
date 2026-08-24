@@ -117,7 +117,6 @@ export const Questions: CollectionConfig = {
     {
       name: 'mappingState',
       type: 'select',
-      defaultValue: 'proposed',
       options: [
         { label: 'Proposed', value: 'proposed' },
         { label: 'Accepted', value: 'accepted' },
