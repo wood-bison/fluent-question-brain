@@ -67,7 +67,10 @@ eight learner Paths under one Program. They are not a one-to-one mapping:
 `Angular` and `PL/SQL` are historical tracks, and `System Design` and
 `Behavioral` are learner paths without an equivalent legacy Track value.
 Question Brain therefore keeps `Track` as content metadata and does not infer a
-Path from it.
+Path from it. The explicit editorial registry later added `path.python` in
+migration `0014_python_path.sql` because the released corpus contains Python
+cards; the live canonical model now has nine Paths, while this audit's original
+eight-path baseline remains historical evidence.
 
 ### Group vs Domain
 
@@ -93,8 +96,8 @@ derived from a Topic, Group, Track, title, or task hint.
 
 - Program: `program.backend-engineer` — **Backend Engineer**.
 - Paths: `path.nodejs-typescript`, `path.java-spring`,
-  `path.dotnet-csharp`, `path.go`, `path.frontend`, `path.system-design`,
-  `path.algorithms`, `path.behavioral`.
+  `path.dotnet-csharp`, `path.go`, `path.python`, `path.frontend`,
+  `path.system-design`, `path.algorithms`, `path.behavioral`.
 - Shared Domains: `domain.runtime`, `domain.http-api`,
   `domain.data-postgresql`, `domain.distributed-systems`,
   `domain.os-networking`, `domain.testing`,
@@ -121,9 +124,11 @@ released through the existing content graph.
 | `internal/search/types.go`, `internal/store/postgres.go` | catalog metadata fields and canonical topic quality buckets; `stage_key` compatibility projection |
 | `docs/contracts/taxonomy.md`, `question-revision.md`, `fluent-engineering-lab.md` | source-of-truth, payload, and Lab boundary contracts |
 
-The migration seeds only the one Program, eight Paths, and seven shared
-Domains. It intentionally does not manufacture capabilities from 132 Topics
-and does not backfill any of the 1392 cards.
+The base migration seeds the one Program, the original eight Paths, and seven
+shared Domains. Migration `0014_python_path.sql` adds the explicit Python Path
+without manufacturing capabilities from Topics. Neither migration backfills
+the question cards; the exact-topic proposal and its dry-run are a separate
+review queue.
 
 ## Verification
 
