@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fluent Question Brain — Аудит и рекомендации</title>
+<style>
+/* ===== TOKENS ===== */
+:root {
+  --field:#f4f1ea; --plate:#fffdf8; --ink:#262620; --ink-body:#3d3a33; --ink-faint:#8a8578; --line:#e2ddd1;
+  --accent:#1b4fd8; --sage:#0d7d6a; --rust:#b4442c; --gold:#92610a;
+  --terminal-bg:#14171c; --terminal-fg:#c9c5ba;
+  --chip-bg:#e8e4d9;
+  --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --font-mono:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,monospace;
+  --max-w:72rem; --prose-w:68ch;
+}
+html[data-theme="dark"] {
+  --field:#12141a; --plate:#191d24; --ink:#ece9e2; --ink-body:#c9c5ba; --ink-faint:#7d7869; --line:#2a2f38;
+  --accent:#6b96ec; --sage:#4fb8a5; --rust:#e07a5f; --gold:#d9a441;
+  --terminal-bg:#0e1116; --terminal-fg:#c9c5ba;
+  --chip-bg:#262b33;
+}
+@media print {
+  :root { --field:#f4f1ea; --plate:#fffdf8; --ink:#262620; --ink-body:#3d3a33; --ink-faint:#8a8578; --line:#e2ddd1;
+    --accent:#1b4fd8; --sage:#0d7d6a; --rust:#b4442c; --gold:#92610a;
+    --terminal-bg:#f8f8f8; --terminal-fg:#111; --chip-bg:#e8e4d9; }
+}
+/* ===== RESET ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);color:var(--ink);background:var(--field);line-height:1.65;font-size:16px}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+code,pre,.mono{font-family:var(--font-mono)}
+code{background:var(--chip-bg);padding:1px 5px;border-radius:4px;font-size:.92em}
+pre{background:var(--terminal-bg);color:var(--terminal-fg);padding:16px 20px;border-radius:8px;overflow-x:auto;line-height:1.5;font-size:14px}
+pre code{background:none;padding:0;font-size:inherit}
+/* ===== TOKENS (code highlight) ===== */
+.tok-com{color:#7d7869;font-style:italic} /* comments — muted */
+.tok-kw{color:var(--accent)}              /* keywords */
+.tok-str{color:var(--sage)}              /* strings */
+.tok-num{color:var(--gold)}             /* numbers */
+/* ===== LAYOUT ===== */
+.wrap{max-width:var(--max-w);margin:0 auto;padding:0 24px}
+.prose{max-width:var(--prose-w);margin:0 auto}
+header{border-bottom:2px solid var(--line);padding:40px 0 24px}
+header h1{font-size:1.8rem;line-height:1.25;letter-spacing:-.02em;color:var(--ink)}
+header .meta{margin-top:6px;font-size:.92rem;color:var(--ink-faint);font-family:var(--font-mono)}
+/* nav */
+nav{position:sticky;top:0;z-index:10;background:var(--field);border-bottom:1px solid var(--line);padding:10px 0;font-size:.82rem;overflow-x:auto;white-space:nowrap}
+nav a{margin-right:16px;color:var(--ink-faint);font-family:var(--font-mono)}
+nav a:hover{text-decoration:none;color:var(--accent)}
+/* theme toggle */
+.theme-toggle{display:inline-flex;gap:6px}
+.theme-toggle button{background:none;border:1px solid var(--line);color:var(--ink-faint);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:.82rem;font-family:var(--font-mono)}
+.theme-toggle button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+/* sections */
+section{padding:32px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:none}
+h2{font-size:1.3rem;margin-bottom:12px;color:var(--ink)}
+h3{font-size:1.05rem;margin:20px 0 8px;color:var(--ink)}
+/* verdict band */
+.verdict{background:var(--accent);color:#fff;padding:20px 24px;border-radius:8px;margin:24px 0;font-size:1rem;line-height:1.55}
+.verdict strong{color:#fff}
+/* chips */
+.chip{display:inline-block;font-size:.78rem;font-family:var(--font-mono);padding:2px 8px;border-radius:12px;margin-right:6px;line-height:1.5}
+.chip-v{background:#d1e7dd;color:#0f5132}.chip-s{background:#cfe2ff;color:#084298}.chip-h{background:#fff3cd;color:#664d03}.chip-n{background:#f8d7da;color:#842029}
+html[data-theme="dark"] .chip-v{background:#134e4a;color:#a7f3d0}
+html[data-theme="dark"] .chip-s{background:#1e3a5f;color:#93c5fd}
+html[data-theme="dark"] .chip-h{background:#5c4b1f;color:#fde68a}
+html[data-theme="dark"] .chip-n{background:#5c1f1f;color:#fecaca}
+/* tables */
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem;margin:16px 0}
+.tbl th,.tbl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+.tbl th{font-family:var(--font-mono);font-size:.82rem;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em}
+.tbl tr:hover td{background:var(--chip-bg)}
+/* pipeline diagram (flex boxes) */
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:20px 0}
+.flow-box{background:var(--plate);border:1px solid var(--line);padding:10px 16px;border-radius:6px;font-size:.88rem;font-family:var(--font-mono);white-space:nowrap}
+.flow-arrow{color:var(--ink-faint);font-size:1.2rem;padding:0 6px}
+.flow-box.active{border-color:var(--accent);color:var(--accent)}
+/* cost ladder */
+.cost-row{display:flex;gap:12px;align-items:baseline;margin:8px 0}
+.cost-badge{font-family:var(--font-mono);font-size:.78rem;padding:2px 8px;border-radius:4px;white-space:nowrap;min-width:90px;text-align:center}
+.cost-low{background:#d1e7dd;color:#0f5132}.cost-mid{background:#fff3cd;color:#664d03}.cost-high{background:#f8d7da;color:#842029}
+html[data-theme="dark"] .cost-low{background:#134e4a;color:#a7f3d0}
+html[data-theme="dark"] .cost-mid{background:#5c4b1f;color:#fde68a}
+html[data-theme="dark"] .cost-high{background:#5c1f1f;color:#fecaca}
+/* priority list */
+ol.pri{list-style:none;counter-reset:pri;max-width:var(--prose-w)}
+ol.pri li{counter-increment:pri;margin-bottom:14px;padding-left:36px;position:relative}
+ol.pri li::before{content:counter(pri);position:absolute;left:0;top:0;width:26px;height:26px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-family:var(--font-mono);font-weight:600}
+/* source ledger */
+.src{font-size:.85rem}
+.src td:first-child{white-space:nowrap;font-family:var(--font-mono);color:var(--ink-faint);width:100px}
+/* footer */
+footer{padding:24px 0;font-size:.85rem;color:var(--ink-faint);text-align:center;border-top:1px solid var(--line);margin-top:40px}
+/* responsive */
+@media(max-width:640px){
+  header h1{font-size:1.35rem}.flow{flex-direction:column;gap:4px}.flow-arrow{transform:rotate(90deg)}
+  .tbl{font-size:.82rem}.tbl th,.tbl td{padding:8px 6px}
+}
+/* print */
+@media print{nav,.theme-toggle{display:none}body{font-size:11pt}pre{white-space:pre-wrap;border:1px solid #ccc}}
+/* focus visible */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<!--
+  THESIS: Question Brain — зрелая система с чёткими контрактами, но CMS-контур наполовину отключён и vault не имеет git remote
+  OWN-WORLD: Trace Dossier; Fluent semantic tokens; light+dark.
+  STORY: читатель понимает архитектуру, моделирует расширяемость, видит расхождения с практиками 2026, решает приоритеты.
+  FIRST VIEWPORT: вердикт + ownership flow + дата.
+  FORM: Trace Dossier; standalone report; no external assets.
+-->
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+  <h1>Fluent Question Brain</h1>
+  <div class="meta">Аудит · 24.08.2026 · 1591 карточка · Тип: архитектурный + веб-ресёрч</div>
+</header>
+
+<!-- NAV -->
+<nav class="wrap" aria-label="Разделы">
+  <a href="#verdict">Вердикт</a>
+  <a href="#architecture">Архитектура</a>
+  <a href="#cms">CMS</a>
+  <a href="#data">Данные</a>
+  <a href="#ext">Расширяемость</a>
+  <a href="#research">Ресёрч 2026</a>
+  <a href="#priorities">Приоритеты</a>
+  <a href="#design">Дизайн отчёта</a>
+  <a href="#sources">Источники</a>
+  <span style="float:right" class="theme-toggle" role="group" aria-label="Тема">
+    <button onclick="setTheme('light')" aria-pressed="false">Light</button>
+    <button onclick="setTheme('dark')" aria-pressed="true">Dark</button>
+    <button onclick="setTheme('auto')" aria-pressed="false">Auto</button>
+  </span>
+</nav>
+
+<!-- 1. VERDICT -->
+<section id="verdict">
+  <h2>Вердикт</h2>
+  <div class="verdict">
+    <strong>Сильная архитектура, дыра в операционке.</strong> Контракты иммутабельных ревизий, SHA-256 идемпотентности и staging-поиск стадийный — <em>учебниковый</em> набор для контент-сервиса. Две критические проблемы: <strong>(1)</strong> CMS-промоушен не передаёт task/rubric/choices/company — CMS отстаёт от собственной модели; <strong>(2)</strong> vault без git remote — потеря 1593 файлов необратима. Гейты G0–G7 закрыты, RU 100%, p95 поиска ~40 мс.
+  </div>
+  <p style="margin-top:12px">
+    <span class="chip chip-v">ПРОВЕРЕНО</span> <span style="font-size:.92rem">1591 карточка опубликована, все smoke-гейты пройдены</span>
+  </p>
+</section>
+
+<!-- 2. ARCHITECTURE -->
+<section id="architecture">
+  <h2>Как устроен проект</h2>
+  <div class="prose">
+    <p><strong>Канон контента</strong> — Go API над одним PostgreSQL (<code>content</code>-схема): <code>question</code> (стабильная identity) → immutable <code>question_revision</code> c SHA-256 <code>content_hash</code> → локали <code>en/ru</code> в <code>question_locale</code>. Поиск стадийный: exact → FTS/trigram → семантика (pgvector, bge-m3 через Ollama) → RRF-фьюжн с объяснимым provenance. Все кросс-системные записи идут через <code>audit_event</code> + <code>outbox</code>.</p>
+
+    <h3>Ownership flow</h3>
+    <div class="flow" role="img" aria-label="Диаграмма потока контента">
+      <div class="flow-box">Obsidian vault</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">qb-import</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box active">content.*</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">Lab API clients</div>
+    </div>
+    <div class="flow" role="img" aria-label="Диаграмма CMS">
+      <div class="flow-box">Payload CMS (cms.*)</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box active">POST /v1/promote</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box active">content.*</div>
+    </div>
+
+    <p><strong>Пайплайн авторства:</strong> Obsidian-vault → <code>qb-import</code> (markdown-парсер, quality-gates, idempotency по хешу) — это де-факто главный путь. Payload CMS — вторая ветка: черновики в изолированной <code>cms</code>-схеме, публикация через хук <code>afterChange</code> → <code>POST /v1/promote</code> (токен) → единственная транзакционная запись в <code>content</code>.</p>
+    <p><span class="chip chip-v">ПРОВЕРЕНО</span> Клиент Lab читает только released-API; CMS не пишет content-схему напрямую.</p>
+  </div>
+</section>
+
+<!-- 3. CMS -->
+<section id="cms">
+  <h2>Зачем CMS — вердикт</h2>
+  <div class="prose">
+    <p>Паттерн «CMS как редакторская поверхность над каноническим стором» — <strong>правильный</strong> и совпадает с консенсусом 2025–2026. Payload даёт бесплатно drafts/versions/diff/локализацию — руками на React Admin/Refine это недели работы.</p>
+    <p><strong>Но реализация наполовину подключена — и это главная проблема:</strong></p>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Факт</th><th>Следствие</th></tr></thead>
+    <tbody>
+      <tr><td>Whitelist промоушена не содержит task/rubric/choices/company</td><td>Через CMS физически нельзя авторить те типы карточек, которые вы добавили импортёром</td></tr>
+      <tr><td>Коллекция Questions.ts тех же полей не имеет</td><td>CMS отстаёт от собственной модели данных</td></tr>
+      <tr><td>Payload <code>afterChange</code> не различает draft-save vs publish (discussion #4616)</td><td><code>promotePublishedQuestion</code> сидит на минном поле</td></tr>
+      <tr><td>BUG-10: healthcheck считает healthy белый экран</td><td>CMS-контур не мониторится по-настоящему</td></tr>
+    </tbody>
+  </table>
+  <div class="prose">
+    <p><span class="chip chip-s">СИНТЕЗ</span> Два честных варианта: <strong>(а)</strong> достроить контракт промоушена до полной модели, или <strong>(б)</strong> честно признать vault-importer главным авторским путём. Третий вариант «оставить как есть» — худший.</p>
+  </div>
+</section>
+
+<!-- 4. DATA MODEL -->
+<section id="data">
+  <h2>Модель данных и структура вопросов</h2>
+  <div class="prose">
+    <p>Базовая форма — свободный текст: на каждую локаль <code>prompt / short_answer / explanation</code> + произвольные <code>sections</code> в JSONB. <strong>Дискриминатора <code>question_type</code> нет нигде.</strong> Вместо него три опциональных типизированных блока в payload:</p>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Блок</th><th>Назначение</th><th>Поля</th></tr></thead>
+    <tbody>
+      <tr><td><code>choices</code></td><td>MCQ-скрининг</td><td>options[], answer_key, rationale</td></tr>
+      <tr><td><code>task</code></td><td>Практическое упражнение</td><td>condition, starter, solution, walkthrough, difficulty, constraints</td></tr>
+      <tr><td><code>rubric</code></td><td>Оценочная рубрика</td><td>levels[{label, text}]</td></tr>
+    </tbody>
+  </table>
+  <div class="prose">
+    <p><strong>«Задачи с assert'ами» (Notion JS)</strong> — текстовые <code>console.assert(...)</code> внутри секции Task, не исполняемая структура. Исполняемые задачи живут вне Question Brain — во внешнем <code>fluent-task-runtime/tasks/&lt;id&gt;/task.json</code> с обратной ссылкой <code>questionKeys</code>.</p>
+    <p><span class="chip chip-v">ПРОВЕРЕНО</span> <code>question_edge</code> и вся таксономия v1 — schema-only задел без единого Go-writer'а. Пустые таблицы — ожидаемое состояние.</p>
+    <h3>Ключевые таблицы</h3>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>Таблица</th><th>Роль</th><th>Ключевой момент</th></tr></thead>
+    <tbody>
+      <tr><td><code>question</code></td><td>Стабильная identity</td><td>status CHECK, current_revision_id</td></tr>
+      <tr><td><code>question_revision</code></td><td>Неизменяемая ревизия</td><td>UNIQUE(content_hash), normalized_payload jsonb</td></tr>
+      <tr><td><code>question_locale</code></td><td>Тексты по локалям</td><td>prompt/short_answer/explanation/body jsonb, tsvector</td></tr>
+      <tr><td><code>question_topic</code></td><td>Привязка к темам</td><td>relation CHECK primary/secondary/coverage</td></tr>
+      <tr><td><code>question_edge</code></td><td>Связи между вопросами</td><td>kind CHECK (5 типов), weight, self-edge запрещён</td></tr>
+      <tr><td><code>embedding_profile</code></td><td>Профили эмбеддингов</td><td>provider/model/dimensions/metric</td></tr>
+      <tr><td><code>question_embedding</code></td><td>Вектора</td><td>vector(1024) + CHECK dims</td></tr>
+      <tr><td><code>duplicate_candidate</code></td><td>Дедупликация</td><td>exact_score/semantic_score, decision</td></tr>
+      <tr><td><code>import_run / import_item</code></td><td>Журнал импорта</td><td>append-only, 7 действий</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 5. EXTENSIBILITY -->
+<section id="ext">
+  <h2>Расширяемость</h2>
+  <div class="prose">
+    <p>Форма вопроса синхронизирована в <strong>трёх местах</strong>: Go-структура <code>canonicalCard</code> (источник хеша), whitelist промоушена, SQL-проекции. Любая новая индексируемая сущность = правка всех трёх.</p>
+  </div>
+  <div class="cost-row"><div class="cost-badge cost-low">Дёшево</div><span><strong>Новое поле данных в payload</strong> — JSONB, хеши старых ревизий стабильны, миграция не нужна</span></div>
+  <div class="cost-row"><div class="cost-badge cost-mid">Средне</div><span><strong>Новый фильтруемый dimension</strong> (как level/company) — ALTER+backfill+индекс + правки ~6 слоёв: canonicalCard, promote whitelist, Search-SQL, search/types.go, CMS collection, browse facets</span></div>
+  <div class="cost-row"><div class="cost-badge cost-mid">Средне</div><span><strong>Исполняемые задачи</strong> — расширить TaskBlock+парсер или развивать внешний runtime-реестр (уже задокументирован в taxonomy.md)</span></div>
+  <div class="cost-row"><div class="cost-badge cost-high">Дорого</div><span><strong>Новый тип связи</strong> — CHECK-констрейнт в 0001:122 → миграция + инвариант в AGENTS.md</span></div>
+
+  <h3>Пример: добавить company в промоушен</h3>
+  <pre><code><span class="tok-com">// internal/httpapi/server.go:320–397 — canonicalFields</span>
+<span class="tok-kw">var</span> canonicalFields = []<span class="tok-kw">string</span>{
+  <span class="tok-str">"stable_key"</span>, <span class="tok-str">"slug"</span>, <span class="tok-str">"title"</span>, <span class="tok-str">"question"</span>,
+  <span class="tok-str">"short_answer"</span>, <span class="tok-str">"explanation"</span>,
+  <span class="tok-com">// ← company, task, rubric, choices отсутствуют!</span>
+  <span class="tok-str">"level"</span>, <span class="tok-str">"track"</span>, <span class="tok-str">"topic"</span>,
+}</code></pre>
+</section>
+
+<!-- 6. RESEARCH -->
+<section id="research">
+  <h2>Ресёрч 2026 — сверка с практиками</h2>
+  <div class="prose">
+    <h3>Совпадает с консенсусом <span class="chip chip-v">ПРОВЕРЕНО</span></h3>
+    <ul>
+      <li><strong>Postgres вместо отдельных vector/graph DB</strong> — уходить при ~100M+ векторов / измеренном узком месте <span class="chip chip-h">ГИПОТЕЗА</span> для Question Brain — пока не нужно</li>
+      <li><strong>RRF поверх рангов, не скоров</strong> — канонический рецепт ParadeDB (2025-10), Crunchy Data (2026-07)</li>
+      <li><strong>Immutable revisions + SHA-256 + transactional outbox</strong> — MinimumCD artifacts, microservices.io outbox pattern</li>
+      <li><strong>pgvector 0.8.x</strong> — iterative scan для filtered queries; HNSW дефолтный ef_search=40 under-recalls</li>
+    </ul>
+
+    <h3>Расхождения <span class="chip chip-n">СЛЕДУЮЩАЯ ПРОВЕРКА</span></h3>
+    <ul>
+      <li><strong>BUG-7</strong> — порог на RRF-после-слияния; консенсус 2025–2026: гейты <em>на плечо до ранжирования</em></li>
+      <li><strong>BUG-8</strong> — преждевременные HNSW/IVFFlat на 7.6k векторов; правило «measure first»</li>
+      <li><strong>ts_rank</strong> слаб на коротких корпусах; если упадёт — BM25-in-Postgres (ParadeDB pg_search, TigerData pg_textsearch v1.0)</li>
+    </ul>
+
+    <h3>Чего не хватает (психометрическая модель)</h3>
+    <table class="tbl">
+      <thead><tr><th>Атрибут</th><th>Зрелые платформы</th><th>Question Brain</th></tr></thead>
+      <tbody>
+        <tr><td>Жизненный цикл айтема</td><td>draft → pilot → operational → retired</td><td>draft → published → archived ✓</td></tr>
+        <tr><td>Difficulty / IRT</td><td>IRT b, discrimination a, guessing c</td><td>Только editor-level (текст)</td></tr>
+        <tr><td>Exposure tracking</td><td>% показов, repetition penalty</td><td>Нет</td></tr>
+        <tr><td>QTI 3.x export</td><td>Стандарт 1EdTech, 20+ item types</td><td>Нет</td></tr>
+        <tr><td>LLM pipeline</td><td>Structured output → quality gates → HITL → dedup → calibration</td><td>Partial: gates + dedup ✓, calibration ✗</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 7. PRIORITIES -->
+<section id="priorities">
+  <h2>Приоритеты</h2>
+  <div class="prose">
+    <ol class="pri">
+      <li><strong>BUG-9 — vault без git remote</strong> (1593 файла, источник правды). Дороже любых архитектурных вопросей. <span class="chip chip-n">КРИТИЧНО</span></li>
+      <li><strong>Решить судьбу CMS</strong>: достроить промоушен до полной модели <em>или</em> понизить до опциональной. Половинчатое состояние — худшее.</li>
+      <li><strong>Закрыть BUG-7/BUG-8</strong> — они бьют по главному продукту (поиск).</li>
+      <li><strong>Словари нормализации</strong> company/group (BUG-3/4) — фасеты и аналитика гниют без них.</li>
+      <li><strong>Потом:</strong> дискриминатор типа (производное поле), exposure/сложность-метрики, QTI-экспорт.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- 8. DESIGN -->
+<section id="design">
+  <h2>Как сделан этот отчёт и почему</h2>
+  <div class="prose">
+    <p>Отчёт следует конвенции <em>Trace Dossier</em> из пайплайна <code>pi-html-report</code>. Вот принципы и почему они работают:</p>
+
+    <h3>1. Вердикт первым</h3>
+    <p>Читатель принимает решение за 10 секунд. Всё после — подкрепление. В外围ing начало с контекста — классическая ошибка технических отчётов.</p>
+
+    <h3>2. Семантические токены</h3>
+    <p>Каждый цвет — функция: <code>--accent</code> = активный маршрут/важное, <code>--sage</code> = проверенное, <code>--rust</code> = проблема, <code>--gold</code> = внешний/неподтверждённый. Не «красный = плохо» — а «красный = нужна проверка».</p>
+
+    <h3>3. Семантические стейты</h3>
+    <p><span class="chip chip-v">ПРОВЕРЕНО</span> = найдено в коде/primary source. <span class="chip chip-s">СИНТЕЗ</span> = вывод из фактов. <span class="chip chip-h">ГИПОТЕЗА</span> = плосибо, но не проверено. <span class="chip chip-n">СЛЕДУЮЩАЯ ПРОВЕРКА</span> = минимальный эксперимент. Это не маркировка — это контракт достоверности.</p>
+
+    <h3>4. Terminal-bg для кода</h3>
+    <p>Фон <code>--terminal-bg</code> не меняется между темами. Это значит: <code>.tok-kw</code>, <code>.tok-str</code>, <code>.tok-num</code>, <code>.tok-com</code> — всегда одни и те же цвета. Читатель не переучивается при переключении.</p>
+
+    <h3>5. Нет градиентов, нет CDN, нет дашбордов</h3>
+    <p>Каждый лишний HTTP-запрос, каждый «красивый» градиент — мусор для print, мусор для screen readers, мусор для модели, которая читает HTML. Сам файл — артефакт; он должен работать автономно.</p>
+
+    <h3>6. 65–75 символов на строку</h3>
+    <p>Доказано с 2000-х (Baym et al.,订阅阅读研究ы). Длинные строки утомляют; слишком короткие — дробят мысль. <code>.prose { max-width: 68ch }</code> — баланс.</p>
+
+    <h3>7. Печать как отдельный тест</h3>
+    <p>Если отчёт не читаем в печати — он нечитаем на projector, на экране совещания, в PDF-экспорте. <code>@media print</code> переключает на light, убирает nav/toggle.</p>
+  </div>
+</section>
+
+<!-- 9. SOURCES -->
+<section id="sources">
+  <h2>Источники</h2>
+  <table class="tbl src">
+    <thead><tr><th>Источник</th><th>Тип</th><th>Что поддерживает</th></tr></thead>
+    <tbody>
+      <tr><td>ARCHITECTURE.md</td><td>Project</td><td>Схема ownership, hybrid search path, performance envelope</td></tr>
+      <tr><td>db/migrations/0001-0011</td><td>Project</td><td>Все SQL-таблицы, CHECK-констрейнты, индексы</td></tr>
+      <tr><td>internal/normalize/card.go</td><td>Project</td><td>Go-типы, canonicalPayload, TaskBlock/ChoicesBlock/RubricBlock</td></tr>
+      <tr><td>internal/httpapi/server.go:320–397</td><td>Project</td><td>Whitelist промоушена, отсутствие task/rubric/choices</td></tr>
+      <tr><td>apps/cms/src/collections/Questions.ts</td><td>Project</td><td>Фиксированные поля CMS</td></tr>
+      <tr><td>apps/cms/src/hooks/promotePublishedQuestion.ts</td><td>Project</td><td>CMS→content мост, afterChange hook</td></tr>
+      <tr><td>docs/contracts/question-revision.md</td><td>Project</td><td>Контракт ревизии, типизированные блоки</td></tr>
+      <tr><td>HANDOFF-BUGS.md</td><td>Project</td><td>Открытые баги BUG-1..11</td></tr>
+      <tr><td>paradedb.com/blog/hybrid-search (2025-10)</td><td>Blog</td><td>RRF recipe, score normalization</td></tr>
+      <tr><td>crunchydata.com/blog/hybrid-vector-search (2026-07)</td><td>Blog</td><td>Filtered ANN patterns</td></tr>
+      <tr><td>github.com/pgvector/pgvector CHANGELOG</td><td>Official</td><td>pgvector 0.8.x features, halfvec, iterative scan</td></tr>
+      <tr><td>payloadcms.com/docs/versions/overview</td><td>Official</td><td>Payload drafts, afterChange semantics</td></tr>
+      <tr><td>github.com/payloadcms/payload/discussions/4616</td><td>Issue</td><td>afterChange draft-vs-publish ambiguity</td></tr>
+      <tr><td>microservices.io/patterns/data/transactional-outbox</td><td>Pattern</td><td>Transactional outbox canonical</td></tr>
+      <tr><td>1edtech.org/standards/qti</td><td>Standard</td><td>QTI 3.x item types, metadata model</td></tr>
+      <tr><td>research.duolingo.com (Settles, McCarthy)</td><td>Paper</td><td>Computational psychometrics, cold-start calibration</td></tr>
+      <tr><td>arxiv.org/html/2505.06591v1</td><td>Paper</td><td>LLM-generated Q&A, Pydantic structured output + IRT</td></tr>
+      <tr><td>mdpi.com/2227-7102/15/8/1029</td><td>Journal</td><td>LLM item generation, HITL review</td></tr>
+      <tr><td>supabase.com/docs/guides/database/extensions/pgvector</td><td>Docs</td><td>pgvector filtered search, iterative scan</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Fluent Question Brain Audit · 24.08.2026 · Generated by opencode · Theme: ephemeral</p>
+</footer>
+
+</div><!-- .wrap -->
+<script>
+function setTheme(t){
+  var h=document.documentElement, btns=document.querySelectorAll('.theme-toggle button');
+  if(t==='auto'){h.removeAttribute('data-theme')}else{h.setAttribute('data-theme',t)}
+  btns.forEach(function(b){b.setAttribute('aria-pressed',b.textContent.toLowerCase()===t)});
+}
+/* init auto from system */
+if(!document.cookie.match(/theme=(light|dark)/)){
+  var pref=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';
+  document.documentElement.setAttribute('data-theme',pref);
+  document.querySelectorAll('.theme-toggle button').forEach(function(b){
+    if(b.textContent.toLowerCase()===pref)b.setAttribute('aria-pressed','true')
+  });
+}
+</script>
+</body>
+</html>
