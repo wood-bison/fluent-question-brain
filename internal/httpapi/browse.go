@@ -164,7 +164,7 @@ function tags(m, item) {
   const add = (t, c) => { if (t) box.appendChild(el('span', 'tag' + (c ? ' ' + c : ''), t)); };
   add(item.stable_key, 'k');
   add(m.track); add(m.level);
-  add(m.company, 'c');
+  if (m.company && m.company !== 'unclassified') add(m.company, 'c');
   add(m.topic);
   return box;
 }

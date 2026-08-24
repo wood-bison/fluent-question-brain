@@ -17,6 +17,7 @@ apps/cms/dist/
 
 # Local Compose state
 deploy/compose/.data/
+.pi/
 
 # Editors and OS
 .DS_Store
