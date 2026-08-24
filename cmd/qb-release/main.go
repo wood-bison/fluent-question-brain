@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/wood-bison/fluent-question-brain/internal/normalize"
+	"github.com/wood-bison/fluent-question-brain/internal/quality"
 	"github.com/wood-bison/fluent-question-brain/internal/store"
 )
 
@@ -118,6 +119,13 @@ func main() {
 		}
 		item.StableKey = card.StableKey
 		item.ContentHash = card.Hash
+		if issues := quality.CardIssues(card); len(issues) > 0 {
+			item.Action = "invalid"
+			item.Error = formatQualityIssues(issues)
+			report.Items = append(report.Items, item)
+			report.Totals[item.Action]++
+			continue
+		}
 		item.Action = "validated"
 		report.Items = append(report.Items, item)
 		report.Totals[item.Action]++
@@ -185,6 +193,14 @@ func main() {
 	}
 	encoded, _ := json.Marshal(report.Totals)
 	fmt.Printf("vault release %s: %s\n", map[bool]string{true: "published", false: "dry-run"}[*approve], encoded)
+}
+
+func formatQualityIssues(issues []quality.PromptIssue) string {
+	parts := make([]string, 0, len(issues))
+	for _, issue := range issues {
+		parts = append(parts, issue.Code+": "+issue.Message)
+	}
+	return "content quality gate: " + strings.Join(parts, "; ")
 }
 
 func collectFiles(root string) ([]string, error) {

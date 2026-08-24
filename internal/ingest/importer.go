@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/wood-bison/fluent-question-brain/internal/normalize"
+	"github.com/wood-bison/fluent-question-brain/internal/quality"
 	"github.com/wood-bison/fluent-question-brain/internal/store"
 	"github.com/wood-bison/fluent-question-brain/internal/taxonomy"
 )
@@ -133,6 +134,18 @@ func Run(ctx context.Context, options Options) (Report, error) {
 		}
 		item.StableKey = card.StableKey
 		item.ContentHash = card.Hash
+		if issues := quality.CardIssues(card); len(issues) > 0 {
+			item.Action = "invalid"
+			item.Error = formatQualityIssues(issues)
+			report.Totals[item.Action]++
+			report.Items = append(report.Items, item)
+			if db != nil {
+				if err := db.RecordImportItem(ctx, store.ImportItem{RunID: report.RunID, SourceRef: item.SourceRef, StableKey: item.StableKey, ContentHash: item.ContentHash, Action: item.Action, Error: item.Error}); err != nil {
+					return finishWithError(ctx, db, report, err)
+				}
+			}
+			continue
+		}
 		// Empty taxonomy used to pass silently, leaving a card with no place
 		// in the topic tree (QB-BUG-6). Surface it as an explicit warning.
 		if strings.TrimSpace(card.Track) == "" {
@@ -208,6 +221,14 @@ func Run(ctx context.Context, options Options) (Report, error) {
 		}
 	}
 	return report, nil
+}
+
+func formatQualityIssues(issues []quality.PromptIssue) string {
+	parts := make([]string, 0, len(issues))
+	for _, issue := range issues {
+		parts = append(parts, issue.Code+": "+issue.Message)
+	}
+	return "content quality gate: " + strings.Join(parts, "; ")
 }
 
 func finishWithError(ctx context.Context, db *store.Postgres, report Report, cause error) (Report, error) {

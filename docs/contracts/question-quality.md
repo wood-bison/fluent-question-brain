@@ -18,11 +18,14 @@ The response is deliberately answer-free. It contains:
   quality audit only — `/v1/release` omits them — and either value above zero
   also produces an entry in `warnings`, because a lagging indexer silently
   degrades semantic search;
-- `checks.ru_prompt_equals_answer`: production cards whose Russian prompt is
-  empty or identical to the Russian short answer. Such a locale technically
-  exists, so `missing_russian` stays green while the question was never
-  actually written; this counter makes that defect visible (quality-only,
-  always serialized);
+- `checks.degenerate_prompts`: production cards whose English or Russian
+  prompt is not a usable question — empty, equal to the answer/title/topic,
+  an unpunctuated short label, a known PDF heading such as `C`/`SQL`/`-`, or
+  text containing an extracted PDF control/replacement character. A card is
+  counted once even when both locales fail. This is the I0 content gate;
+- `checks.ru_prompt_equals_answer`: the legacy Russian-only equality counter,
+  retained for compatibility with older operators and dashboards. It is a
+  subset of `degenerate_prompts`;
 - open exact prompt duplicate groups as stable keys plus an opaque fingerprint;
 - resolved exact prompt groups, including their terminal review decisions, so
   an audit remains explainable without re-opening settled candidates;
@@ -37,7 +40,9 @@ reported under `resolved_duplicate_groups` only after every pair has an
 explicit terminal decision (`not_duplicate`, `keep_separate`, or `merge`);
 otherwise it remains in `duplicate_groups` and keeps the warning. Review
 actions remain explicit and auditable, and answer bodies are fetched only from
-the normal stable-key question read boundary.
+the normal stable-key question read boundary. The same I0 checks run before a
+source-vault import/release, so `/v1/quality` is a post-publish guard rather
+than the first place malformed content is discovered.
 
 Include smoke/fixture records only for diagnostics:
 

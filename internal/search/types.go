@@ -177,7 +177,18 @@ type ReleaseChecks struct {
 // quality-only counters are plain ints so they always serialize, including 0.
 type QualityChecks struct {
 	ReleaseChecks
+	// RuPromptEqualsAnswer is retained for clients that consumed the original
+	// audit field. DegeneratePrompts is the I0 gate and covers both locales plus
+	// shape/PDF extraction failures.
 	RuPromptEqualsAnswer int `json:"ru_prompt_equals_answer"`
+	// DegeneratePrompts counts production cards whose RU or EN prompt is not
+	// a usable question: empty, equal to the answer, equal to the card title
+	// or topic, a single unpunctuated word, or shorter than ~20 characters
+	// without a question mark. Equality with the answer
+	// alone was not enough: a PDF section heading leaked into the prompt
+	// ("SQL", "Указатели", ":") is also not equal to the answer, which let
+	// 70 unusable cards pass the old check.
+	DegeneratePrompts int `json:"degenerate_prompts"`
 }
 
 type ReleaseResponse struct {

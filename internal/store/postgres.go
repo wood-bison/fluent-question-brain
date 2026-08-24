@@ -15,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/wood-bison/fluent-question-brain/internal/embedding"
 	"github.com/wood-bison/fluent-question-brain/internal/normalize"
+	"github.com/wood-bison/fluent-question-brain/internal/quality"
 	"github.com/wood-bison/fluent-question-brain/internal/search"
 	"github.com/wood-bison/fluent-question-brain/internal/taxonomy"
 )
@@ -1574,24 +1575,58 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	checks.OutboxPending = &outboxPending
 	checks.LocalesWithoutEmbedding = &localesWithoutEmbedding
 
-	// A Russian prompt that merely repeats the answer text (or is empty)
-	// means the locale exists but the question was never really written —
-	// the exact defect behind missing_russian reporting green too early.
-	var ruPromptEqualsAnswer int
-	if err := p.pool.QueryRow(ctx, `
-		select count(*)
+	// Degenerate-prompt audit: a locale row can exist while its prompt is
+	// not a usable question at all. Equality with the answer is only one
+	// failure mode; PDF section headings leaked into prompts ("SQL",
+	// "Указатели", ":") pass an equality check while leaving the card
+	// unusable, which is how 70 broken cards once passed acceptance.
+	rows, err := p.pool.Query(ctx, `
+		select
+			coalesce(ru.prompt, ''),
+			coalesce(ru.short_answer, ''),
+			(ru.id is not null),
+			coalesce(en.prompt, ''),
+			coalesce(en.short_answer, ''),
+			(en.id is not null),
+			coalesce(qr.normalized_payload->>'title', ''),
+			coalesce(qr.normalized_payload->>'topic', ''),
+			qr.normalized_payload
 		from content.question q
 		join content.workspace w on w.id = q.workspace_id
-		join content.question_revision r on r.id = q.current_revision_id
-		join content.question_locale ru on ru.revision_id = r.id and ru.locale = 'ru'
+		join content.question_revision qr on qr.id = q.current_revision_id
+		left join content.question_locale ru on ru.revision_id = qr.id and ru.locale = 'ru'
+		left join content.question_locale en on en.revision_id = qr.id and en.locale = 'en'
 		where w.stable_key = $1
 		  and q.status = 'published'
 		  and q.content_kind = 'production'
-		  and (trim(ru.prompt) = '' or trim(ru.prompt) = trim(coalesce(ru.short_answer, '')))
-	`, strings.TrimSpace(request.WorkspaceKey)).Scan(&ruPromptEqualsAnswer); err != nil {
-		return search.QualityResponse{}, fmt.Errorf("count degenerate russian prompts: %w", err)
+	`, strings.TrimSpace(request.WorkspaceKey))
+	if err != nil {
+		return search.QualityResponse{}, fmt.Errorf("query prompts for degeneracy audit: %w", err)
 	}
-	checks.RuPromptEqualsAnswer = ruPromptEqualsAnswer
+	defer rows.Close()
+	degenerate := 0
+	for rows.Next() {
+		var ruPrompt, ruAnswer, enPrompt, enAnswer, title, topic string
+		var ruPresent, enPresent bool
+		var payload []byte
+		if err := rows.Scan(&ruPrompt, &ruAnswer, &ruPresent, &enPrompt, &enAnswer, &enPresent, &title, &topic, &payload); err != nil {
+			return search.QualityResponse{}, fmt.Errorf("scan prompts for degeneracy audit: %w", err)
+		}
+		if ruPresent && len(quality.PromptIssues(ruPrompt, ruAnswer, title, topic)) > 0 {
+			degenerate++
+		} else if enPresent && len(quality.PromptIssues(enPrompt, enAnswer, title, topic)) > 0 {
+			degenerate++
+		} else if quality.IsPDFHeading(title) || quality.JSONHasPDFArtifact(payload) {
+			degenerate++
+		}
+		if ruPresent && (strings.TrimSpace(ruPrompt) == "" || strings.TrimSpace(ruPrompt) == strings.TrimSpace(ruAnswer)) {
+			checks.RuPromptEqualsAnswer++
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return search.QualityResponse{}, fmt.Errorf("iterate prompts for degeneracy audit: %w", err)
+	}
+	checks.DegeneratePrompts = degenerate
 
 	tracks := make(map[string]int)
 	topics := make(map[string]int)
@@ -1599,7 +1634,7 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	companies := make(map[string]int)
 	locales := make(map[string]int)
 	duplicatePrompts := make(map[string][]string)
-	rows, err := p.pool.Query(ctx, `
+	rows, err = p.pool.Query(ctx, `
 		select
 			q.stable_key,
 			qr.normalized_payload,
@@ -1895,8 +1930,8 @@ func qualityWarnings(checks search.QualityChecks, duplicateGroups int) []string 
 	if checks.MissingRussian > 0 {
 		warnings = append(warnings, "some published questions fall back from Russian to English")
 	}
-	if checks.RuPromptEqualsAnswer > 0 {
-		warnings = append(warnings, fmt.Sprintf("%d Russian prompts are empty or equal the answer text instead of asking the question", checks.RuPromptEqualsAnswer))
+	if checks.DegeneratePrompts > 0 {
+		warnings = append(warnings, fmt.Sprintf("%d published cards have a degenerate prompt or extracted PDF artefact", checks.DegeneratePrompts))
 	}
 	if duplicateGroups > 0 {
 		warnings = append(warnings, "exact prompt duplicate groups require explicit review")
