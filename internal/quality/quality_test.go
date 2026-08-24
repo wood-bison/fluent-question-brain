@@ -7,7 +7,7 @@ import (
 )
 
 func TestPromptIssuesRejectsPDFHeadings(t *testing.T) {
-	for _, prompt := range []string{"C", "SQL", "-", "Указатели", "Jquery", "DeepCopy"} {
+	for _, prompt := range []string{"C", "SQL", "-", ".", "OZ-146 —", "Указатели", "Jquery", "DeepCopy"} {
 		if len(PromptIssues(prompt, "A useful answer", "Memory", "Runtime")) == 0 {
 			t.Errorf("prompt %q passed the shape gate", prompt)
 		}
@@ -43,6 +43,15 @@ func TestJSONHasPDFArtifactFindsPageBreak(t *testing.T) {
 	}
 }
 
+func TestJSONHasPDFLayoutArtifactIgnoresTaxonomyMetadata(t *testing.T) {
+	if JSONHasPDFLayoutArtifact([]byte(`{"scope":"Ozon","track":"Backend","title":"A useful question"}`), "Ozon") {
+		t.Fatal("taxonomy metadata was treated as a PDF sidebar marker")
+	}
+	if !JSONHasPDFLayoutArtifact([]byte(`{"scope":"Ozon","track":"Backend","sections":[{"title":"Task","body":"SQL\nExplain the query"}]}`), "Ozon") {
+		t.Fatal("learner-facing PDF sidebar marker was not detected")
+	}
+}
+
 func TestCardIssuesRejectsPlaceholderTitleAndPDFText(t *testing.T) {
 	card := normalize.Card{
 		Title:    "SQL",
@@ -52,5 +61,33 @@ func TestCardIssuesRejectsPlaceholderTitleAndPDFText(t *testing.T) {
 	}
 	if got := CardIssues(card); len(got) < 2 {
 		t.Fatalf("card issues = %#v, want title and PDF issues", got)
+	}
+}
+
+func TestCardIssuesRejectsOzonPDFLayoutMarkers(t *testing.T) {
+	card := normalize.Card{
+		Scope:    "Ozon",
+		Title:    "What is a syscall?",
+		Sections: []normalize.Section{{Title: "Task", Body: "SQL\nWhat is a syscall?\n\n1/40\nЗадачник"}},
+	}
+
+	issues := CardIssues(card)
+	for _, issue := range issues {
+		if issue.Code == "pdf_layout_artifact" {
+			return
+		}
+	}
+	t.Fatalf("expected pdf_layout_artifact, got %#v", issues)
+}
+
+func TestHasPDFLayoutArtifactDistinguishesSidebarPrefixFromGoCode(t *testing.T) {
+	if !HasPDFLayoutArtifact("Ozon", "GO Go (теория)") {
+		t.Fatal("uppercase PDF sidebar prefix was not detected")
+	}
+	if !HasPDFLayoutArtifact("Ozon", ": : Q Зачем нужен TCP?") {
+		t.Fatal("PDF colon prefix was not detected")
+	}
+	if HasPDFLayoutArtifact("Ozon", "go func() { run() }") {
+		t.Fatal("authored lowercase Go code was rejected")
 	}
 }

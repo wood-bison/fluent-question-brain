@@ -45,6 +45,27 @@ func CardIssues(card normalize.Card) []PromptIssue {
 			})
 			break
 		}
+		if HasPDFLayoutArtifact(card.Scope, section.Body) {
+			issues = append(issues, PromptIssue{
+				Code:    "pdf_layout_artifact",
+				Message: fmt.Sprintf("section %q contains an extracted PDF footer or sidebar marker", section.Title),
+			})
+			break
+		}
+	}
+	if len(card.Payload) > 0 {
+		if JSONHasPDFArtifact(card.Payload) {
+			issues = append(issues, PromptIssue{
+				Code:    "pdf_artifact",
+				Message: "canonical payload contains an extracted PDF control or replacement character",
+			})
+		}
+		if JSONHasPDFLayoutArtifact(card.Payload, card.Scope) {
+			issues = append(issues, PromptIssue{
+				Code:    "pdf_layout_artifact",
+				Message: "canonical payload contains an extracted PDF footer or sidebar marker",
+			})
+		}
 	}
 	return deduplicate(issues)
 }
@@ -66,6 +87,29 @@ func JSONHasPDFArtifact(payload []byte) bool {
 		return false
 	}
 	return valueHasPDFArtifact(value)
+}
+
+// JSONHasPDFLayoutArtifact checks known PDF footer/sidebar markers in the
+// learner-facing parts of the normalized payload. Metadata such as Track:
+// Backend is deliberately excluded: the same category labels that indicate a
+// PDF sidebar when they appear as a content line are valid taxonomy values.
+// These markers are scoped to Ozon's extracted interview sheets; the same
+// words in authored cards are not rejected globally.
+func JSONHasPDFLayoutArtifact(payload []byte, scope string) bool {
+	var value any
+	if err := json.Unmarshal(payload, &value); err != nil {
+		return false
+	}
+	object, ok := value.(map[string]any)
+	if !ok {
+		return false
+	}
+	for _, key := range []string{"question", "sections", "task", "rubric", "choices"} {
+		if valueHasPDFLayoutArtifact(object[key], scope) {
+			return true
+		}
+	}
+	return false
 }
 
 // IsPDFHeading exposes the title/heading check to the database audit.
@@ -132,13 +176,31 @@ func HasPDFArtifact(value string) bool {
 	return false
 }
 
+// HasPDFLayoutArtifact detects the visible remnants of the Ozon PDF sidebar
+// and footer: page counters, the "Задачник" footer, and isolated category
+// labels that were inserted between the actual task and rubric.
+func HasPDFLayoutArtifact(scope, value string) bool {
+	if !strings.EqualFold(strings.TrimSpace(scope), "ozon") {
+		return false
+	}
+	for _, line := range strings.Split(strings.ReplaceAll(value, "\r\n", "\n"), "\n") {
+		if isPDFLayoutLine(line) {
+			return true
+		}
+	}
+	return false
+}
+
 func isPDFHeading(value string) bool {
 	value = normalizeComparable(value)
 	if value == "" {
 		return true
 	}
+	if strings.HasSuffix(value, "—") || strings.Trim(value, " .,:;—-") == "" {
+		return true
+	}
 	switch value {
-	case "c", "sql", "-", ":", ";", "указатели", "jquery", "deepcopy":
+	case "c", "sql", "-", ".", ":", ";", "указатели", "jquery", "deepcopy":
 		return true
 	default:
 		return false
@@ -163,6 +225,66 @@ func valueHasPDFArtifact(value any) bool {
 		}
 	}
 	return false
+}
+
+func valueHasPDFLayoutArtifact(value any, scope string) bool {
+	switch typed := value.(type) {
+	case string:
+		return HasPDFLayoutArtifact(scope, typed)
+	case []any:
+		for _, child := range typed {
+			if valueHasPDFLayoutArtifact(child, scope) {
+				return true
+			}
+		}
+	case map[string]any:
+		for _, child := range typed {
+			if valueHasPDFLayoutArtifact(child, scope) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func isPDFLayoutLine(value string) bool {
+	original := strings.TrimSpace(value)
+	// The extracted Ozon sheets prefix sidebar categories with an uppercase
+	// `GO`; lowercase `go func` lines are authored code and must remain valid.
+	if strings.HasPrefix(original, "GO ") || original == "GO" || strings.HasPrefix(original, ": :") {
+		return true
+	}
+	value = normalizeComparable(original)
+	if value == "" {
+		return false
+	}
+	if strings.Contains(value, "https://matrix.o3.ru/trials") || strings.Contains(value, "задачник") || strings.Contains(value, "go ос, сети и эксплуатация") || strings.HasPrefix(value, "аналитика данных ") {
+		return true
+	}
+	if isPageCounter(value) {
+		return true
+	}
+	switch value {
+	case "c", "sql", "bi", "java", "frontend", "backend", "product", "ds", "scala", "go", ":", "-":
+		return true
+	default:
+		return false
+	}
+}
+
+func isPageCounter(value string) bool {
+	parts := strings.Split(value, "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return false
+	}
+	for _, part := range parts {
+		for _, r := range part {
+			if r < '0' || r > '9' {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func normalizeComparable(value string) string {

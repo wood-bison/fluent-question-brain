@@ -1590,6 +1590,7 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 			(en.id is not null),
 			coalesce(qr.normalized_payload->>'title', ''),
 			coalesce(qr.normalized_payload->>'topic', ''),
+			coalesce(qr.normalized_payload->>'scope', ''),
 			qr.normalized_payload
 		from content.question q
 		join content.workspace w on w.id = q.workspace_id
@@ -1606,17 +1607,17 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	defer rows.Close()
 	degenerate := 0
 	for rows.Next() {
-		var ruPrompt, ruAnswer, enPrompt, enAnswer, title, topic string
+		var ruPrompt, ruAnswer, enPrompt, enAnswer, title, topic, scope string
 		var ruPresent, enPresent bool
 		var payload []byte
-		if err := rows.Scan(&ruPrompt, &ruAnswer, &ruPresent, &enPrompt, &enAnswer, &enPresent, &title, &topic, &payload); err != nil {
+		if err := rows.Scan(&ruPrompt, &ruAnswer, &ruPresent, &enPrompt, &enAnswer, &enPresent, &title, &topic, &scope, &payload); err != nil {
 			return search.QualityResponse{}, fmt.Errorf("scan prompts for degeneracy audit: %w", err)
 		}
 		if ruPresent && len(quality.PromptIssues(ruPrompt, ruAnswer, title, topic)) > 0 {
 			degenerate++
 		} else if enPresent && len(quality.PromptIssues(enPrompt, enAnswer, title, topic)) > 0 {
 			degenerate++
-		} else if quality.IsPDFHeading(title) || quality.JSONHasPDFArtifact(payload) {
+		} else if quality.IsPDFHeading(title) || quality.JSONHasPDFArtifact(payload) || quality.JSONHasPDFLayoutArtifact(payload, scope) {
 			degenerate++
 		}
 		if ruPresent && (strings.TrimSpace(ruPrompt) == "" || strings.TrimSpace(ruPrompt) == strings.TrimSpace(ruAnswer)) {

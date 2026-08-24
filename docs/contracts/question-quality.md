@@ -21,8 +21,12 @@ The response is deliberately answer-free. It contains:
 - `checks.degenerate_prompts`: production cards whose English or Russian
   prompt is not a usable question — empty, equal to the answer/title/topic,
   an unpunctuated short label, a known PDF heading such as `C`/`SQL`/`-`, or
-  text containing an extracted PDF control/replacement character. A card is
-  counted once even when both locales fail. This is the I0 content gate;
+  text containing an extracted PDF control/replacement character. For Ozon
+  cards the same check also covers learner-facing `sections`, `task`,
+  `rubric`, and `choices` payload content, rejecting extracted PDF sidebar or
+  footer remnants such as page counters and category labels while ignoring
+  valid taxonomy metadata such as `Track: Backend`. A card is counted once
+  even when both locales fail. This is the I0 content gate;
 - `checks.ru_prompt_equals_answer`: the legacy Russian-only equality counter,
   retained for compatibility with older operators and dashboards. It is a
   subset of `degenerate_prompts`;
