@@ -33,6 +33,11 @@ export const PublishedQuestions: CollectionConfig = {
   // The view carries no version history of its own; revisions live in the
   // canonical schema and are addressed by contentHash / revisionNo below.
   versions: false,
+  // Edit locks exist to stop two people editing one document. Nothing here is
+  // editable, and the lock table has no relation column for this collection
+  // (it predates it, and the adapter runs with push disabled), so asking for
+  // locks would only produce a failing query on every document open.
+  lockDocuments: false,
   fields: [
     // Custom text ID: the stable graph key is already unique and readable,
     // which beats a synthetic integer the view cannot supply anyway.

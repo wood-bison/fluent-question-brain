@@ -104,6 +104,12 @@ services:
       PAYLOAD_DATABASE_URL: postgres://question_brain:question_brain@postgres:5432/question_brain?sslmode=disable
       QUESTION_BRAIN_PROMOTE_URL: http://api:8080/v1/promote
       QUESTION_BRAIN_INTERNAL_TOKEN: ${QUESTION_BRAIN_INTERNAL_TOKEN:-local-promote-token}
+      # Loopback-only stack: sign the admin in automatically so browsing the
+      # bank does not start with a password prompt. Set QB_CMS_DEV_LOGIN=0 to
+      # get the normal login form back.
+      QB_CMS_DEV_LOGIN: ${QB_CMS_DEV_LOGIN:-1}
+      QB_CMS_DEV_EMAIL: ${QB_CMS_DEV_EMAIL:-dev@local.dev}
+      QB_CMS_DEV_PASSWORD: ${QB_CMS_DEV_PASSWORD:-local-dev-password}
     ports:
       - "127.0.0.1:${QB_CMS_PORT:-48128}:3000"
     logging: *json-logging

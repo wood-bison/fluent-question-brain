@@ -6,6 +6,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 
 import { PublishedQuestions } from './src/collections/PublishedQuestions'
+import { devLogin, seedDevUser } from './src/devLogin'
 import { Questions } from './src/collections/Questions'
 import { Users } from './src/collections/Users'
 
@@ -18,9 +19,14 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname, 'src'),
     },
+    // Opt-in only; see src/devLogin.ts for why this is not keyed off NODE_ENV.
+    ...(devLogin.enabled
+      ? { autoLogin: { email: devLogin.email, password: devLogin.password } }
+      : {}),
   },
   collections: [Users, Questions, PublishedQuestions],
   editor: lexicalEditor(),
+  onInit: seedDevUser,
   localization: {
     locales: ['en', 'ru'],
     defaultLocale: 'ru',
