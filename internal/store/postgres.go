@@ -1606,6 +1606,7 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	}
 	defer rows.Close()
 	degenerate := 0
+	semanticShape := 0
 	for rows.Next() {
 		var ruPrompt, ruAnswer, enPrompt, enAnswer, title, topic, scope string
 		var ruPresent, enPresent bool
@@ -1613,12 +1614,27 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 		if err := rows.Scan(&ruPrompt, &ruAnswer, &ruPresent, &enPrompt, &enAnswer, &enPresent, &title, &topic, &scope, &payload); err != nil {
 			return search.QualityResponse{}, fmt.Errorf("scan prompts for degeneracy audit: %w", err)
 		}
-		if ruPresent && len(quality.PromptIssues(ruPrompt, ruAnswer, title, topic)) > 0 {
+		ruIssues := []quality.PromptIssue(nil)
+		enIssues := []quality.PromptIssue(nil)
+		if ruPresent {
+			ruIssues = quality.PromptIssues(ruPrompt, ruAnswer, title, topic)
+		}
+		if enPresent {
+			enIssues = quality.PromptIssues(enPrompt, enAnswer, title, topic)
+		}
+		titleHasSemanticShapeIssue := quality.IsPDFHeading(title) || quality.IsCodeFragmentTitle(title)
+		if len(ruIssues) > 0 || len(enIssues) > 0 || titleHasSemanticShapeIssue || quality.JSONHasPDFArtifact(payload) || quality.JSONHasPDFLayoutArtifact(payload, scope) {
 			degenerate++
-		} else if enPresent && len(quality.PromptIssues(enPrompt, enAnswer, title, topic)) > 0 {
-			degenerate++
-		} else if quality.IsPDFHeading(title) || quality.JSONHasPDFArtifact(payload) || quality.JSONHasPDFLayoutArtifact(payload, scope) {
-			degenerate++
+		}
+		semanticIssue := titleHasSemanticShapeIssue
+		for _, issue := range append(ruIssues, enIssues...) {
+			if quality.IsSemanticShapeIssue(issue.Code) {
+				semanticIssue = true
+				break
+			}
+		}
+		if semanticIssue {
+			semanticShape++
 		}
 		if ruPresent && (strings.TrimSpace(ruPrompt) == "" || strings.TrimSpace(ruPrompt) == strings.TrimSpace(ruAnswer)) {
 			checks.RuPromptEqualsAnswer++
@@ -1628,6 +1644,7 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 		return search.QualityResponse{}, fmt.Errorf("iterate prompts for degeneracy audit: %w", err)
 	}
 	checks.DegeneratePrompts = degenerate
+	checks.SemanticShapeIssues = semanticShape
 
 	tracks := make(map[string]int)
 	topics := make(map[string]int)

@@ -8,6 +8,12 @@ into Question (RU) or Question (EN) before the Go boundary sees the file.
 import unicodedata
 
 PDF_HEADINGS = {"c", "sql", "-", ":", ";", "указатели", "jquery", "deepcopy"}
+TRAILING_FRAGMENT_WORDS = {
+    "для", "у", "нас", "в", "во", "на", "с", "со", "к", "ко", "по",
+    "из", "от", "до", "без", "над", "под", "при", "об", "о", "который",
+    "которая", "которое", "которые", "если", "когда", "чтобы", "for", "to",
+    "with", "and", "or", "that", "which", "if", "when",
+}
 
 
 def normalize(value):
@@ -31,6 +37,21 @@ def has_pdf_artifact(value):
     return False
 
 
+def is_prompt_fragment(value):
+    value = (value or "").strip()
+    if not value or has_question_mark(value):
+        return False
+    if value[-1] in ",:;—-":
+        return True
+    if value[-1] in ".!。！":
+        return False
+    words = value.split()
+    if len(words) < 2:
+        return False
+    last = words[-1].strip(" \t\r\n.,!?;:()[]{}\"'«»`").casefold()
+    return last in TRAILING_FRAGMENT_WORDS or value.casefold().endswith(" у нас")
+
+
 def is_pdf_heading(value):
     return normalize(value) in PDF_HEADINGS
 
@@ -52,6 +73,8 @@ def prompt_issues(prompt, answer="", title="", topic=""):
         issues.append("pdf_heading_prompt")
     if has_pdf_artifact(prompt):
         issues.append("pdf_artifact")
+    if is_prompt_fragment(prompt):
+        issues.append("fragment_prompt")
 
     words = prompt.split()
     if len(words) == 1 and not has_question_mark(prompt) and not has_punctuation(prompt):

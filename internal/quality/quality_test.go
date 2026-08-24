@@ -22,6 +22,47 @@ func TestPromptIssuesKeepsConciseQuestions(t *testing.T) {
 	}
 }
 
+func TestPromptIssuesRejectsExtractedSentenceFragments(t *testing.T) {
+	for _, prompt := range []string{
+		"Построить оптимальный индекс для",
+		"Мой сервис использует внешний API, в рамках тарифа у нас",
+		"Это обёртка над кешем,",
+		"Design a rate limiter for",
+	} {
+		if got := PromptIssues(prompt, "A useful answer", "A card", "A topic"); !hasIssueCode(got, "fragment_prompt") {
+			t.Errorf("prompt %q passed the fragment gate: %#v", prompt, got)
+		}
+	}
+}
+
+func TestPromptIssuesKeepsCompleteImperatives(t *testing.T) {
+	for _, prompt := range []string{
+		"Напишите функцию для слияния каналов",
+		"Рассказать, как устроен LRU cache",
+		"Design a rate limiter for an external API",
+	} {
+		if got := PromptIssues(prompt, "A useful answer", "A card", "A topic"); hasIssueCode(got, "fragment_prompt") {
+			t.Errorf("complete prompt %q was classified as a fragment: %#v", prompt, got)
+		}
+	}
+}
+
+func TestCardIssuesRejectsCodeFragmentTitle(t *testing.T) {
+	if !IsCodeFragmentTitle("a = map[B]int{}") {
+		t.Fatal("map assignment title was not classified as code debris")
+	}
+	issues := CardIssues(normalize.Card{
+		Title:    "a = map[B]int{}",
+		Question: "How does comma-ok work?",
+	})
+	if !hasIssueCode(issues, "code_fragment_title") {
+		t.Fatalf("code title passed shape gate: %#v", issues)
+	}
+	if !IsSemanticShapeIssue("code_fragment_title") {
+		t.Fatal("code fragment title is not part of semantic shape gate")
+	}
+}
+
 func TestPromptIssuesRejectsAnswerAndMetadataCopies(t *testing.T) {
 	if got := PromptIssues("A useful answer", "A useful answer", "A card", "A topic"); len(got) == 0 {
 		t.Fatal("prompt equal to answer passed")
@@ -90,4 +131,13 @@ func TestHasPDFLayoutArtifactDistinguishesSidebarPrefixFromGoCode(t *testing.T) 
 	if HasPDFLayoutArtifact("Ozon", "go func() { run() }") {
 		t.Fatal("authored lowercase Go code was rejected")
 	}
+}
+
+func hasIssueCode(issues []PromptIssue, code string) bool {
+	for _, issue := range issues {
+		if issue.Code == code {
+			return true
+		}
+	}
+	return false
 }

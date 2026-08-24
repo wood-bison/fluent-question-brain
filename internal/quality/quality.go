@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/wood-bison/fluent-question-brain/internal/normalize"
 )
@@ -28,6 +29,12 @@ func CardIssues(card normalize.Card) []PromptIssue {
 		issues = append(issues, PromptIssue{
 			Code:    "placeholder_title",
 			Message: "card title is a PDF section heading or placeholder",
+		})
+	}
+	if isCodeFragmentTitle(card.Title) {
+		issues = append(issues, PromptIssue{
+			Code:    "code_fragment_title",
+			Message: "card title is an extracted code fragment rather than a semantic title",
 		})
 	}
 
@@ -117,6 +124,28 @@ func IsPDFHeading(value string) bool {
 	return isPDFHeading(value)
 }
 
+// IsCodeFragmentTitle exposes the title-shape check to the database audit.
+// A title may contain code examples, but a bare assignment/function literal
+// is extraction debris and not a useful learner-facing label.
+func IsCodeFragmentTitle(value string) bool {
+	return isCodeFragmentTitle(value)
+}
+
+// IsSemanticShapeIssue identifies the answer-free semantic/shape failures
+// surfaced by /v1/quality. PDF control/layout failures remain separate so the
+// audit can distinguish malformed prose from extraction debris.
+func IsSemanticShapeIssue(code string) bool {
+	switch code {
+	case "empty_prompt", "prompt_equals_answer", "prompt_matches_title",
+		"prompt_matches_topic", "pdf_heading_prompt", "placeholder_title",
+		"code_fragment_title", "single_token_prompt", "short_label_prompt",
+		"fragment_prompt":
+		return true
+	default:
+		return false
+	}
+}
+
 func appendPromptIssues(issues []PromptIssue, locale, prompt, answer, title, topic string) []PromptIssue {
 	add := func(code, message string) {
 		if locale != "" {
@@ -145,6 +174,9 @@ func appendPromptIssues(issues []PromptIssue, locale, prompt, answer, title, top
 	}
 	if HasPDFArtifact(prompt) {
 		add("pdf_artifact", "prompt contains an extracted PDF control or replacement character")
+	}
+	if isPromptFragment(prompt) {
+		add("fragment_prompt", "prompt ends like an incomplete extracted sentence")
 	}
 
 	// A single bare token is almost always a heading, not an interview
@@ -205,6 +237,62 @@ func isPDFHeading(value string) bool {
 	default:
 		return false
 	}
+}
+
+func isCodeFragmentTitle(value string) bool {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return false
+	}
+	// These patterns are intentionally narrow: code in a descriptive title is
+	// allowed, while a standalone assignment/map/function expression is a
+	// reliable signal that a PDF code column was promoted to the title.
+	if strings.Contains(value, ":=") || strings.Contains(value, "map[") {
+		return true
+	}
+	if strings.Contains(value, "func ") && strings.Contains(value, "(") {
+		return true
+	}
+	return strings.ContainsAny(value, "{}") && strings.Contains(value, "=")
+}
+
+var trailingFragmentWords = map[string]struct{}{
+	"для": {}, "у": {}, "нас": {}, "в": {}, "во": {}, "на": {}, "с": {},
+	"со": {}, "к": {}, "ко": {}, "по": {}, "из": {}, "от": {}, "до": {},
+	"без": {}, "над": {}, "под": {}, "при": {}, "об": {}, "о": {},
+	"который": {}, "которая": {}, "которое": {}, "которые": {},
+	"если": {}, "когда": {}, "чтобы": {},
+	"for": {}, "to": {}, "with": {}, "and": {}, "or": {}, "that": {},
+	"which": {}, "if": {}, "when": {},
+}
+
+func isPromptFragment(value string) bool {
+	value = strings.TrimSpace(value)
+	if value == "" || hasQuestionMark(value) {
+		return false
+	}
+	trimmed := strings.TrimRightFunc(value, unicode.IsSpace)
+	if len(trimmed) == 0 {
+		return false
+	}
+	last, _ := utf8.DecodeLastRuneInString(trimmed)
+	if strings.ContainsRune(",:;—-", last) {
+		return true
+	}
+	// A terminal full stop is a complete statement even when its last word is
+	// a preposition (for example, "What is this tool used for.").
+	if strings.ContainsRune(".!?。！？", last) {
+		return false
+	}
+	words := strings.Fields(trimmed)
+	if len(words) < 2 {
+		return false
+	}
+	lastWord := strings.Trim(strings.ToLower(words[len(words)-1]), " \t\r\n.,!?;:()[]{}\"'«»`")
+	if _, ok := trailingFragmentWords[lastWord]; ok {
+		return true
+	}
+	return strings.HasSuffix(strings.ToLower(trimmed), " у нас")
 }
 
 func valueHasPDFArtifact(value any) bool {

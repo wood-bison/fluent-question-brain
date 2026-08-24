@@ -183,12 +183,16 @@ type QualityChecks struct {
 	RuPromptEqualsAnswer int `json:"ru_prompt_equals_answer"`
 	// DegeneratePrompts counts production cards whose RU or EN prompt is not
 	// a usable question: empty, equal to the answer, equal to the card title
-	// or topic, a single unpunctuated word, or shorter than ~20 characters
-	// without a question mark. Equality with the answer
+	// or topic, a single unpunctuated word, a truncated sentence fragment, or
+	// shorter than ~20 characters without a question mark. Equality with the answer
 	// alone was not enough: a PDF section heading leaked into the prompt
 	// ("SQL", "Указатели", ":") is also not equal to the answer, which let
 	// 70 unusable cards pass the old check.
 	DegeneratePrompts int `json:"degenerate_prompts"`
+	// SemanticShapeIssues is the subset of degenerate cards whose learner
+	// prompt/title shape is malformed. PDF control/layout debris is counted by
+	// DegeneratePrompts but intentionally not repeated here.
+	SemanticShapeIssues int `json:"semantic_shape_issues"`
 }
 
 type ReleaseResponse struct {
