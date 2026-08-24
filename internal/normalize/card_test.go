@@ -96,3 +96,48 @@ func TestCardFromPayloadPreservesLegacyFieldsAndHash(t *testing.T) {
 		t.Fatalf("legacy fields were dropped: %s", card.Payload)
 	}
 }
+
+func TestRussianFieldsPrefersQuestionRUOverCoreIdea(t *testing.T) {
+	card, err := ParseMarkdown("test.md", []byte(`# Q-1 — Sample
+
+ID: Q-1
+Question: Sample question?
+
+## Question (RU)
+
+Примерный вопрос на русском?
+
+## Core Idea (RU)
+
+Суть решения одной строкой.
+`))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	prompt, shortAnswer, _ := RussianFields(card)
+	if prompt != "Примерный вопрос на русском?" {
+		t.Fatalf("ru prompt = %q, want the Question (RU) text", prompt)
+	}
+	if shortAnswer != "Суть решения одной строкой." {
+		t.Fatalf("ru short answer = %q, want the Core Idea (RU) text", shortAnswer)
+	}
+}
+
+func TestRussianFieldsFallsBackToCoreIdeaWhenNoQuestionRU(t *testing.T) {
+	card, err := ParseMarkdown("test.md", []byte(`# Q-2 — Legacy style
+
+ID: Q-2
+Question: Legacy question?
+
+## Core Idea (RU)
+
+Единый текст вместо вопроса и ответа.
+`))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	prompt, shortAnswer, _ := RussianFields(card)
+	if prompt != shortAnswer || prompt == "" {
+		t.Fatalf("expected degenerate fallback prompt==answer, got %q vs %q", prompt, shortAnswer)
+	}
+}
