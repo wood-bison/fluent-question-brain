@@ -1,0 +1,45 @@
+{
+  "source_system": "fluent-question-vault",
+  "source_root": "/vault/Question Cards",
+  "workspace_key": "fluent-interview",
+  "dry_run": true,
+  "started_at": "2026-08-24T10:59:57.323481376Z",
+  "finished_at": "2026-08-24T10:59:57.325486501Z",
+  "totals": {
+    "files": 5,
+    "would_create": 5
+  },
+  "archived": 0,
+  "items": [
+    {
+      "source_ref": "/vault/Question Cards/OZ-197 — Списывание денег с карточки.md",
+      "stable_key": "question.oz-197",
+      "content_hash": "2fb9b264da85c21cca8ca0ce00886fa2e9b1d843673ac681950c349de8ee6250",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-198 — Проектирование data платформы.md",
+      "stable_key": "question.oz-198",
+      "content_hash": "1508fff0b40e5f110a9d45d7dd5efeba1adf327dc6e42e1916f846e093d353eb",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-199 — Синхронизация данных.md",
+      "stable_key": "question.oz-199",
+      "content_hash": "17e07a2e59aee8aed10e320a6700e61b1c26a575cedf3194c53ebf0929a54b90",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-200 — Матчинг отелей.md",
+      "stable_key": "question.oz-200",
+      "content_hash": "fba130f4b275747f0d113ebd9cc660eb290f42e3a8e5b3a80423f28e5a374478",
+      "action": "would_create"
+    },
+    {
+      "source_ref": "/vault/Question Cards/OZ-201 — Partners Reports.md",
+      "stable_key": "question.oz-201",
+      "content_hash": "92363c8303aa74f53cf694e0dcc4551dd6164ef9ec947622f902c2c3b5ee080d",
+      "action": "would_create"
+    }
+  ]
+}
