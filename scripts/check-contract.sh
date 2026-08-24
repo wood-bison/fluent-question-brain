@@ -16,6 +16,8 @@ test -s "${repo_root}/internal/quality/quality.go"
 test -s "${repo_root}/internal/mapping/manifest.go"
 test -s "${repo_root}/cmd/qb-map-release/main.go"
 test -s "${repo_root}/docs/contracts/fluent-engineering-lab.md"
+test -s "${repo_root}/docs/contracts/question-capability-task.v1.md"
+test -s "${repo_root}/docs/adr/0003-reviewed-content-relations-and-capability-bindings.md"
 test -s "${repo_root}/apps/cms/src/migrations/20260824_path_taxonomy.ts"
 test -s "${repo_root}/apps/cms/package-lock.json"
 for script in load-smoke migration-smoke backup-restore-smoke failure-injection-smoke rollback-smoke g5-smoke apply-curriculum-mapping-migration; do
@@ -63,6 +65,10 @@ fi
 
 if command -v docker >/dev/null 2>&1; then
   docker compose -f "${repo_root}/deploy/compose/compose.yaml" config >/dev/null
+fi
+
+if command -v go >/dev/null 2>&1; then
+  go test ./internal/contractmodel >/dev/null
 fi
 
 echo "question-brain contract: ok"

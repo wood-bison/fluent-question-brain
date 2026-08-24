@@ -1,0 +1,54 @@
+{
+  "contractVersion": "question-capability-task.v1",
+  "questionCards": [
+    { "stableKey": "question.rate-limiter", "revisionId": "qrev-rate-1", "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "locales": ["en", "ru"], "status": "published" },
+    { "stableKey": "question.circuit-breaker", "revisionId": "qrev-circuit-1", "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "locales": ["en", "ru"], "status": "published" },
+    { "stableKey": "question.node-event-loop", "revisionId": "qrev-node-loop-1", "contentHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "locales": ["en", "ru"], "status": "published" },
+    { "stableKey": "question.postgres-query-plan", "revisionId": "qrev-pg-plan-1", "contentHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "locales": ["en", "ru"], "status": "published" },
+    { "stableKey": "question.theory-only-tradeoffs", "revisionId": "qrev-theory-1", "contentHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "locales": ["en", "ru"], "status": "published" }
+  ],
+  "capabilities": [
+    { "key": "capability.distributed-systems.rate-limiter", "title": { "en": "Rate limiting", "ru": "Ограничение частоты" }, "lifecycle": "active" },
+    { "key": "capability.distributed-systems.circuit-breaker", "title": { "en": "Circuit breaker", "ru": "Circuit breaker" }, "lifecycle": "active" },
+    { "key": "capability.nodejs.event-loop-ordering", "title": { "en": "Event-loop ordering", "ru": "Порядок event loop" }, "lifecycle": "active" },
+    { "key": "capability.postgresql.query-plan-analysis", "title": { "en": "Query-plan analysis", "ru": "Анализ плана запроса" }, "lifecycle": "active" },
+    { "key": "capability.engineering.tradeoffs", "title": { "en": "Engineering trade-offs", "ru": "Инженерные компромиссы" }, "lifecycle": "active" }
+  ],
+  "capabilityDomainBindings": [
+    { "capabilityKey": "capability.distributed-systems.rate-limiter", "domainKey": "domain.distributed-systems", "role": "primary" },
+    { "capabilityKey": "capability.distributed-systems.rate-limiter", "domainKey": "domain.http-api", "role": "secondary" },
+    { "capabilityKey": "capability.distributed-systems.circuit-breaker", "domainKey": "domain.distributed-systems", "role": "primary" },
+    { "capabilityKey": "capability.nodejs.event-loop-ordering", "domainKey": "domain.runtime", "role": "primary" },
+    { "capabilityKey": "capability.postgresql.query-plan-analysis", "domainKey": "domain.data-postgresql", "role": "primary" },
+    { "capabilityKey": "capability.engineering.tradeoffs", "domainKey": "domain.testing", "role": "primary" }
+  ],
+  "questionCapabilityBindings": [
+    { "question": { "stableKey": "question.rate-limiter", "revisionId": "qrev-rate-1", "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "role": "preparation" }, "capabilityKey": "capability.distributed-systems.rate-limiter", "role": "primary", "provenance": "editorial-review-2026-08-24", "confidence": 1 },
+    { "question": { "stableKey": "question.circuit-breaker", "revisionId": "qrev-circuit-1", "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "role": "preparation" }, "capabilityKey": "capability.distributed-systems.circuit-breaker", "role": "primary", "provenance": "editorial-review-2026-08-24", "confidence": 1 },
+    { "question": { "stableKey": "question.node-event-loop", "revisionId": "qrev-node-loop-1", "contentHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "role": "preparation" }, "capabilityKey": "capability.nodejs.event-loop-ordering", "role": "primary", "provenance": "editorial-review-2026-08-24", "confidence": 1 },
+    { "question": { "stableKey": "question.postgres-query-plan", "revisionId": "qrev-pg-plan-1", "contentHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "role": "preparation" }, "capabilityKey": "capability.postgresql.query-plan-analysis", "role": "primary", "provenance": "editorial-review-2026-08-24", "confidence": 1 },
+    { "question": { "stableKey": "question.theory-only-tradeoffs", "revisionId": "qrev-theory-1", "contentHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "role": "preparation" }, "capabilityKey": "capability.engineering.tradeoffs", "role": "primary", "provenance": "editorial-review-2026-08-24", "confidence": 1 }
+  ],
+  "taskFamilies": [
+    { "key": "task-family.token-bucket", "title": { "en": "Implement a token bucket", "ru": "Реализовать token bucket" }, "capabilityKeys": ["capability.distributed-systems.rate-limiter"], "questionBindings": [{ "stableKey": "question.rate-limiter", "revisionId": "qrev-rate-1", "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "role": "preparation" }], "revisionIds": ["task.token-bucket-go", "task.token-bucket-java", "task.token-bucket-csharp", "task.token-bucket-typescript"], "status": "released" },
+    { "key": "task-family.circuit-breaker", "title": { "en": "Implement a circuit breaker", "ru": "Реализовать circuit breaker" }, "capabilityKeys": ["capability.distributed-systems.circuit-breaker"], "questionBindings": [{ "stableKey": "question.circuit-breaker", "revisionId": "qrev-circuit-1", "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "role": "preparation" }], "revisionIds": ["task.circuit-breaker-go", "task.circuit-breaker-java", "task.circuit-breaker-csharp", "task.circuit-breaker-typescript"], "status": "in_review" },
+    { "key": "task-family.capstone-platform", "title": { "en": "Build a resilient platform", "ru": "Построить отказоустойчивую платформу" }, "capabilityKeys": ["capability.distributed-systems.rate-limiter", "capability.distributed-systems.circuit-breaker", "capability.engineering.tradeoffs"], "questionBindings": [{ "stableKey": "question.rate-limiter", "revisionId": "qrev-rate-1", "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "role": "context" }, { "stableKey": "question.circuit-breaker", "revisionId": "qrev-circuit-1", "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "role": "context" }], "revisionIds": ["task.capstone-platform-go"], "status": "draft" }
+  ],
+  "taskRevisions": [
+    { "taskId": "task.token-bucket-go", "revision": 1, "taskFamilyKey": "task-family.token-bucket", "language": "go", "profile": "go", "status": "released", "immutableHash": "1111111111111111111111111111111111111111111111111111111111111111" },
+    { "taskId": "task.token-bucket-java", "revision": 1, "taskFamilyKey": "task-family.token-bucket", "language": "java", "profile": "java", "status": "released", "immutableHash": "2222222222222222222222222222222222222222222222222222222222222222" },
+    { "taskId": "task.token-bucket-csharp", "revision": 1, "taskFamilyKey": "task-family.token-bucket", "language": "csharp", "profile": "dotnet", "status": "released", "immutableHash": "3333333333333333333333333333333333333333333333333333333333333333" },
+    { "taskId": "task.token-bucket-typescript", "revision": 1, "taskFamilyKey": "task-family.token-bucket", "language": "typescript", "profile": "node", "status": "released", "immutableHash": "4444444444444444444444444444444444444444444444444444444444444444" },
+    { "taskId": "task.capstone-platform-go", "revision": 1, "taskFamilyKey": "task-family.capstone-platform", "language": "go", "profile": "go", "status": "draft", "immutableHash": "5555555555555555555555555555555555555555555555555555555555555555" }
+  ],
+  "contentRelations": [
+    { "relationId": "relation.rate-to-circuit", "from": "question.rate-limiter", "to": "question.circuit-breaker", "kind": "related", "status": "accepted", "provenance": "editorial-review-2026-08-24", "confidence": 1 },
+    { "relationId": "relation.node-loop-to-rate", "from": "question.node-event-loop", "to": "question.rate-limiter", "kind": "prerequisite", "status": "proposed", "provenance": "semantic-proposal-2026-08-24", "confidence": 0.78 }
+  ],
+  "runs": [
+    { "runId": "run-2026-08-24-0001", "taskId": "task.token-bucket-go", "taskRevision": 1, "status": "passed", "resultHash": "6666666666666666666666666666666666666666666666666666666666666666" }
+  ],
+  "evidence": [
+    { "evidenceId": "evidence-2026-08-24-0001", "runId": "run-2026-08-24-0001", "state": "accepted", "recordedAt": "2026-08-24T20:00:00Z" }
+  ]
+}

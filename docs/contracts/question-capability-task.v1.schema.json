@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fluent-interview.dev/contracts/question-capability-task.v1.schema.json",
+  "title": "Question → Capability → Task production contract",
+  "description": "Cross-repository identity and relationship contract. Prose, executable files, hidden tests, learner progress, and run evidence remain owned by their bounded services.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "questionCards", "capabilities", "capabilityDomainBindings", "questionCapabilityBindings", "taskFamilies", "taskRevisions", "contentRelations", "runs", "evidence"],
+  "properties": {
+    "contractVersion": { "const": "question-capability-task.v1" },
+    "questionCards": { "type": "array", "items": { "$ref": "#/$defs/questionCard" } },
+    "capabilities": { "type": "array", "items": { "$ref": "#/$defs/capability" } },
+    "capabilityDomainBindings": { "type": "array", "items": { "$ref": "#/$defs/capabilityDomainBinding" } },
+    "questionCapabilityBindings": { "type": "array", "items": { "$ref": "#/$defs/questionCapabilityBinding" } },
+    "taskFamilies": { "type": "array", "items": { "$ref": "#/$defs/taskFamily" } },
+    "taskRevisions": { "type": "array", "items": { "$ref": "#/$defs/taskRevision" } },
+    "contentRelations": { "type": "array", "items": { "$ref": "#/$defs/contentRelation" } },
+    "runs": { "type": "array", "items": { "$ref": "#/$defs/run" } },
+    "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } }
+  },
+  "$defs": {
+    "key": { "type": "string", "minLength": 3, "pattern": "^[a-z][a-z0-9-]*(\\.[a-z0-9][a-z0-9._-]*)+$" },
+    "questionKey": { "type": "string", "pattern": "^question\\.[a-z0-9][a-z0-9._-]*$" },
+    "capabilityKey": { "type": "string", "pattern": "^capability\\.[a-z0-9-]+\\.[a-z0-9][a-z0-9-]*$" },
+    "domainKey": { "type": "string", "pattern": "^domain\\.[a-z0-9][a-z0-9-]*$" },
+    "localized": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["en", "ru"],
+      "properties": { "en": { "type": "string", "minLength": 1 }, "ru": { "type": "string", "minLength": 1 } }
+    },
+    "questionBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stableKey", "revisionId", "contentHash"],
+      "properties": {
+        "stableKey": { "$ref": "#/$defs/questionKey" },
+        "revisionId": { "type": "string", "minLength": 1 },
+        "contentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "role": { "enum": ["preparation", "context", "follow_up", "recall"] }
+      }
+    },
+    "questionCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stableKey", "revisionId", "contentHash", "locales", "status"],
+      "properties": {
+        "stableKey": { "$ref": "#/$defs/questionKey" },
+        "revisionId": { "type": "string", "minLength": 1 },
+        "contentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "locales": { "type": "array", "items": { "enum": ["en", "ru"] }, "minItems": 1, "uniqueItems": true },
+        "status": { "enum": ["draft", "in_review", "published", "archived"] }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "title", "lifecycle"],
+      "properties": {
+        "key": { "$ref": "#/$defs/capabilityKey" },
+        "title": { "$ref": "#/$defs/localized" },
+        "lifecycle": { "enum": ["active", "deprecated", "retired"] },
+        "aliases": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "supersedes": { "type": "array", "items": { "$ref": "#/$defs/capabilityKey" }, "uniqueItems": true }
+      }
+    },
+    "capabilityDomainBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capabilityKey", "domainKey", "role"],
+      "properties": {
+        "capabilityKey": { "$ref": "#/$defs/capabilityKey" },
+        "domainKey": { "$ref": "#/$defs/domainKey" },
+        "role": { "enum": ["primary", "secondary"] }
+      }
+    },
+    "questionCapabilityBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question", "capabilityKey", "role", "provenance"],
+      "properties": {
+        "question": { "$ref": "#/$defs/questionBinding" },
+        "capabilityKey": { "$ref": "#/$defs/capabilityKey" },
+        "role": { "enum": ["primary", "prerequisite", "follow_up", "contrast", "recall"] },
+        "provenance": { "type": "string", "minLength": 1 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "taskFamily": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "title", "capabilityKeys", "questionBindings", "revisionIds", "status"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^task-family\\.[a-z0-9][a-z0-9-]*$" },
+        "title": { "$ref": "#/$defs/localized" },
+        "capabilityKeys": { "type": "array", "items": { "$ref": "#/$defs/capabilityKey" }, "uniqueItems": true },
+        "questionBindings": { "type": "array", "items": { "$ref": "#/$defs/questionBinding" } },
+        "revisionIds": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1, "uniqueItems": true },
+        "status": { "enum": ["draft", "in_review", "released", "retired"] }
+      }
+    },
+    "taskRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["taskId", "revision", "taskFamilyKey", "language", "profile", "status", "immutableHash"],
+      "properties": {
+        "taskId": { "type": "string", "pattern": "^task\\.[a-z0-9][a-z0-9-]*$" },
+        "revision": { "type": "integer", "minimum": 1 },
+        "taskFamilyKey": { "type": "string", "pattern": "^task-family\\.[a-z0-9][a-z0-9-]*$" },
+        "language": { "type": "string", "pattern": "^[a-z][a-z0-9+#.-]*$" },
+        "profile": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["draft", "in_review", "released", "retired"] },
+        "immutableHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "contentRelation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relationId", "from", "to", "kind", "status", "provenance"],
+      "properties": {
+        "relationId": { "type": "string", "minLength": 1 },
+        "from": { "$ref": "#/$defs/questionKey" },
+        "to": { "$ref": "#/$defs/questionKey" },
+        "kind": { "enum": ["prerequisite", "related", "contrast", "follow_up", "variant", "duplicate", "supersedes"] },
+        "status": { "enum": ["proposed", "accepted", "rejected", "retired"] },
+        "provenance": { "type": "string", "minLength": 1 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runId", "taskId", "taskRevision", "status", "resultHash"],
+      "properties": {
+        "runId": { "type": "string", "minLength": 1 },
+        "taskId": { "type": "string", "pattern": "^task\\.[a-z0-9][a-z0-9-]*$" },
+        "taskRevision": { "type": "integer", "minimum": 1 },
+        "status": { "enum": ["queued", "running", "passed", "failed", "timeout", "error"] },
+        "resultHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidenceId", "runId", "state", "recordedAt"],
+      "properties": {
+        "evidenceId": { "type": "string", "minLength": 1 },
+        "runId": { "type": "string", "minLength": 1 },
+        "state": { "enum": ["observed", "accepted", "needs_review"] },
+        "recordedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}
