@@ -165,6 +165,104 @@ func (p *Postgres) MissingRussianSources(ctx context.Context, workspaceKey strin
 	return items, nil
 }
 
+// DegenerateRussianSources returns current published production revisions
+// whose Russian locale exists but carries answer text standing in for the
+// question (empty prompt, or prompt equal to the short answer). These rows
+// were written by imports of legacy-style cards; no translated question was
+// ever stored for them, so they cannot be restored from history.
+func (p *Postgres) DegenerateRussianSources(ctx context.Context, workspaceKey string) ([]TranslationSource, error) {
+	rows, err := p.pool.Query(ctx, `
+		select q.id::text, qr.id::text, q.stable_key, qr.content_hash, qr.normalized_payload
+		from content.question q
+		join content.question_revision qr on qr.id = q.current_revision_id
+		join content.question_locale ru on ru.revision_id = qr.id and ru.locale = 'ru'
+		where q.workspace_id = (select id from content.workspace where stable_key = $1)
+		  and q.status = 'published'
+		  and q.content_kind = 'production'
+		  and (trim(ru.prompt) = '' or trim(ru.prompt) = trim(coalesce(ru.short_answer, '')))
+		order by q.stable_key
+	`, strings.TrimSpace(workspaceKey))
+	if err != nil {
+		return nil, fmt.Errorf("query degenerate Russian prompts: %w", err)
+	}
+	defer rows.Close()
+	items := make([]TranslationSource, 0)
+	for rows.Next() {
+		var item TranslationSource
+		if err := rows.Scan(&item.QuestionID, &item.RevisionID, &item.StableKey, &item.ContentHash, &item.Payload); err != nil {
+			return nil, fmt.Errorf("scan degenerate Russian locale: %w", err)
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate degenerate Russian locales: %w", err)
+	}
+	return items, nil
+}
+
+// RepairRussianPrompt replaces a degenerate Russian prompt with a translated
+// question. The update is guarded: it only applies while the stored prompt is
+// still degenerate, so a concurrent editorial fix always wins. The payload,
+// revision, and content_hash are untouched; an audit record and an outbox
+// event let the indexer re-embed the changed locale text.
+func (p *Postgres) RepairRussianPrompt(ctx context.Context, source TranslationSource, question, actor, provider string) error {
+	question = strings.TrimSpace(question)
+	if question == "" {
+		return fmt.Errorf("repaired russian prompt is empty")
+	}
+	metadata, err := json.Marshal(map[string]string{
+		"stable_key":  source.StableKey,
+		"revision_id": source.RevisionID,
+		"source_hash": source.ContentHash,
+		"locale":      "ru",
+		"provider":    provider,
+		"actor":       actor,
+		"mode":        "degenerate-prompt-repair",
+	})
+	if err != nil {
+		return fmt.Errorf("encode repair audit: %w", err)
+	}
+	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return fmt.Errorf("begin repair transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	result, err := tx.Exec(ctx, `
+		update content.question_locale ru
+		set prompt = $3
+		from content.question_revision qr
+		where qr.id = ru.revision_id
+		  and ru.locale = 'ru'
+		  and qr.id = $2::uuid
+		  and (trim(ru.prompt) = '' or trim(ru.prompt) = trim(coalesce(ru.short_answer, '')))
+	`, source.QuestionID, source.RevisionID, question)
+	if err != nil {
+		return fmt.Errorf("repair russian prompt: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return nil // already fixed elsewhere; nothing to audit
+	}
+	if _, err := tx.Exec(ctx, `
+		insert into content.audit_event (workspace_id, aggregate_type, aggregate_id, event_type, actor, metadata)
+		select q.workspace_id, 'question_locale', q.id, 'question.locale.translated', $2, $3::jsonb
+		from content.question q
+		where q.id = $1::uuid
+	`, source.QuestionID, actor, metadata); err != nil {
+		return fmt.Errorf("write repair audit: %w", err)
+	}
+	if _, err := tx.Exec(ctx, `
+		insert into content.outbox_event (aggregate_type, aggregate_id, event_type, idempotency_key, payload)
+		values ('question_locale', $1::uuid, 'question.locale.translated', $2, $3::jsonb)
+		on conflict (idempotency_key) do nothing
+	`, source.QuestionID, "question-locale-ru-prompt:"+source.RevisionID, metadata); err != nil {
+		return fmt.Errorf("write repair outbox: %w", err)
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit repair transaction: %w", err)
+	}
+	return nil
+}
+
 // StoreRussianTranslation adds one validated locale to an existing
 // immutable revision. It is intentionally insert-only: correcting a draft
 // requires a new explicit translation review rather than silently replacing
@@ -1472,9 +1570,28 @@ func (p *Postgres) Quality(ctx context.Context, request search.QualityRequest) (
 	`, strings.TrimSpace(request.WorkspaceKey)).Scan(&localesWithoutEmbedding); err != nil {
 		return search.QualityResponse{}, fmt.Errorf("count locales without embedding: %w", err)
 	}
-	checks := release.Checks
+	checks := search.QualityChecks{ReleaseChecks: release.Checks}
 	checks.OutboxPending = &outboxPending
 	checks.LocalesWithoutEmbedding = &localesWithoutEmbedding
+
+	// A Russian prompt that merely repeats the answer text (or is empty)
+	// means the locale exists but the question was never really written —
+	// the exact defect behind missing_russian reporting green too early.
+	var ruPromptEqualsAnswer int
+	if err := p.pool.QueryRow(ctx, `
+		select count(*)
+		from content.question q
+		join content.workspace w on w.id = q.workspace_id
+		join content.question_revision r on r.id = q.current_revision_id
+		join content.question_locale ru on ru.revision_id = r.id and ru.locale = 'ru'
+		where w.stable_key = $1
+		  and q.status = 'published'
+		  and q.content_kind = 'production'
+		  and (trim(ru.prompt) = '' or trim(ru.prompt) = trim(coalesce(ru.short_answer, '')))
+	`, strings.TrimSpace(request.WorkspaceKey)).Scan(&ruPromptEqualsAnswer); err != nil {
+		return search.QualityResponse{}, fmt.Errorf("count degenerate russian prompts: %w", err)
+	}
+	checks.RuPromptEqualsAnswer = ruPromptEqualsAnswer
 
 	tracks := make(map[string]int)
 	topics := make(map[string]int)
@@ -1770,13 +1887,16 @@ func qualityBuckets(values map[string]int) []search.QualityBucket {
 	return buckets
 }
 
-func qualityWarnings(checks search.ReleaseChecks, duplicateGroups int) []string {
+func qualityWarnings(checks search.QualityChecks, duplicateGroups int) []string {
 	warnings := make([]string, 0, 5)
 	if checks.GraphReleased < checks.Published {
 		warnings = append(warnings, "published questions still have graph placement review debt")
 	}
 	if checks.MissingRussian > 0 {
 		warnings = append(warnings, "some published questions fall back from Russian to English")
+	}
+	if checks.RuPromptEqualsAnswer > 0 {
+		warnings = append(warnings, fmt.Sprintf("%d Russian prompts are empty or equal the answer text instead of asking the question", checks.RuPromptEqualsAnswer))
 	}
 	if duplicateGroups > 0 {
 		warnings = append(warnings, "exact prompt duplicate groups require explicit review")

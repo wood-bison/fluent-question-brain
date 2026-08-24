@@ -60,6 +60,7 @@ func main() {
 	actor := flag.String("actor", "translation-editorial-2026-08-22", "audit actor")
 	workers := flag.Int("workers", 2, "concurrent translation requests")
 	limit := flag.Int("limit", 0, "translate at most N cards; zero means all")
+	repairDegenerate := flag.Bool("repair-degenerate-prompts", false, "re-translate the question for production cards whose Russian prompt degenerated into the answer text, updating only the ru prompt column")
 	approve := flag.Bool("approve", false, "write generated Russian locales to Postgres")
 	reportPath := flag.String("report", "", "write a machine-readable JSON report")
 	flag.Parse()
@@ -78,7 +79,12 @@ func main() {
 		fatal("open database: %v", err)
 	}
 	defer db.Close()
-	sources, err := db.MissingRussianSources(ctx, *workspaceKey)
+	var sources []store.TranslationSource
+	if *repairDegenerate {
+		sources, err = db.DegenerateRussianSources(ctx, *workspaceKey)
+	} else {
+		sources, err = db.MissingRussianSources(ctx, *workspaceKey)
+	}
 	if err != nil {
 		fatal("read translation sources: %v", err)
 	}
@@ -104,7 +110,7 @@ func main() {
 	if *provider != "google" {
 		fatal("LLM translation providers are disabled; provider must be google")
 	}
-	items := translateAll(ctx, db, sources, *actor, *workers, *approve)
+	items := translateAll(ctx, db, sources, *actor, *workers, *approve, *repairDegenerate)
 	report.Items = items
 	for _, item := range items {
 		if item.Status == "translated" || item.Status == "stored" {
@@ -133,7 +139,7 @@ func main() {
 	}
 }
 
-func translateAll(ctx context.Context, db *store.Postgres, sources []store.TranslationSource, actor string, workers int, approve bool) []reportItem {
+func translateAll(ctx context.Context, db *store.Postgres, sources []store.TranslationSource, actor string, workers int, approve, repairDegenerate bool) []reportItem {
 	type result struct {
 		index int
 		item  reportItem
@@ -148,6 +154,39 @@ func translateAll(ctx context.Context, db *store.Postgres, sources []store.Trans
 			for index := range jobs {
 				source := sources[index]
 				item := reportItem{StableKey: source.StableKey}
+				if repairDegenerate {
+					var input translationInput
+					if err := json.Unmarshal(source.Payload, &input); err != nil {
+						item.Status, item.Error = "failed", err.Error()
+						results <- result{index: index, item: item}
+						continue
+					}
+					questionOnly := strings.TrimSpace(input.Question)
+					if questionOnly == "" {
+						item.Status, item.Error = "failed", "canonical payload has no question"
+						results <- result{index: index, item: item}
+						continue
+					}
+					translated, err := translateWithGoogle(ctx, translationInput{Question: questionOnly})
+					if err != nil {
+						item.Status, item.Error = "failed", err.Error()
+						results <- result{index: index, item: item}
+						continue
+					}
+					if approve {
+						err = db.RepairRussianPrompt(ctx, source, translated.Question, actor, "google-translate:text-endpoint:degenerate-prompt-repair")
+						if err != nil {
+							item.Status, item.Error = "failed", err.Error()
+							results <- result{index: index, item: item}
+							continue
+						}
+						item.Status = "stored"
+					} else {
+						item.Status = "translated"
+					}
+					results <- result{index: index, item: item}
+					continue
+				}
 				translated, err := translateSource(ctx, source)
 				if err != nil {
 					item.Status, item.Error = "failed", err.Error()
@@ -257,21 +296,48 @@ func googleTranslateText(ctx context.Context, text string) (string, error) {
 	values.Set("tl", "ru")
 	values.Set("dt", "t")
 	values.Set("q", text)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://translate.googleapis.com/translate_a/single?"+values.Encode(), nil)
-	if err != nil {
-		return "", fmt.Errorf("create translation request: %w", err)
+	// The public endpoint rate-limits bursts with 429; a bounded backoff
+	// keeps long editorial batches alive without hammering the service.
+	backoff := 3 * time.Second
+	var lastErr error
+	for attempt := 0; attempt < 4; attempt++ {
+		if attempt > 0 {
+			select {
+			case <-ctx.Done():
+				return "", ctx.Err()
+			case <-time.After(backoff):
+			}
+			backoff *= 4
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://translate.googleapis.com/translate_a/single?"+values.Encode(), nil)
+		if err != nil {
+			return "", fmt.Errorf("create translation request: %w", err)
+		}
+		resp, err := (&http.Client{Timeout: 30 * time.Second}).Do(req)
+		if err != nil {
+			lastErr = fmt.Errorf("call translation endpoint: %w", err)
+			continue
+		}
+		if resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
+			resp.Body.Close()
+			lastErr = fmt.Errorf("translation endpoint returned %s", resp.Status)
+			continue
+		}
+		if resp.StatusCode == http.StatusBadRequest {
+			resp.Body.Close()
+			return "", errGoogleRequestTooLong
+		}
+		if resp.StatusCode >= http.StatusBadRequest {
+			resp.Body.Close()
+			return "", fmt.Errorf("translation endpoint returned %s", resp.Status)
+		}
+		return decodeGoogleTranslation(resp)
 	}
-	resp, err := (&http.Client{Timeout: 30 * time.Second}).Do(req)
-	if err != nil {
-		return "", fmt.Errorf("call translation endpoint: %w", err)
-	}
+	return "", lastErr
+}
+
+func decodeGoogleTranslation(resp *http.Response) (string, error) {
 	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusBadRequest {
-		return "", errGoogleRequestTooLong
-	}
-	if resp.StatusCode >= http.StatusBadRequest {
-		return "", fmt.Errorf("translation endpoint returned %s", resp.Status)
-	}
 	var root []json.RawMessage
 	if err := json.NewDecoder(resp.Body).Decode(&root); err != nil {
 		return "", fmt.Errorf("decode translation response: %w", err)

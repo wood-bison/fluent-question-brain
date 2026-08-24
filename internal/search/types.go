@@ -172,6 +172,14 @@ type ReleaseChecks struct {
 	LocalesWithoutEmbedding *int `json:"locales_without_embedding,omitempty"`
 }
 
+// QualityChecks is the /v1/quality view of ReleaseChecks plus audit-only
+// content-quality counters. The embedded release fields stay byte-identical;
+// quality-only counters are plain ints so they always serialize, including 0.
+type QualityChecks struct {
+	ReleaseChecks
+	RuPromptEqualsAnswer int `json:"ru_prompt_equals_answer"`
+}
+
 type ReleaseResponse struct {
 	ContractVersion  string        `json:"contract_version"`
 	WorkspaceKey     string        `json:"workspace_key"`
@@ -226,7 +234,7 @@ type QualityResponse struct {
 	GeneratedAt             time.Time                       `json:"generated_at"`
 	Total                   int                             `json:"total"`
 	IncludeFixtures         bool                            `json:"include_fixtures"`
-	Checks                  ReleaseChecks                   `json:"checks"`
+	Checks                  QualityChecks                   `json:"checks"`
 	Locales                 []QualityBucket                 `json:"locales"`
 	Tracks                  []QualityBucket                 `json:"tracks"`
 	Topics                  []QualityBucket                 `json:"topics"`

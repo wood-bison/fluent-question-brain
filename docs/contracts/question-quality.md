@@ -18,6 +18,11 @@ The response is deliberately answer-free. It contains:
   quality audit only — `/v1/release` omits them — and either value above zero
   also produces an entry in `warnings`, because a lagging indexer silently
   degrades semantic search;
+- `checks.ru_prompt_equals_answer`: production cards whose Russian prompt is
+  empty or identical to the Russian short answer. Such a locale technically
+  exists, so `missing_russian` stays green while the question was never
+  actually written; this counter makes that defect visible (quality-only,
+  always serialized);
 - open exact prompt duplicate groups as stable keys plus an opaque fingerprint;
 - resolved exact prompt groups, including their terminal review decisions, so
   an audit remains explainable without re-opening settled candidates;
