@@ -2,8 +2,13 @@
   "contract_version": "question-brain.curriculum-mapping-canonicalization.v1",
   "source_manifest": "curriculum-mapping-2026-08-24-editorial-approved.json",
   "output_manifest": "curriculum-mapping-2026-08-25-canonical.json",
-  "generated_at": "2026-08-25",
+  "generated_at": "2026-08-25T05:27:55.993Z",
+  "question_release_id": "question-release-d00a14931e607336",
+  "catalog_questions": 1591,
+  "manifest_entries": 1591,
+  "repinned": 48,
   "replaced": 13,
+  "missing": 0,
   "aliases": {
     "capability.runtime.node-event-loop-001": "capability.nodejs.event-loop-ordering",
     "capability.runtime.node-cpu-bound-002": "capability.nodejs.cpu-bound-work",
@@ -17,5 +22,5 @@
     "capability.distributed-systems.node-idempotency-013": "capability.distributed-systems.idempotent-delivery",
     "capability.delivery-observability.node-cache-014": "capability.delivery-observability.cache-invalidation"
   },
-  "policy": "new releases use canonical capability registry keys; historical approved manifest remains immutable"
+  "policy": "new releases use current revision/hash pins and canonical capability registry keys; historical approved manifest remains immutable"
 }
