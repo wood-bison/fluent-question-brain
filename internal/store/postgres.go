@@ -1580,19 +1580,26 @@ func (p *Postgres) Release(ctx context.Context, request search.ReleaseRequest) (
 	if err := rows.Err(); err != nil {
 		return search.ReleaseResponse{}, fmt.Errorf("iterate question release: %w", err)
 	}
+	capabilityBindingReleaseID, capabilityRegistryReleaseID, capabilityKeys, err := p.activeCapabilityRelease(ctx, workspaceKey)
+	if err != nil {
+		return search.ReleaseResponse{}, fmt.Errorf("read capability release: %w", err)
+	}
 
 	response := search.ReleaseResponse{
-		ContractVersion:  "question-brain.release.v1",
-		WorkspaceKey:     workspaceKey,
-		ReleaseID:        releaseID,
-		SourceSnapshotID: releaseID,
-		GeneratedAt:      time.Now().UTC(),
-		Total:            len(items),
-		IncludeFixtures:  includeFixtures,
-		ExcludedFixtures: excludedFixtures,
-		ExcludedNonProd:  excludedNonProduction,
-		Items:            items,
-		Checks:           checks,
+		ContractVersion:             "question-brain.release.v1",
+		WorkspaceKey:                workspaceKey,
+		ReleaseID:                   releaseID,
+		SourceSnapshotID:            releaseID,
+		CapabilityRegistryReleaseID: capabilityRegistryReleaseID,
+		CapabilityBindingReleaseID:  capabilityBindingReleaseID,
+		CapabilityKeys:              capabilityKeys,
+		GeneratedAt:                 time.Now().UTC(),
+		Total:                       len(items),
+		IncludeFixtures:             includeFixtures,
+		ExcludedFixtures:            excludedFixtures,
+		ExcludedNonProd:             excludedNonProduction,
+		Items:                       items,
+		Checks:                      checks,
 	}
 	response.Provenance.Explainable = true
 	response.Provenance.Source = "content.question.current_revision"
@@ -1603,6 +1610,49 @@ func (p *Postgres) Release(ctx context.Context, request search.ReleaseRequest) (
 		"fixture-boundary",
 	}
 	return response, nil
+}
+
+// activeCapabilityRelease exposes the immutable registry pins needed by an
+// external release consumer. The keys are an answer-free snapshot of active
+// canonical capabilities; aliases and deprecated keys are deliberately
+// absent. A runtime release must copy this snapshot and validate every task
+// capability key against it before it becomes runnable.
+func (p *Postgres) activeCapabilityRelease(ctx context.Context, workspaceKey string) (string, string, []string, error) {
+	var bindingReleaseID, registryReleaseID string
+	err := p.pool.QueryRow(ctx, `
+		select binding_release_id, capability_registry_release_id
+		from content.question_capability_binding_release release
+		join content.workspace workspace on workspace.id = release.workspace_id
+		where workspace.stable_key = $1 and release.status = 'active'
+	`, workspaceKey).Scan(&bindingReleaseID, &registryReleaseID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", "", nil, fmt.Errorf("no active capability binding release for workspace %q", workspaceKey)
+		}
+		return "", "", nil, err
+	}
+	rows, err := p.pool.Query(ctx, `
+		select stable_key
+		from content.taxonomy_capability
+		where lifecycle = 'active'
+		order by stable_key
+	`)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("query active capability registry: %w", err)
+	}
+	defer rows.Close()
+	keys := make([]string, 0)
+	for rows.Next() {
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			return "", "", nil, fmt.Errorf("scan active capability registry: %w", err)
+		}
+		keys = append(keys, key)
+	}
+	if err := rows.Err(); err != nil {
+		return "", "", nil, fmt.Errorf("iterate active capability registry: %w", err)
+	}
+	return bindingReleaseID, registryReleaseID, keys, nil
 }
 
 func containsLocale(locales []string, wanted string) bool {

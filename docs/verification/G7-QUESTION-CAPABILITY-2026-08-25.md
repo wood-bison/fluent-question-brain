@@ -29,7 +29,7 @@ Migration `0018` was applied idempotently.
 ```text
 generated manifest: 1,591 entries
 dry-run: 1,591 entries · 19 bound · 1,572 theory_only · 19 bindings
-approved release: question-capability-release-1e9ce61471213390
+approved release: question-capability-release-3c38b4c8c0fa7f47
 projection: 19 bindings · 1,591 reviews · 19 release items · 1 active release
 repeat approval: same release ID, no duplicate release items
 rollback: restored the previous release ID with 19 bindings after a second
@@ -37,6 +37,12 @@ release was published; no immutable release items were rewritten
 semantic review staging: 742 target cards · 1,373 candidates generated ·
 1,288 open proposals after idempotent conflict coalescing
 ```
+
+The active capability registry pin for this release is
+`capability-registry-2026-08-25-v3`. The registry includes the explicit
+execution-boundary capability used by the unreleased project-book family; it
+is available for release validation but is not a fabricated QuestionCard
+station.
 
 The 19 existing reviewed crosswalk station references were canonicalized into
 active registry keys. The remaining 1,572 cards have an explicit

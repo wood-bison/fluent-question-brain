@@ -134,6 +134,13 @@ dry-run by default and creates an immutable active binding release. The live
 baseline is recorded in
 `docs/verification/G7-QUESTION-CAPABILITY-2026-08-25.md`.
 
+The active registry snapshot for the release join is
+`capability-registry-2026-08-25-v3` (manifest:
+`docs/manifests/capability-registry-2026-08-25.json`). It adds the explicit
+`capability.delivery-observability.execution-boundary` identity used by the
+unreleased project-book family; adding that identity does not fabricate a
+learner station or change any QuestionCard disposition.
+
 ### Topic registry proposal (review queue)
 
 For the next curriculum slice, the repository also carries an exact-topic

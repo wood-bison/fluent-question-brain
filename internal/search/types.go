@@ -213,18 +213,21 @@ type QualityChecks struct {
 }
 
 type ReleaseResponse struct {
-	ContractVersion  string        `json:"contract_version"`
-	WorkspaceKey     string        `json:"workspace_key"`
-	ReleaseID        string        `json:"release_id"`
-	SourceSnapshotID string        `json:"source_snapshot_id"`
-	GeneratedAt      time.Time     `json:"generated_at"`
-	Total            int           `json:"total"`
-	IncludeFixtures  bool          `json:"include_fixtures"`
-	ExcludedFixtures int           `json:"excluded_fixtures"`
-	ExcludedNonProd  int           `json:"excluded_non_production"`
-	Checks           ReleaseChecks `json:"checks"`
-	Items            []ReleaseItem `json:"items"`
-	Provenance       struct {
+	ContractVersion             string        `json:"contract_version"`
+	WorkspaceKey                string        `json:"workspace_key"`
+	ReleaseID                   string        `json:"release_id"`
+	SourceSnapshotID            string        `json:"source_snapshot_id"`
+	CapabilityRegistryReleaseID string        `json:"capability_registry_release_id,omitempty"`
+	CapabilityBindingReleaseID  string        `json:"capability_binding_release_id,omitempty"`
+	CapabilityKeys              []string      `json:"capability_keys,omitempty"`
+	GeneratedAt                 time.Time     `json:"generated_at"`
+	Total                       int           `json:"total"`
+	IncludeFixtures             bool          `json:"include_fixtures"`
+	ExcludedFixtures            int           `json:"excluded_fixtures"`
+	ExcludedNonProd             int           `json:"excluded_non_production"`
+	Checks                      ReleaseChecks `json:"checks"`
+	Items                       []ReleaseItem `json:"items"`
+	Provenance                  struct {
 		Explainable bool     `json:"explainable"`
 		Source      string   `json:"source"`
 		Pipeline    []string `json:"pipeline"`

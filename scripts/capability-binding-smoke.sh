@@ -17,7 +17,7 @@ docker run --rm --network host \
   -v "${repo_root}:/src" -v /tmp:/tmp -w /src \
   golang:1.24-bookworm go run ./cmd/qb-capability-release \
   --database-url "postgres://question_brain:question_brain@127.0.0.1:${pg_port}/question_brain?sslmode=disable" \
-  --workspace-key fluent-interview --registry-release capability-registry-2026-08-24-v2 \
+  --workspace-key fluent-interview --registry-release capability-registry-2026-08-25-v3 \
   --generate "/src/${manifest_rel}" --stage-proposals
 
 dry_run="$(docker run --rm --network host \
@@ -97,7 +97,7 @@ docker run --rm --network host \
   -v "${repo_root}:/src" -v /tmp:/tmp -w /src \
   golang:1.24-bookworm go run ./cmd/qb-capability-release \
   --database-url "postgres://question_brain:question_brain@127.0.0.1:${pg_port}/question_brain?sslmode=disable" \
-  --workspace-key fluent-interview --registry-release capability-registry-2026-08-24-v3 \
+  --workspace-key fluent-interview --registry-release capability-registry-2026-08-25-v4 \
   --generate "${manifest_v2}"
 
 docker run --rm --network host \

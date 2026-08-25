@@ -120,7 +120,8 @@ values
   ('capability.postgresql.query-planning', 'domain.data-postgresql', 'PostgreSQL query planning', 'query-planning', 'active'),
   ('capability.postgresql.row-locks', 'domain.data-postgresql', 'PostgreSQL row locks', 'row-locks', 'active'),
   ('capability.distributed-systems.idempotent-delivery', 'domain.distributed-systems', 'Idempotent message delivery', 'idempotent-delivery', 'active'),
-  ('capability.delivery-observability.cache-invalidation', 'domain.delivery-observability', 'Cache invalidation and stampede control', 'cache-invalidation', 'active')
+  ('capability.delivery-observability.cache-invalidation', 'domain.delivery-observability', 'Cache invalidation and stampede control', 'cache-invalidation', 'active'),
+  ('capability.delivery-observability.execution-boundary', 'domain.delivery-observability', 'Execution boundary ownership and evidence', 'execution-boundary', 'active')
 on conflict (stable_key) do update
 set domain_key = excluded.domain_key,
     title = excluded.title,
@@ -142,7 +143,8 @@ where stable_key in (
   'capability.postgresql.query-planning',
   'capability.postgresql.row-locks',
   'capability.distributed-systems.idempotent-delivery',
-  'capability.delivery-observability.cache-invalidation'
+  'capability.delivery-observability.cache-invalidation',
+  'capability.delivery-observability.execution-boundary'
 )
 on conflict (capability_key, domain_key) do nothing;
 

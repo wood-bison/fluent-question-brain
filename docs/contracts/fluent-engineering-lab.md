@@ -78,6 +78,14 @@ opening answer bodies. `source_snapshot_id` is the deterministic content
 fingerprint used by the release; a graph publication remains a separate,
 explicit release boundary.
 
+The same answer-free response also carries the active canonical capability
+snapshot needed by Task Runtime: `capability_registry_release_id`,
+`capability_binding_release_id`, and `capability_keys`. A runtime release must
+pin those IDs and validate every `capabilityKeys` entry against the supplied
+active-key snapshot. Deprecated aliases are never emitted. If the active
+capability release is unavailable, the endpoint fails rather than allowing a
+consumer to infer stations from titles or task metadata.
+
 Every search response carries `provenance.explainable=true`, the active
 pipeline (`exact`, `fts`, `trigram`, and the semantic profile), per-result
 match stages, and a stable `revision_id`/`content_hash`. The Lab can safely
