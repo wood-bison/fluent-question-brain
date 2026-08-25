@@ -38,6 +38,24 @@ func TestNormalizeAllowsManyCapabilitiesForOneQuestion(t *testing.T) {
 	}
 }
 
+func TestNormalizeAllowsOneCapabilityForManyQuestions(t *testing.T) {
+	entries := []Entry{
+		testEntry("bound", []Binding{{
+			PathKey: "path.nodejs-typescript", CapabilityKey: "capability.http-api.rate-limiter", Role: "primary", Provenance: "editorial",
+		}}),
+		{
+			StableKey: "question.rate-limiter-follow-up", RevisionID: "00000000-0000-0000-0000-000000000002",
+			ContentHash: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", Disposition: "bound",
+			Rationale: "explicit review decision", Bindings: []Binding{{
+				PathKey: "path.go", CapabilityKey: "capability.http-api.rate-limiter", Role: "follow_up", Provenance: "editorial",
+			}},
+		},
+	}
+	if _, err := testManifest(entries).Normalize(); err != nil {
+		t.Fatalf("one capability for many questions rejected: %v", err)
+	}
+}
+
 func TestNormalizeAllowsTheoryOnlyWithoutFabricatingBinding(t *testing.T) {
 	entries, err := testManifest([]Entry{testEntry("theory_only", nil)}).Normalize()
 	if err != nil {

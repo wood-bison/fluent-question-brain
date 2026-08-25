@@ -36,6 +36,42 @@ assert r["bindings"] == r["bound"], r
 print("g7 dry-run:", r["manifest_entries"], "entries", r["bound"], "bound", r["theory_only"], "theory_only")
 '
 
+# A reviewed manifest is revision-pinned. Mutating one hash must fail closed
+# before approval rather than silently rebinding a newer QuestionCard.
+stale_manifest="/tmp/qb-g7-capability-binding-manifest-stale.json"
+python3 - "${manifest}" "${stale_manifest}" <<'PY'
+import json, sys
+
+source, target = sys.argv[1:]
+data = json.load(open(source))
+for entry in data["entries"]:
+    if entry["disposition"] == "bound":
+        entry["content_hash"] = "f" * 64
+        break
+else:
+    raise SystemExit("no bound entry available for stale-pin fixture")
+json.dump(data, open(target, "w"), indent=2)
+open(target, "a").write("\n")
+PY
+set +e
+stale_output="$(docker run --rm --network host \
+  -v "${repo_root}:/src" -v /tmp:/tmp -w /src \
+  golang:1.24-bookworm go run ./cmd/qb-capability-release \
+  --database-url "postgres://question_brain:question_brain@127.0.0.1:${pg_port}/question_brain?sslmode=disable" \
+  --workspace-key fluent-interview --manifest "${stale_manifest}" 2>&1)"
+stale_status=$?
+set -e
+if [[ ${stale_status} -eq 0 ]]; then
+  echo "stale capability binding manifest unexpectedly approved" >&2
+  exit 1
+fi
+printf '%s\n' "${stale_output}" | grep -q 'stale pins' || {
+  echo "stale capability binding failure did not expose the typed reason" >&2
+  printf '%s\n' "${stale_output}" >&2
+  exit 1
+}
+echo "g7 stale-pin guard: blocked as expected"
+
 docker run --rm --network host \
   -v "${repo_root}:/src" -v /tmp:/tmp -w /src \
   golang:1.24-bookworm go run ./cmd/qb-capability-release \
