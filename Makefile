@@ -1,4 +1,4 @@
-.PHONY: check test contract smoke g4-smoke g5-smoke graph-smoke import-review-smoke g6-batch-smoke calibration-smoke capability-binding-smoke compose-up compose-down
+.PHONY: check test go-check contract smoke g4-smoke g5-smoke graph-smoke import-review-smoke g6-batch-smoke calibration-smoke capability-binding-smoke compose-up compose-down
 
 check: contract test
 
@@ -30,7 +30,9 @@ contract:
 	bash scripts/check-contract.sh
 
 test:
-	@if command -v go >/dev/null 2>&1; then go test ./...; else echo "go toolchain not installed locally; Docker CI will run go test ./..."; fi
+	bash scripts/go-check.sh
+
+go-check: test
 
 compose-up:
 	docker compose -p fluent-question-brain -f deploy/compose/compose.yaml up --build
