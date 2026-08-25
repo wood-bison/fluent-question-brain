@@ -46,6 +46,129 @@ type CapabilityBindingReleaseReport struct {
 	BlockedReasons              []string  `json:"blocked_reasons,omitempty"`
 }
 
+type CapabilityBindingRollbackReport struct {
+	WorkspaceKey      string `json:"workspace_key"`
+	PreviousReleaseID string `json:"previous_release_id,omitempty"`
+	RestoredReleaseID string `json:"restored_release_id"`
+	RestoredBindings  int    `json:"restored_bindings"`
+	Approved          bool   `json:"approved"`
+	Blocked           bool   `json:"blocked"`
+	BlockedReason     string `json:"blocked_reason,omitempty"`
+}
+
+// RollbackCapabilityBindings restores a previously released binding snapshot
+// as the active learner projection. It changes only active pointers and the
+// compatibility projection; immutable release items and review decisions are
+// never rewritten.
+func (p *Postgres) RollbackCapabilityBindings(ctx context.Context, workspaceKey, targetReleaseID, actor string, approve bool) (CapabilityBindingRollbackReport, error) {
+	workspaceKey = strings.TrimSpace(workspaceKey)
+	targetReleaseID = strings.TrimSpace(targetReleaseID)
+	actor = strings.TrimSpace(actor)
+	if workspaceKey == "" || targetReleaseID == "" {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("workspace_key and target_release_id are required")
+	}
+	if actor == "" {
+		actor = "question-brain-capability-binding-rollback"
+	}
+	var workspaceID, status string
+	if err := p.pool.QueryRow(ctx, `select id::text from content.workspace where stable_key = $1`, workspaceKey).Scan(&workspaceID); err != nil {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("read capability rollback workspace: %w", err)
+	}
+	if err := p.pool.QueryRow(ctx, `select status from content.question_capability_binding_release where binding_release_id = $1 and workspace_id = $2::uuid`, targetReleaseID, workspaceID).Scan(&status); err != nil {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("read target capability release: %w", err)
+	}
+	report := CapabilityBindingRollbackReport{WorkspaceKey: workspaceKey, RestoredReleaseID: targetReleaseID, Approved: approve}
+	if status == "active" {
+		return report, nil
+	}
+	if status != "rolled_back" {
+		report.Blocked = true
+		report.BlockedReason = fmt.Sprintf("target release has unsupported status %q", status)
+		return report, nil
+	}
+	if !approve {
+		return report, nil
+	}
+	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("begin capability rollback: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	var previousID *string
+	if err := tx.QueryRow(ctx, `
+		select binding_release_id from content.question_capability_binding_release
+		where workspace_id = $1::uuid and status = 'active' for update
+	`, workspaceID).Scan(&previousID); err != nil && err != pgx.ErrNoRows {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("read active capability release: %w", err)
+	}
+	if previousID != nil {
+		report.PreviousReleaseID = *previousID
+		if *previousID == targetReleaseID {
+			return report, nil
+		}
+		if _, err := tx.Exec(ctx, `
+			update content.question_capability_binding_release
+			set status = 'rolled_back', rolled_back_at = now(), rolled_back_by = $2
+			where binding_release_id = $1
+		`, *previousID, actor); err != nil {
+			return CapabilityBindingRollbackReport{}, fmt.Errorf("close active capability release: %w", err)
+		}
+		if _, err := tx.Exec(ctx, `delete from content.question_capability where binding_release_id = $1`, *previousID); err != nil {
+			return CapabilityBindingRollbackReport{}, fmt.Errorf("clear active capability projection: %w", err)
+		}
+	}
+	if _, err := tx.Exec(ctx, `
+		update content.question_capability_binding_release
+		set status = 'active', rolled_back_at = null, rolled_back_by = null
+		where binding_release_id = $1 and workspace_id = $2::uuid and status = 'rolled_back'
+	`, targetReleaseID, workspaceID); err != nil {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("activate target capability release: %w", err)
+	}
+	if err := tx.QueryRow(ctx, `
+		select count(*) from content.question_capability_binding_release_item where binding_release_id = $1
+	`, targetReleaseID).Scan(&report.RestoredBindings); err != nil {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("count restored capability bindings: %w", err)
+	}
+	if _, err := tx.Exec(ctx, `
+		insert into content.question_capability
+		(revision_id, path_key, capability_key, mapping_state, mapping_version, source,
+		 role, provenance, confidence, question_release_id, capability_registry_release_id,
+		 binding_release_id, source_proposal_id)
+		select item.revision_id, item.path_key, item.capability_key, 'accepted', $2,
+		       'question-brain-capability-binding-rollback', item.role, item.provenance,
+		       item.confidence, release.question_release_id,
+		       release.capability_registry_release_id, release.binding_release_id,
+		       item.source_proposal_id
+		from content.question_capability_binding_release_item item
+		join content.question_capability_binding_release release
+		  on release.binding_release_id = item.binding_release_id
+		where item.binding_release_id = $1
+		on conflict (revision_id, path_key, capability_key) do update set
+		 mapping_state = 'accepted', mapping_version = excluded.mapping_version,
+		 source = excluded.source, role = excluded.role, provenance = excluded.provenance,
+		 confidence = excluded.confidence, question_release_id = excluded.question_release_id,
+		 capability_registry_release_id = excluded.capability_registry_release_id,
+		 binding_release_id = excluded.binding_release_id, source_proposal_id = excluded.source_proposal_id
+	`, targetReleaseID, taxonomy.Version); err != nil {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("restore capability projection: %w", err)
+	}
+	metadata, _ := json.Marshal(map[string]any{
+		"target_release_id":   targetReleaseID,
+		"previous_release_id": report.PreviousReleaseID,
+		"restored_bindings":   report.RestoredBindings,
+	})
+	if _, err := tx.Exec(ctx, `
+		insert into content.audit_event (workspace_id, aggregate_type, aggregate_id, event_type, actor, metadata)
+		values ($1::uuid, 'question_capability_binding_release', $1::uuid, 'question.capability.bindings.rolled_back', $2, $3::jsonb)
+	`, workspaceID, actor, metadata); err != nil {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("write capability rollback audit: %w", err)
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return CapabilityBindingRollbackReport{}, fmt.Errorf("commit capability rollback: %w", err)
+	}
+	return report, nil
+}
+
 // GenerateCapabilityBindingManifest creates a complete review queue from
 // explicit current curriculum rows only. Existing reviewed runtime mappings
 // become bound candidates (with their legacy key recorded as evidence); cards

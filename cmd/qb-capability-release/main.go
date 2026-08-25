@@ -19,6 +19,7 @@ func main() {
 	workspaceKey := flag.String("workspace-key", "fluent-interview", "stable workspace key")
 	manifestPath := flag.String("manifest", "", "complete JSON capability binding manifest")
 	generatePath := flag.String("generate", "", "write a complete review manifest generated from explicit current mappings")
+	rollbackID := flag.String("rollback-release", "", "restore a previous binding release by ID")
 	registryRelease := flag.String("registry-release", "capability-registry-2026-08-24-v2", "pinned capability registry release")
 	actor := flag.String("actor", "question-brain-capability-binding-release", "audit actor")
 	source := flag.String("source", "question-brain-g7-reviewed-disposition-2026-08-25", "source for generated review manifest")
@@ -29,8 +30,12 @@ func main() {
 	if *databaseURL == "" {
 		fail("-database-url or DATABASE_URL is required")
 	}
-	if *manifestPath == "" && *generatePath == "" {
-		fail("one of -manifest or -generate is required")
+	if *rollbackID != "" {
+		if *manifestPath != "" || *generatePath != "" {
+			fail("-rollback-release cannot be combined with -manifest or -generate")
+		}
+	} else if *manifestPath == "" && *generatePath == "" {
+		fail("one of -manifest, -generate, or -rollback-release is required")
 	}
 	if *manifestPath != "" && *generatePath != "" {
 		fail("-manifest and -generate cannot be combined")
@@ -43,6 +48,21 @@ func main() {
 		fail("open database: %v", err)
 	}
 	defer db.Close()
+	if *rollbackID != "" {
+		rollback, err := db.RollbackCapabilityBindings(ctx, *workspaceKey, *rollbackID, *actor, *approve)
+		if err != nil {
+			fail("capability binding rollback failed: %v", err)
+		}
+		encoded, err := json.MarshalIndent(rollback, "", "  ")
+		if err != nil {
+			fail("encode capability rollback report: %v", err)
+		}
+		fmt.Println(string(encoded))
+		if rollback.Blocked {
+			os.Exit(1)
+		}
+		return
+	}
 
 	var manifest capabilitybinding.Manifest
 	if *generatePath != "" {

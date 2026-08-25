@@ -28,6 +28,8 @@ dry-run: 1,591 entries · 19 bound · 1,572 theory_only · 19 bindings
 approved release: question-capability-release-1e9ce61471213390
 projection: 19 bindings · 1,591 reviews · 19 release items · 1 active release
 repeat approval: same release ID, no duplicate release items
+rollback: restored the previous release ID with 19 bindings after a second
+release was published; no immutable release items were rewritten
 ```
 
 The 19 existing reviewed crosswalk station references were canonicalized into
@@ -39,4 +41,5 @@ editorial review may change a row to `bound`, `needs_new_capability`, or
 
 The reproducible command is `make capability-binding-smoke`; it applies the
 idempotent migration, generates the manifest, runs a blocked-free dry-run,
-approves it twice, and checks the active release/projection counts.
+approves it twice, publishes a second isolated registry revision, rolls back
+to the first release, and checks the active release/projection counts.
