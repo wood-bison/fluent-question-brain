@@ -22,28 +22,39 @@ type CapabilityBindingReleaseRequest struct {
 }
 
 type CapabilityBindingReleaseReport struct {
-	ContractVersion             string    `json:"contract_version"`
-	TaxonomyVersion             string    `json:"taxonomy_version"`
-	WorkspaceKey                string    `json:"workspace_key"`
-	QuestionReleaseID           string    `json:"question_release_id"`
-	CapabilityRegistryReleaseID string    `json:"capability_registry_release_id"`
-	BindingReleaseID            string    `json:"binding_release_id"`
-	GeneratedAt                 time.Time `json:"generated_at"`
-	Approved                    bool      `json:"approved"`
-	Blocked                     bool      `json:"blocked"`
-	Published                   int       `json:"published"`
-	ManifestEntries             int       `json:"manifest_entries"`
-	Bound                       int       `json:"bound"`
-	TheoryOnly                  int       `json:"theory_only"`
-	NeedsNewCapability          int       `json:"needs_new_capability"`
-	Rejected                    int       `json:"rejected"`
-	Bindings                    int       `json:"bindings"`
-	Changed                     int       `json:"changed"`
-	Unchanged                   int       `json:"unchanged"`
-	Invalid                     int       `json:"invalid"`
-	MissingManifest             int       `json:"missing_manifest"`
-	ExtraManifest               int       `json:"extra_manifest"`
-	BlockedReasons              []string  `json:"blocked_reasons,omitempty"`
+	ContractVersion             string                      `json:"contract_version"`
+	TaxonomyVersion             string                      `json:"taxonomy_version"`
+	WorkspaceKey                string                      `json:"workspace_key"`
+	QuestionReleaseID           string                      `json:"question_release_id"`
+	CapabilityRegistryReleaseID string                      `json:"capability_registry_release_id"`
+	BindingReleaseID            string                      `json:"binding_release_id"`
+	GeneratedAt                 time.Time                   `json:"generated_at"`
+	Approved                    bool                        `json:"approved"`
+	Blocked                     bool                        `json:"blocked"`
+	Published                   int                         `json:"published"`
+	ManifestEntries             int                         `json:"manifest_entries"`
+	Bound                       int                         `json:"bound"`
+	TheoryOnly                  int                         `json:"theory_only"`
+	NeedsNewCapability          int                         `json:"needs_new_capability"`
+	Rejected                    int                         `json:"rejected"`
+	Bindings                    int                         `json:"bindings"`
+	Changed                     int                         `json:"changed"`
+	Unchanged                   int                         `json:"unchanged"`
+	Invalid                     int                         `json:"invalid"`
+	MissingManifest             int                         `json:"missing_manifest"`
+	ExtraManifest               int                         `json:"extra_manifest"`
+	BlockedReasons              []string                    `json:"blocked_reasons,omitempty"`
+	Coverage                    []CapabilityBindingCoverage `json:"coverage,omitempty"`
+}
+
+type CapabilityBindingCoverage struct {
+	Dimension       string `json:"dimension"`
+	Key             string `json:"key"`
+	Cards           int    `json:"cards"`
+	Bound           int    `json:"bound"`
+	TheoryOnly      int    `json:"theory_only"`
+	NeedsCapability int    `json:"needs_new_capability"`
+	Rejected        int    `json:"rejected"`
 }
 
 type CapabilityBindingRollbackReport struct {
@@ -257,6 +268,10 @@ type currentCapabilityRevision struct {
 	RevisionID string
 	Hash       string
 	PathKey    string
+	DomainKey  string
+	Locales    []string
+	Topics     []string
+	CardKind   string
 }
 
 type CapabilityNeighborProposalReport struct {
@@ -530,6 +545,7 @@ func (p *Postgres) ReleaseCapabilityBindings(ctx context.Context, request Capabi
 	if len(current) != len(entries) {
 		report.BlockedReasons = append(report.BlockedReasons, "capability manifest does not cover every current production revision")
 	}
+	report.Coverage = capabilityBindingCoverage(entries, current)
 	sort.Strings(report.BlockedReasons)
 	report.Blocked = report.MissingManifest > 0 || report.ExtraManifest > 0 || report.Invalid > 0 || len(current) != len(entries)
 	if report.Blocked || !request.Approve {
@@ -666,16 +682,105 @@ func (p *Postgres) ReleaseCapabilityBindings(ctx context.Context, request Capabi
 	return report, nil
 }
 
+func capabilityBindingCoverage(entries []capabilitybinding.Entry, current map[string]currentCapabilityRevision) []CapabilityBindingCoverage {
+	type key struct{ dimension, value string }
+	rows := map[key]*CapabilityBindingCoverage{}
+	ensure := func(dimension, value string) *CapabilityBindingCoverage {
+		if strings.TrimSpace(value) == "" {
+			value = "unmapped"
+		}
+		k := key{dimension: dimension, value: value}
+		if rows[k] == nil {
+			rows[k] = &CapabilityBindingCoverage{Dimension: dimension, Key: value}
+		}
+		return rows[k]
+	}
+	countDisposition := func(row *CapabilityBindingCoverage, disposition string) {
+		row.Cards++
+		switch disposition {
+		case "bound":
+			row.Bound++
+		case "theory_only":
+			row.TheoryOnly++
+		case "needs_new_capability":
+			row.NeedsCapability++
+		case "rejected":
+			row.Rejected++
+		}
+	}
+	for _, entry := range entries {
+		row, ok := current[entry.StableKey]
+		if !ok {
+			continue
+		}
+		values := map[string][]string{
+			"path": []string{row.PathKey}, "domain": []string{row.DomainKey},
+			"locale": row.Locales, "card_kind": []string{row.CardKind}, "topic": row.Topics,
+		}
+		for dimension, dimensionValues := range values {
+			if len(dimensionValues) == 0 {
+				dimensionValues = []string{"unmapped"}
+			}
+			seen := map[string]struct{}{}
+			for _, value := range dimensionValues {
+				value = strings.TrimSpace(value)
+				if value == "" {
+					value = "unmapped"
+				}
+				if _, exists := seen[value]; exists {
+					continue
+				}
+				seen[value] = struct{}{}
+				countDisposition(ensure(dimension, value), entry.Disposition)
+			}
+		}
+		if len(entry.Bindings) == 0 {
+			continue
+		}
+		for _, binding := range entry.Bindings {
+			coverage := ensure("capability", binding.CapabilityKey)
+			coverage.Cards++
+			coverage.Bound++
+		}
+	}
+	result := make([]CapabilityBindingCoverage, 0, len(rows))
+	for _, row := range rows {
+		result = append(result, *row)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].Dimension == result[j].Dimension {
+			return result[i].Key < result[j].Key
+		}
+		return result[i].Dimension < result[j].Dimension
+	})
+	return result
+}
+
 func (p *Postgres) currentCapabilityRevisions(ctx context.Context, workspaceKey string) (map[string]currentCapabilityRevision, string, error) {
 	var workspaceID string
 	if err := p.pool.QueryRow(ctx, `select id::text from content.workspace where stable_key = $1`, workspaceKey).Scan(&workspaceID); err != nil {
 		return nil, "", fmt.Errorf("read capability binding workspace: %w", err)
 	}
 	rows, err := p.pool.Query(ctx, `
-		select q.stable_key, qr.id::text, qr.content_hash, coalesce(mapping.path_key, '')
+		select q.stable_key, qr.id::text, qr.content_hash,
+		       coalesce(mapping.path_key, ''), coalesce(mapping.domain_key, ''),
+		       coalesce(locales.locales, '{}'::text[]),
+		       coalesce(topics.topics, '{}'::text[]),
+		       coalesce(nullif(qr.normalized_payload->>'card_kind', ''),
+		                nullif(qr.normalized_payload->>'group', ''), 'unknown')
 		from content.question q
 		join content.question_revision qr on qr.id = q.current_revision_id
 		left join content.question_curriculum_mapping mapping on mapping.revision_id = qr.id
+		left join lateral (
+			select array_agg(distinct locale order by locale) as locales
+			from content.question_locale where revision_id = qr.id
+		) locales on true
+		left join lateral (
+			select array_agg(distinct topic.title order by topic.title) as topics
+			from content.question_topic relation
+			join content.topic topic on topic.id = relation.topic_id
+			where relation.question_id = q.id
+		) topics on true
 		where q.workspace_id = $1::uuid and q.status = 'published' and q.content_kind = 'production'
 		order by q.stable_key
 	`, workspaceID)
@@ -686,7 +791,7 @@ func (p *Postgres) currentCapabilityRevisions(ctx context.Context, workspaceKey 
 	result := make(map[string]currentCapabilityRevision)
 	for rows.Next() {
 		var row currentCapabilityRevision
-		if err := rows.Scan(&row.StableKey, &row.RevisionID, &row.Hash, &row.PathKey); err != nil {
+		if err := rows.Scan(&row.StableKey, &row.RevisionID, &row.Hash, &row.PathKey, &row.DomainKey, &row.Locales, &row.Topics, &row.CardKind); err != nil {
 			return nil, "", fmt.Errorf("scan current capability revision: %w", err)
 		}
 		result[row.StableKey] = row
