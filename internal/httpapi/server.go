@@ -64,6 +64,12 @@ type capabilityBindingReviewService interface {
 	DecideCapabilityBindingProposal(context.Context, string, string, string, string) (store.CapabilityBindingProposal, error)
 }
 
+type capabilityAliasSupersessionReviewService interface {
+	ListCapabilityAliasSupersessionProposals(context.Context, string, string) ([]store.CapabilityAliasSupersessionProposal, error)
+	CreateCapabilityAliasSupersessionProposal(context.Context, store.CapabilityAliasSupersessionProposalRequest, string) (store.CapabilityAliasSupersessionProposal, error)
+	DecideCapabilityAliasSupersessionProposal(context.Context, string, string, string, string) (store.CapabilityAliasSupersessionProposal, error)
+}
+
 type Server struct {
 	databaseURL   string
 	searchService search.Service
@@ -120,6 +126,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/duplicates/decision", s.duplicateDecision)
 	mux.HandleFunc("GET /v1/capability-bindings/review", s.capabilityBindingReview)
 	mux.HandleFunc("POST /v1/capability-bindings/review/{proposalID}/decision", s.capabilityBindingDecision)
+	mux.HandleFunc("GET /v1/capability-aliases/review", s.capabilityAliasSupersessionReview)
+	mux.HandleFunc("POST /v1/capability-aliases/review", s.capabilityAliasSupersessionProposal)
+	mux.HandleFunc("POST /v1/capability-aliases/review/{proposalID}/decision", s.capabilityAliasSupersessionDecision)
 	return requestID(mux)
 }
 
@@ -935,6 +944,106 @@ func (s *Server) capabilityBindingDecision(w http.ResponseWriter, r *http.Reques
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"contract_version": "question-brain.capability-binding-decision.v1",
+		"proposal":         proposal,
+		"actor":            graphActor(r, "question-brain-reviewer"),
+		"idempotent":       true,
+	})
+}
+
+// capabilityAliasSupersessionReview exposes the canonical identity migration
+// queue. It is answer-free and returns an explicit empty list when no
+// proposals exist; there is no hidden legacy fallback.
+func (s *Server) capabilityAliasSupersessionReview(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.searchService.(capabilityAliasSupersessionReviewService)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "capability_alias_review_service_unavailable"})
+		return
+	}
+	workspace := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspace == "" {
+		workspace = "fluent-interview"
+	}
+	status := strings.TrimSpace(r.URL.Query().Get("status"))
+	if status == "" {
+		status = "proposed"
+	}
+	proposals, err := backend.ListCapabilityAliasSupersessionProposals(r.Context(), workspace, status)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": store.CapabilityAliasSupersessionReviewContractVersion,
+		"workspace_key":    workspace,
+		"status":           status,
+		"proposals":        proposals,
+	})
+}
+
+func (s *Server) capabilityAliasSupersessionProposal(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.searchService.(capabilityAliasSupersessionReviewService)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "capability_alias_review_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var request store.CapabilityAliasSupersessionProposalRequest
+	if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&request); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_capability_alias_proposal_request"})
+		return
+	}
+	proposal, err := backend.CreateCapabilityAliasSupersessionProposal(r.Context(), request, graphActor(r, "question-brain-editorial"))
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]any{
+		"contract_version": store.CapabilityAliasSupersessionReviewContractVersion,
+		"proposal":         proposal,
+	})
+}
+
+func (s *Server) capabilityAliasSupersessionDecision(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.searchService.(capabilityAliasSupersessionReviewService)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "capability_alias_review_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var body struct {
+		Decision  string `json:"decision"`
+		Rationale string `json:"rationale"`
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&body); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_capability_alias_decision_request"})
+		return
+	}
+	body.Decision = strings.ToLower(strings.TrimSpace(body.Decision))
+	body.Rationale = strings.TrimSpace(body.Rationale)
+	if body.Decision != "accepted" && body.Decision != "rejected" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "unsupported_capability_alias_decision"})
+		return
+	}
+	if body.Rationale == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "capability_alias_decision_requires_rationale"})
+		return
+	}
+	proposal, err := backend.DecideCapabilityAliasSupersessionProposal(
+		r.Context(), r.PathValue("proposalID"), body.Decision,
+		graphActor(r, "question-brain-reviewer"), body.Rationale,
+	)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": store.CapabilityAliasSupersessionDecisionContractVersion,
 		"proposal":         proposal,
 		"actor":            graphActor(r, "question-brain-reviewer"),
 		"idempotent":       true,

@@ -40,6 +40,49 @@ func (s *duplicateReviewStub) RecordDuplicateDecision(_ context.Context, decisio
 	return nil
 }
 
+type capabilityAliasReviewStub struct {
+	httpSearchStub
+	proposal store.CapabilityAliasSupersessionProposal
+	decision struct {
+		proposalID string
+		decision   string
+		actor      string
+		rationale  string
+	}
+}
+
+func (s *capabilityAliasReviewStub) ListCapabilityAliasSupersessionProposals(context.Context, string, string) ([]store.CapabilityAliasSupersessionProposal, error) {
+	if s.proposal.ID == "" {
+		return []store.CapabilityAliasSupersessionProposal{}, nil
+	}
+	return []store.CapabilityAliasSupersessionProposal{s.proposal}, nil
+}
+
+func (s *capabilityAliasReviewStub) CreateCapabilityAliasSupersessionProposal(_ context.Context, request store.CapabilityAliasSupersessionProposalRequest, actor string) (store.CapabilityAliasSupersessionProposal, error) {
+	s.proposal = store.CapabilityAliasSupersessionProposal{
+		ID: "proposal-1", WorkspaceKey: request.WorkspaceKey, Action: request.Action,
+		SourceKey: request.SourceKey, CanonicalKey: request.CanonicalKey,
+		Reason: request.Reason, Source: request.Source, Status: "proposed",
+	}
+	if actor == "" {
+		s.proposal.Source = "question-brain-editorial"
+	}
+	return s.proposal, nil
+}
+
+func (s *capabilityAliasReviewStub) DecideCapabilityAliasSupersessionProposal(_ context.Context, proposalID, decision, actor, rationale string) (store.CapabilityAliasSupersessionProposal, error) {
+	s.decision = struct {
+		proposalID string
+		decision   string
+		actor      string
+		rationale  string
+	}{proposalID, decision, actor, rationale}
+	s.proposal.Status = decision
+	s.proposal.DecidedBy = actor
+	s.proposal.Reason = rationale
+	return s.proposal, nil
+}
+
 func TestLiveEndpoint(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	New("postgres://user:pass@localhost:5432/db").Handler().ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/health/live", nil))
@@ -185,5 +228,52 @@ func TestDuplicateDecisionReturnsAuditableContract(t *testing.T) {
 	}
 	if stub.decision.Actor != "sergey" || stub.decision.Rationale == "" || stub.decision.Decision != "not_duplicate" {
 		t.Fatalf("unexpected persisted decision: %#v", stub.decision)
+	}
+}
+
+func TestCapabilityAliasReviewQueueIsExplicitlyEmpty(t *testing.T) {
+	stub := &capabilityAliasReviewStub{}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/v1/capability-aliases/review?workspace=fluent-interview&status=proposed", nil)
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body.String())
+	}
+	body := recorder.Body.String()
+	if !strings.Contains(body, `"contract_version":"question-brain.capability-alias-supersession-review.v1"`) || !strings.Contains(body, `"proposals":[]`) {
+		t.Fatalf("queue contract is not explicit: %s", body)
+	}
+}
+
+func TestCapabilityAliasReviewDecisionRequiresInternalToken(t *testing.T) {
+	t.Setenv("QUESTION_BRAIN_INTERNAL_TOKEN", "review-token")
+	stub := &capabilityAliasReviewStub{proposal: store.CapabilityAliasSupersessionProposal{ID: "proposal-1", Status: "proposed"}}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/v1/capability-aliases/review/proposal-1/decision", bytes.NewBufferString(`{"decision":"accepted","rationale":"confirmed"}`))
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", recorder.Code)
+	}
+}
+
+func TestCapabilityAliasReviewDecisionReturnsVersionedContract(t *testing.T) {
+	t.Setenv("QUESTION_BRAIN_INTERNAL_TOKEN", "review-token")
+	stub := &capabilityAliasReviewStub{proposal: store.CapabilityAliasSupersessionProposal{
+		ID: "proposal-1", WorkspaceKey: "fluent-interview", Action: "alias",
+		SourceKey: "capability.legacy.loop", CanonicalKey: "capability.nodejs.event-loop-ordering", Status: "proposed",
+	}}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/v1/capability-aliases/review/proposal-1/decision", bytes.NewBufferString(`{"decision":"accepted","rationale":"canonical registry review"}`))
+	request.Header.Set("X-Question-Brain-Token", "review-token")
+	request.Header.Set("X-Question-Brain-Actor", "sergey")
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body.String())
+	}
+	if !strings.Contains(recorder.Body.String(), `"contract_version":"question-brain.capability-alias-supersession-decision.v1"`) {
+		t.Fatal("decision contract version missing")
+	}
+	if stub.decision.actor != "sergey" || stub.decision.decision != "accepted" || stub.decision.rationale == "" {
+		t.Fatalf("unexpected alias decision: %#v", stub.decision)
 	}
 }
