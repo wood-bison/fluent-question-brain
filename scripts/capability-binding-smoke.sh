@@ -18,7 +18,7 @@ docker run --rm --network host \
   golang:1.24-bookworm go run ./cmd/qb-capability-release \
   --database-url "postgres://question_brain:question_brain@127.0.0.1:${pg_port}/question_brain?sslmode=disable" \
   --workspace-key fluent-interview --registry-release capability-registry-2026-08-24-v2 \
-  --generate "/src/${manifest_rel}"
+  --generate "/src/${manifest_rel}" --stage-proposals
 
 dry_run="$(docker run --rm --network host \
   -v "${repo_root}:/src" -w /src \
@@ -86,12 +86,13 @@ print("g7 rollback:", r["restored_release_id"], "bindings", r["restored_bindings
 '
 
 db_counts="$(docker compose -p fluent-question-brain -f "${repo_root}/deploy/compose/compose.yaml" exec -T postgres psql -U question_brain -d question_brain -Atc \
-  "select count(*) from content.question_capability where binding_release_id is not null; select count(*) from content.question_capability_review; select count(*) from content.question_capability_binding_release_item; select count(*) from content.question_capability_binding_release where workspace_id=(select id from content.workspace where stable_key='fluent-interview') and status='active';")"
+  "select count(*) from content.question_capability where binding_release_id is not null; select count(*) from content.question_capability_review; select count(*) from content.question_capability_binding_release_item; select count(*) from content.question_capability_binding_release where workspace_id=(select id from content.workspace where stable_key='fluent-interview') and status='active'; select count(*) from content.question_capability_binding_proposal where status='proposed';")"
 printf '%s\n' "${db_counts}" | python3 -c '
 import sys
 values=[int(x) for x in sys.stdin.read().split()]
-assert len(values) == 4 and values[0] > 0 and values[1] >= 500 and values[2] >= values[0] and values[3] == 1, values
+assert len(values) == 5 and values[0] > 0 and values[1] >= 500 and values[2] >= values[0] and values[3] == 1 and values[4] > 0, values
 print("g7 projection:", "bindings", values[0], "reviews", values[1], "release_items", values[2])
+print("g7 semantic candidates:", values[4])
 '
 
 echo "question-brain G7 capability binding smoke: complete reviewed disposition release passed"

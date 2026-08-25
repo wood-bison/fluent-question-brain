@@ -259,6 +259,161 @@ type currentCapabilityRevision struct {
 	PathKey    string
 }
 
+type CapabilityNeighborProposalReport struct {
+	ProfileKey      string  `json:"profile_key"`
+	ProfileRevision string  `json:"profile_revision"`
+	MinSimilarity   float64 `json:"min_similarity"`
+	MaxCandidates   int     `json:"max_candidates"`
+	Targets         int     `json:"targets"`
+	Candidates      int     `json:"candidates"`
+	Unchanged       int     `json:"unchanged"`
+}
+
+// StageCapabilityNeighborProposals creates review-only candidates from
+// existing active pgvector embeddings and reviewed capability exemplars. It
+// never changes a disposition or a learner release. Exact editorial
+// crosswalks remain authoritative; semantic neighbors only explain a possible
+// placement for a human review.
+func (p *Postgres) StageCapabilityNeighborProposals(ctx context.Context, workspaceKey, registryReleaseID, source string) (CapabilityNeighborProposalReport, error) {
+	workspaceKey = strings.TrimSpace(workspaceKey)
+	registryReleaseID = strings.TrimSpace(registryReleaseID)
+	source = strings.TrimSpace(source)
+	if workspaceKey == "" || registryReleaseID == "" || source == "" {
+		return CapabilityNeighborProposalReport{}, fmt.Errorf("workspace_key, registry_release_id, and source are required")
+	}
+	release, err := p.Release(ctx, search.ReleaseRequest{WorkspaceKey: workspaceKey})
+	if err != nil {
+		return CapabilityNeighborProposalReport{}, fmt.Errorf("read question release: %w", err)
+	}
+	var profileKey, profileRevision string
+	var minSimilarity float64
+	var maxCandidates int
+	if err := p.pool.QueryRow(ctx, `
+		select profile_key, revision, min_similarity::float8, max_candidates
+		from content.capability_binding_profile_config
+		where profile_key = 'semantic-neighbor-v1'
+	`).Scan(&profileKey, &profileRevision, &minSimilarity, &maxCandidates); err != nil {
+		return CapabilityNeighborProposalReport{}, fmt.Errorf("read capability neighbor profile: %w", err)
+	}
+	var workspaceID string
+	if err := p.pool.QueryRow(ctx, `select id::text from content.workspace where stable_key = $1`, workspaceKey).Scan(&workspaceID); err != nil {
+		return CapabilityNeighborProposalReport{}, fmt.Errorf("read capability proposal workspace: %w", err)
+	}
+	rows, err := p.pool.Query(ctx, `
+		with exemplar_embeddings as (
+			select distinct on (coalesce(alias.canonical_key, mapping.capability_key), mapping.path_key, qr.id)
+				coalesce(alias.canonical_key, mapping.capability_key) as capability_key,
+				mapping.path_key, qr.id as revision_id, embedding.embedding
+			from content.question q
+			join content.question_revision qr on qr.id = q.current_revision_id
+			join content.question_curriculum_mapping mapping
+			  on mapping.revision_id = qr.id and mapping.mapping_state = 'accepted'
+			left join content.taxonomy_capability_alias alias
+			  on alias.alias_key = mapping.capability_key
+			join content.taxonomy_capability capability
+			  on capability.stable_key = coalesce(alias.canonical_key, mapping.capability_key)
+			 and capability.lifecycle = 'active'
+			join content.question_locale locale on locale.revision_id = qr.id
+			join content.question_embedding embedding
+			  on embedding.locale_id = locale.id and embedding.profile_key = 'semantic-v1'
+			where q.workspace_id = $1::uuid and q.status = 'published' and q.content_kind = 'production'
+			  and mapping.capability_key is not null
+			order by coalesce(alias.canonical_key, mapping.capability_key), mapping.path_key, qr.id,
+				case when locale.locale = 'en' then 0 when locale.locale = 'ru' then 1 else 2 end
+		), target_embeddings as (
+			select distinct on (qr.id)
+				q.stable_key, qr.id as revision_id, embedding.embedding
+			from content.question q
+			join content.question_revision qr on qr.id = q.current_revision_id
+			join content.question_locale locale on locale.revision_id = qr.id
+			join content.question_embedding embedding
+			  on embedding.locale_id = locale.id and embedding.profile_key = 'semantic-v1'
+			where q.workspace_id = $1::uuid and q.status = 'published' and q.content_kind = 'production'
+			order by qr.id, case when locale.locale = 'en' then 0 when locale.locale = 'ru' then 1 else 2 end
+		), scored as (
+			select target.stable_key, target.revision_id, exemplar.path_key,
+			       exemplar.capability_key, exemplar.revision_id as exemplar_revision_id,
+			       (1 - (target.embedding <=> exemplar.embedding))::float8 as similarity
+			from target_embeddings target
+			cross join exemplar_embeddings exemplar
+			where target.revision_id <> exemplar.revision_id
+		), ranked as (
+			select *, row_number() over (
+				partition by stable_key order by similarity desc, capability_key, path_key
+			) as candidate_rank
+			from scored
+			where similarity >= $2::float8
+		)
+		select stable_key, revision_id::text, path_key, capability_key,
+		       exemplar_revision_id::text, similarity::float8
+		from ranked
+		where candidate_rank <= $3
+		order by stable_key, candidate_rank
+	`, workspaceID, minSimilarity, maxCandidates)
+	if err != nil {
+		return CapabilityNeighborProposalReport{}, fmt.Errorf("query capability neighbor candidates: %w", err)
+	}
+	defer rows.Close()
+	type candidate struct {
+		stableKey, revisionID, pathKey, capabilityKey, exemplarRevisionID string
+		similarity                                                        float64
+	}
+	candidates := make([]candidate, 0)
+	targets := map[string]struct{}{}
+	for rows.Next() {
+		var item candidate
+		if err := rows.Scan(&item.stableKey, &item.revisionID, &item.pathKey, &item.capabilityKey, &item.exemplarRevisionID, &item.similarity); err != nil {
+			return CapabilityNeighborProposalReport{}, fmt.Errorf("scan capability neighbor candidate: %w", err)
+		}
+		candidates = append(candidates, item)
+		targets[item.stableKey] = struct{}{}
+	}
+	if err := rows.Err(); err != nil {
+		return CapabilityNeighborProposalReport{}, fmt.Errorf("iterate capability neighbor candidates: %w", err)
+	}
+	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return CapabilityNeighborProposalReport{}, fmt.Errorf("begin capability proposal staging: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	unchanged := 0
+	for _, item := range candidates {
+		evidence, _ := json.Marshal(map[string]any{
+			"method":               "pgvector-semantic-neighbor",
+			"profile_key":          profileKey,
+			"profile_revision":     profileRevision,
+			"similarity":           item.similarity,
+			"exemplar_revision_id": item.exemplarRevisionID,
+		})
+		command, err := tx.Exec(ctx, `
+			insert into content.question_capability_binding_proposal
+			(workspace_id, revision_id, path_key, capability_key, role, provenance,
+			 confidence, evidence, question_release_id, capability_registry_release_id,
+			 status, rationale, source)
+			values ($1::uuid, $2::uuid, $3, $4, 'supporting_evidence', $5,
+			 $6, $7::jsonb, $8, $9, 'proposed',
+			 'Semantic neighbor of a reviewed capability exemplar; human review required.', $10)
+			on conflict (workspace_id, revision_id, path_key, capability_key, role, capability_registry_release_id)
+			do update set confidence = excluded.confidence, evidence = excluded.evidence,
+			 source = excluded.source, rationale = excluded.rationale
+			where content.question_capability_binding_proposal.status = 'proposed'
+		`, workspaceID, item.revisionID, item.pathKey, item.capabilityKey,
+			"semantic-neighbor-v1", item.similarity, evidence, release.ReleaseID, registryReleaseID, source)
+		if err != nil {
+			return CapabilityNeighborProposalReport{}, fmt.Errorf("stage capability neighbor proposal for %s: %w", item.stableKey, err)
+		}
+		if command.RowsAffected() == 0 {
+			unchanged++
+		}
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return CapabilityNeighborProposalReport{}, fmt.Errorf("commit capability proposal staging: %w", err)
+	}
+	return CapabilityNeighborProposalReport{ProfileKey: profileKey, ProfileRevision: profileRevision,
+		MinSimilarity: minSimilarity, MaxCandidates: maxCandidates, Targets: len(targets),
+		Candidates: len(candidates), Unchanged: unchanged}, nil
+}
+
 // ReleaseCapabilityBindings validates a complete, revision-pinned reviewed
 // disposition and optionally makes it the single active station release. It
 // never derives a capability from a title, legacy Topic, breadcrumb, or

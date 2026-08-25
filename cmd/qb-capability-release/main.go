@@ -23,6 +23,7 @@ func main() {
 	registryRelease := flag.String("registry-release", "capability-registry-2026-08-24-v2", "pinned capability registry release")
 	actor := flag.String("actor", "question-brain-capability-binding-release", "audit actor")
 	source := flag.String("source", "question-brain-g7-reviewed-disposition-2026-08-25", "source for generated review manifest")
+	stageProposals := flag.Bool("stage-proposals", false, "stage semantic-neighbor candidates while generating; never accepts them")
 	approve := flag.Bool("approve", false, "materialize the validated release; without this flag the command is dry-run")
 	reportPath := flag.String("report", "", "optional JSON report path")
 	flag.Parse()
@@ -78,6 +79,17 @@ func main() {
 			fail("write generated manifest: %v", err)
 		}
 		fmt.Printf("generated capability review manifest: %s (%d entries)\n", *generatePath, len(manifest.Entries))
+		if *stageProposals {
+			proposalReport, err := db.StageCapabilityNeighborProposals(ctx, *workspaceKey, *registryRelease, *source)
+			if err != nil {
+				fail("stage capability neighbor proposals: %v", err)
+			}
+			proposalJSON, err := json.MarshalIndent(proposalReport, "", "  ")
+			if err != nil {
+				fail("encode capability proposal report: %v", err)
+			}
+			fmt.Println(string(proposalJSON))
+		}
 		return
 	}
 	data, err := os.ReadFile(*manifestPath)

@@ -55,7 +55,14 @@ The generator is intentionally conservative: it can promote an existing
 reviewed curriculum capability crosswalk into a canonical station binding;
 all other current cards receive an explicit `theory_only` or
 `needs_new_capability` disposition. It never infers from Topic, Group, title,
-breadcrumb, filename, or embeddings.
+breadcrumb, or filename. Embeddings are used only by the optional review-only
+candidate stage described below, never to accept a binding.
+
+For editorial review, `--stage-proposals` additionally compares existing
+`semantic-v1` pgvector embeddings with reviewed capability exemplars. The
+profile-owned `semantic-neighbor-v1` threshold and candidate bound are stored
+in `content.capability_binding_profile_config`. These rows are review-only
+(`status=proposed`) and cannot alter the active release.
 
 ## Commands
 
@@ -64,6 +71,12 @@ breadcrumb, filename, or embeddings.
 go run ./cmd/qb-capability-release \
   --database-url "$DATABASE_URL" \
   --generate docs/verification/G7-capability-binding-manifest-2026-08-25.json
+
+# Optionally stage semantic-neighbor review candidates (still no publish).
+go run ./cmd/qb-capability-release \
+  --database-url "$DATABASE_URL" \
+  --generate docs/verification/G7-capability-binding-manifest-2026-08-25.json \
+  --stage-proposals
 
 # Validate only (default is dry-run).
 go run ./cmd/qb-capability-release \

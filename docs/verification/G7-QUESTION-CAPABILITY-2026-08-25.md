@@ -16,6 +16,10 @@ Status: **complete for the current production corpus**.
   still released and searchable, but has no fabricated station or Run button.
 - A second approval of the same manifest reactivates the same release ID and
   creates no duplicate rows.
+- Optional semantic review staging uses the profile-owned
+  `semantic-neighbor-v1` configuration (`min_similarity=0.65`, max three
+  candidates per card) and writes only `status=proposed` rows. It never changes
+  the accepted release.
 
 ## Live verification
 
@@ -30,6 +34,8 @@ projection: 19 bindings · 1,591 reviews · 19 release items · 1 active release
 repeat approval: same release ID, no duplicate release items
 rollback: restored the previous release ID with 19 bindings after a second
 release was published; no immutable release items were rewritten
+semantic review staging: 742 target cards · 1,373 candidates generated ·
+1,288 open proposals after idempotent conflict coalescing
 ```
 
 The 19 existing reviewed crosswalk station references were canonicalized into
@@ -40,6 +46,7 @@ editorial review may change a row to `bound`, `needs_new_capability`, or
 `rejected` in a new pinned release.
 
 The reproducible command is `make capability-binding-smoke`; it applies the
-idempotent migration, generates the manifest, runs a blocked-free dry-run,
+idempotent migration, generates the manifest and semantic review candidates,
+runs a blocked-free dry-run,
 approves it twice, publishes a second isolated registry revision, rolls back
 to the first release, and checks the active release/projection counts.

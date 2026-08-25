@@ -9,6 +9,22 @@
 
 begin;
 
+create table if not exists content.capability_binding_profile_config (
+  profile_key text primary key,
+  min_similarity numeric(6,5) not null,
+  max_candidates integer not null default 3,
+  revision text not null,
+  updated_at timestamptz not null default now(),
+  check (min_similarity >= 0 and min_similarity <= 1),
+  check (max_candidates > 0 and max_candidates <= 20),
+  check (length(trim(revision)) > 0)
+);
+
+insert into content.capability_binding_profile_config
+  (profile_key, min_similarity, max_candidates, revision)
+values ('semantic-neighbor-v1', 0.65, 3, 'g7-capability-neighbor-baseline-2026-08-25')
+on conflict (profile_key) do nothing;
+
 alter table content.question_capability
   add column if not exists role text not null default 'primary',
   add column if not exists provenance text not null default 'question-brain-legacy',
