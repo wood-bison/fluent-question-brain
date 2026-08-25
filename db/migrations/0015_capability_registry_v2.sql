@@ -185,6 +185,14 @@ insert into content.taxonomy_capability_supersedes (superseded_key, canonical_ke
 select alias_key, canonical_key, reason
 from content.taxonomy_capability_alias
 where alias_key like 'capability.%'
+  -- Review smoke aliases are historical identity labels, not capability rows.
+  -- They intentionally remain in the alias table but cannot satisfy the
+  -- supersedes FK until a real capability is created for them.
+  and exists (
+    select 1
+    from content.taxonomy_capability capability
+    where capability.stable_key = taxonomy_capability_alias.alias_key
+  )
 on conflict (superseded_key) do update
 set canonical_key = excluded.canonical_key,
     reason = excluded.reason;
