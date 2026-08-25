@@ -35,10 +35,17 @@ open http://localhost:48128/admin
 For a type/build check without Docker:
 
 ```sh
+npm ci
 npm run typecheck
 npm run generate:types
 npm run build
 ```
+
+This app intentionally uses its own `package-lock.json`: run these commands
+with `npm` from `apps/cms`, not `pnpm --dir apps/cms`. The Lab monorepo uses
+pnpm, but installing its workspace dependencies into this Payload app can
+move or replace the CMS dependency tree and make a healthy Compose container
+look broken on the host.
 
 Do not add a second local catalogue, fallback data source, or direct SQL write
 from Payload. If the published projection and the API disagree, investigate
