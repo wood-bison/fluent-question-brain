@@ -214,7 +214,7 @@ in the vault. It reaches a topic through the question it assesses:
 
 ```
 node-event-loop-001            task.json in Task Runtime
-  questionKeys: [question.c009]
+  questionBindings: [question.c009 + revision/hash]
     └─ question.c009           card in Question Brain
          Topic: Node / Event Loop & Scheduling
          Track: Backend
@@ -226,7 +226,9 @@ gives the task its place in the tree.
 
 `breadcrumb` and `concepts` in `task.json` are display and search hints. They are
 NOT a second taxonomy and must not be used to decide where a task belongs; when
-they disagree with the referenced question's topic, the question wins.
+they disagree with the referenced question's topic, the question wins. A
+capability-only task uses an explicit `capabilityKeys` binding and is not
+forced to invent a question just to obtain a place in the tree.
 
 ## Rules for a new card
 

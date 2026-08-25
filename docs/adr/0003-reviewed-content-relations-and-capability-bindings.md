@@ -26,9 +26,11 @@ Question Brain is the sole writer for:
 
 Candidate semantic edges and capability bindings are never learner-visible
 until an explicit review decision and release. A title, topic, task key, or
-language profile cannot infer a capability. `questionKeys` accept only stable
-Question Brain keys; capability keys are separate fields in Task Runtime and
-Lab contracts.
+language profile cannot infer a capability. Task Runtime question-backed joins
+use immutable `questionBindings`; capability keys are separate fields in
+Task Runtime and Lab contracts. The removed overloaded `questionKeys`
+projection is rejected by current readers and appears only in migration
+evidence.
 
 The cross-system identity rules are defined by
 `question-capability-task.v1`. The workspace schema/fixture is normative; this
@@ -51,4 +53,3 @@ against its stable revision/hash and provenance rules.
   semantics; Postgres/pgvector remains the canonical storage boundary.
 - Lab-side auto-placement: it has no editorial provenance and would make
   discovery counters look like released curriculum.
-
