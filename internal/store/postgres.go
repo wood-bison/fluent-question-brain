@@ -99,6 +99,7 @@ type DuplicateDecision struct {
 	SemanticScore  float64
 	Decision       string
 	Actor          string
+	Rationale      string
 }
 
 type ImportItem struct {
@@ -2186,6 +2187,9 @@ func (p *Postgres) RecordDuplicateDecision(ctx context.Context, decision Duplica
 	if decision.Actor == "" {
 		decision.Actor = "g1-audit"
 	}
+	if strings.TrimSpace(decision.Rationale) == "" {
+		decision.Rationale = "Recorded by the reviewed duplicate-decision command."
+	}
 	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return fmt.Errorf("begin duplicate decision transaction: %w", err)
@@ -2228,6 +2232,7 @@ func (p *Postgres) RecordDuplicateDecision(ctx context.Context, decision Duplica
 		"exact_score":      decision.ExactScore,
 		"semantic_score":   decision.SemanticScore,
 		"decision":         decision.Decision,
+		"rationale":        decision.Rationale,
 	})
 	if err != nil {
 		return fmt.Errorf("encode duplicate evidence: %w", err)

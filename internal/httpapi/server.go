@@ -54,6 +54,15 @@ type importReviewService interface {
 	DecideImportReviewCandidate(context.Context, string, string, string, string) (store.ImportReviewStage, error)
 }
 
+type duplicateReviewService interface {
+	RecordDuplicateDecision(context.Context, store.DuplicateDecision) error
+}
+
+type capabilityBindingReviewService interface {
+	ListCapabilityBindingProposals(context.Context, string, string) ([]store.CapabilityBindingProposal, error)
+	DecideCapabilityBindingProposal(context.Context, string, string, string, string) (store.CapabilityBindingProposal, error)
+}
+
 type Server struct {
 	databaseURL   string
 	searchService search.Service
@@ -106,6 +115,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/import/review", s.importReviewList)
 	mux.HandleFunc("GET /v1/import/review/{stageID}", s.importReviewGet)
 	mux.HandleFunc("POST /v1/import/review/candidates/{candidateID}/decision", s.importReviewDecision)
+	mux.HandleFunc("POST /v1/duplicates/decision", s.duplicateDecision)
+	mux.HandleFunc("GET /v1/capability-bindings/review", s.capabilityBindingReview)
+	mux.HandleFunc("POST /v1/capability-bindings/review/{proposalID}/decision", s.capabilityBindingDecision)
 	return requestID(mux)
 }
 
@@ -767,6 +779,148 @@ func (s *Server) importReviewDecision(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, stage)
 }
 
+// duplicateDecision is the operator-facing HTTP equivalent of qb-audit. The
+// browser never writes to Question Brain's database; it sends one explicit,
+// authenticated, idempotent decision through this release-aware boundary.
+func (s *Server) duplicateDecision(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.searchService.(duplicateReviewService)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "duplicate_review_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var body struct {
+		WorkspaceKey   string  `json:"workspace_key"`
+		LeftStableKey  string  `json:"left_stable_key"`
+		RightStableKey string  `json:"right_stable_key"`
+		ExactScore     float64 `json:"exact_score"`
+		SemanticScore  float64 `json:"semantic_score"`
+		Decision       string  `json:"decision"`
+		Rationale      string  `json:"rationale"`
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&body); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_duplicate_decision_request"})
+		return
+	}
+	body.WorkspaceKey = strings.TrimSpace(body.WorkspaceKey)
+	if body.WorkspaceKey == "" {
+		body.WorkspaceKey = "fluent-interview"
+	}
+	body.LeftStableKey = strings.TrimSpace(body.LeftStableKey)
+	body.RightStableKey = strings.TrimSpace(body.RightStableKey)
+	body.Decision = strings.ToLower(strings.TrimSpace(body.Decision))
+	body.Rationale = strings.TrimSpace(body.Rationale)
+	if body.LeftStableKey == "" || body.RightStableKey == "" || body.LeftStableKey == body.RightStableKey {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "duplicate_decision_requires_distinct_stable_keys"})
+		return
+	}
+	if body.Decision != "not_duplicate" && body.Decision != "keep_separate" && body.Decision != "merge" && body.Decision != "open" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "unsupported_duplicate_decision"})
+		return
+	}
+	if body.Rationale == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "duplicate_decision_requires_rationale"})
+		return
+	}
+	if body.ExactScore < 0 || body.ExactScore > 1 || body.SemanticScore < 0 || body.SemanticScore > 1 {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "duplicate_scores_must_be_between_zero_and_one"})
+		return
+	}
+	err := backend.RecordDuplicateDecision(r.Context(), store.DuplicateDecision{
+		WorkspaceKey: body.WorkspaceKey, LeftStableKey: body.LeftStableKey, RightStableKey: body.RightStableKey,
+		ExactScore: body.ExactScore, SemanticScore: body.SemanticScore, Decision: body.Decision,
+		Actor: graphActor(r, "question-brain-reviewer"), Rationale: body.Rationale,
+	})
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": "question-brain.duplicate-review.v1",
+		"workspace_key":    body.WorkspaceKey,
+		"left_stable_key":  body.LeftStableKey,
+		"right_stable_key": body.RightStableKey,
+		"decision":         body.Decision,
+		"actor":            graphActor(r, "question-brain-reviewer"),
+		"rationale":        body.Rationale,
+	})
+}
+
+// capabilityBindingReview exposes the release-pinned, answer-free capability
+// proposal queue. It is intentionally separate from the immutable learner
+// binding release: accepting a proposal only changes its review state; a new
+// binding release is still required before learner projection can change.
+func (s *Server) capabilityBindingReview(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.searchService.(capabilityBindingReviewService)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "capability_binding_review_service_unavailable"})
+		return
+	}
+	workspace := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspace == "" {
+		workspace = "fluent-interview"
+	}
+	status := strings.TrimSpace(r.URL.Query().Get("status"))
+	if status == "" {
+		status = "proposed"
+	}
+	proposals, err := backend.ListCapabilityBindingProposals(r.Context(), workspace, status)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": "question-brain.capability-binding-review.v1",
+		"workspace_key":    workspace,
+		"status":           status,
+		"proposals":        proposals,
+	})
+}
+
+func (s *Server) capabilityBindingDecision(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.searchService.(capabilityBindingReviewService)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "capability_binding_review_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var body struct {
+		Decision  string `json:"decision"`
+		Rationale string `json:"rationale"`
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&body); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_capability_binding_decision_request"})
+		return
+	}
+	body.Decision = strings.ToLower(strings.TrimSpace(body.Decision))
+	body.Rationale = strings.TrimSpace(body.Rationale)
+	if body.Decision != "accepted" && body.Decision != "rejected" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "unsupported_capability_binding_decision"})
+		return
+	}
+	if body.Rationale == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "capability_binding_decision_requires_rationale"})
+		return
+	}
+	proposal, err := backend.DecideCapabilityBindingProposal(r.Context(), r.PathValue("proposalID"), body.Decision, graphActor(r, "question-brain-reviewer"), body.Rationale)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": "question-brain.capability-binding-decision.v1",
+		"proposal":         proposal,
+		"actor":            graphActor(r, "question-brain-reviewer"),
+		"idempotent":       true,
+	})
+}
+
 func (s *Server) authorizedInternalRequest(r *http.Request) bool {
 	return s.internalToken != "" && r.Header.Get("X-Question-Brain-Token") == s.internalToken
 }
@@ -783,7 +937,7 @@ func writeGraphError(w http.ResponseWriter, err error) {
 	status := http.StatusBadRequest
 	if errors.Is(err, pgx.ErrNoRows) {
 		status = http.StatusNotFound
-	} else if strings.Contains(strings.ToLower(err.Error()), "cycle") || strings.Contains(strings.ToLower(err.Error()), "already active") || strings.Contains(strings.ToLower(err.Error()), "cannot be reused") || strings.Contains(strings.ToLower(err.Error()), "open candidates") || strings.Contains(strings.ToLower(err.Error()), "blocked") {
+	} else if errors.Is(err, store.ErrReviewConflict) || strings.Contains(strings.ToLower(err.Error()), "cycle") || strings.Contains(strings.ToLower(err.Error()), "already active") || strings.Contains(strings.ToLower(err.Error()), "cannot be reused") || strings.Contains(strings.ToLower(err.Error()), "open candidates") || strings.Contains(strings.ToLower(err.Error()), "blocked") {
 		status = http.StatusConflict
 	}
 	writeJSON(w, status, map[string]string{"error": err.Error()})

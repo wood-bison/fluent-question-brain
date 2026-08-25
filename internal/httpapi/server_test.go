@@ -1,13 +1,16 @@
 package httpapi
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/wood-bison/fluent-question-brain/internal/search"
+	"github.com/wood-bison/fluent-question-brain/internal/store"
 )
 
 type httpSearchStub struct {
@@ -25,6 +28,16 @@ func (s *httpSearchStub) GetQuestion(context.Context, string, string, string) (s
 func (s *httpSearchStub) Catalog(_ context.Context, request search.CatalogRequest) (search.CatalogResponse, error) {
 	s.catalogRequest = request
 	return search.CatalogResponse{Questions: []search.CatalogItem{}}, nil
+}
+
+type duplicateReviewStub struct {
+	httpSearchStub
+	decision store.DuplicateDecision
+}
+
+func (s *duplicateReviewStub) RecordDuplicateDecision(_ context.Context, decision store.DuplicateDecision) error {
+	s.decision = decision
+	return nil
 }
 
 func TestLiveEndpoint(t *testing.T) {
@@ -118,5 +131,59 @@ func TestQualityRequiresService(t *testing.T) {
 	New("postgres://user:pass@localhost:5432/db").Handler().ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/v1/quality", nil))
 	if recorder.Code != http.StatusServiceUnavailable {
 		t.Fatalf("status = %d, want 503", recorder.Code)
+	}
+}
+
+func TestDuplicateDecisionRequiresInternalToken(t *testing.T) {
+	t.Setenv("QUESTION_BRAIN_INTERNAL_TOKEN", "review-token")
+	stub := &duplicateReviewStub{}
+	recorder := httptest.NewRecorder()
+	body := bytes.NewBufferString(`{"left_stable_key":"question.a","right_stable_key":"question.b","decision":"not_duplicate","rationale":"Different prompts"}`)
+	request := httptest.NewRequest(http.MethodPost, "/v1/duplicates/decision", body)
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", recorder.Code)
+	}
+}
+
+func TestDuplicateDecisionRequiresRationale(t *testing.T) {
+	t.Setenv("QUESTION_BRAIN_INTERNAL_TOKEN", "review-token")
+	stub := &duplicateReviewStub{}
+	recorder := httptest.NewRecorder()
+	body := bytes.NewBufferString(`{"left_stable_key":"question.a","right_stable_key":"question.b","decision":"not_duplicate"}`)
+	request := httptest.NewRequest(http.MethodPost, "/v1/duplicates/decision", body)
+	request.Header.Set("X-Question-Brain-Token", "review-token")
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400", recorder.Code)
+	}
+	if stub.decision.Decision != "" {
+		t.Fatal("invalid decision reached the write service")
+	}
+}
+
+func TestDuplicateDecisionReturnsAuditableContract(t *testing.T) {
+	t.Setenv("QUESTION_BRAIN_INTERNAL_TOKEN", "review-token")
+	stub := &duplicateReviewStub{}
+	recorder := httptest.NewRecorder()
+	payload, err := json.Marshal(map[string]any{
+		"workspace_key": "fluent-interview", "left_stable_key": "question.a", "right_stable_key": "question.b",
+		"exact_score": 0.97, "semantic_score": 0.41, "decision": "not_duplicate", "rationale": "Different capability boundaries.",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := httptest.NewRequest(http.MethodPost, "/v1/duplicates/decision", bytes.NewReader(payload))
+	request.Header.Set("X-Question-Brain-Token", "review-token")
+	request.Header.Set("X-Question-Brain-Actor", "sergey")
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body.String())
+	}
+	if !strings.Contains(recorder.Body.String(), `"contract_version":"question-brain.duplicate-review.v1"`) {
+		t.Fatal("response does not expose the duplicate review contract")
+	}
+	if stub.decision.Actor != "sergey" || stub.decision.Rationale == "" || stub.decision.Decision != "not_duplicate" {
+		t.Fatalf("unexpected persisted decision: %#v", stub.decision)
 	}
 }
