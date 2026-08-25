@@ -1,4 +1,6 @@
 FROM node:22-bookworm-slim
+ARG SOURCE_REVISION=unknown
+LABEL org.opencontainers.image.revision="$SOURCE_REVISION"
 
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1

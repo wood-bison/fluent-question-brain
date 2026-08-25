@@ -7,5 +7,7 @@ COPY internal ./internal
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags='-s -w' -o /out/qb-index ./cmd/qb-index
 
 FROM gcr.io/distroless/static-debian12:nonroot
+ARG SOURCE_REVISION=unknown
+LABEL org.opencontainers.image.revision="$SOURCE_REVISION"
 COPY --from=build /out/qb-index /qb-index
 ENTRYPOINT ["/qb-index"]

@@ -54,6 +54,8 @@ services:
     build:
       context: ../..
       dockerfile: deploy/compose/Dockerfile.api
+      args:
+        SOURCE_REVISION: ${QUESTION_BRAIN_SOURCE_REVISION:-unknown}
     environment:
       APP_ENV: ${APP_ENV:-local}
       HTTP_ADDR: ":8080"
@@ -92,6 +94,8 @@ services:
     build:
       context: ../..
       dockerfile: deploy/compose/Dockerfile.indexer
+      args:
+        SOURCE_REVISION: ${QUESTION_BRAIN_SOURCE_REVISION:-unknown}
     environment:
       DATABASE_URL: postgres://question_brain:question_brain@postgres:5432/question_brain?sslmode=disable
       EMBEDDING_PROVIDER_ENDPOINT: ${EMBEDDING_PROVIDER_ENDPOINT:-http://host.docker.internal:11434}
@@ -117,6 +121,8 @@ services:
     build:
       context: ../../apps/cms
       dockerfile: Dockerfile
+      args:
+        SOURCE_REVISION: ${QUESTION_BRAIN_SOURCE_REVISION:-unknown}
     environment:
       NODE_ENV: production
       PORT: 3000
