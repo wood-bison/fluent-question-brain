@@ -33,9 +33,12 @@ The optional canonical payload fields are `program_key`, `path_key`,
 present but `mapping_state` is omitted, it defaults to `proposed`; a card with
 no v1 keys at all carries no mapping fields and reads as `unmapped`. A
 capability requires an explicit path and domain. The
-revision-scoped `content.question_capability` table is many-to-many and is
-empty until a reviewed capability registry exists; this is deliberate and
-prevents a mass import from manufacturing learner stations.
+revision-scoped `content.question_capability` table is many-to-many. Its
+current learner projection is populated only by the reviewed G7 binding
+release; a mass import never manufactures learner stations. Every current card
+also receives an explicit G7 disposition (`bound`, `theory_only`,
+`needs_new_capability`, or `rejected`) so an unbound card is visible rather
+than silently missing.
 
 `stage_key` remains a read-only compatibility projection for older Lab clients.
 When a new mapping has `domain_key`, the catalog may expose the same value as
@@ -116,6 +119,20 @@ migration is idempotent and must be applied and smoke-tested before a release
 that writes capability bindings. It creates registry metadata only; it does
 not bulk-assign the current published cards or rewrite release hashes. Card-to-capability
 placement remains a separate reviewed operation in the later G7 gate.
+
+### Question ↔ Capability binding release (G7)
+
+The station-level decision is owned by the separate
+`question-brain.capability-binding.v1` contract and
+`db/migrations/0018_question_capability_bindings.sql`. A complete manifest
+pins every current question revision and records one explicit disposition. A
+`bound` entry may contain several capability bindings and relationship roles;
+`theory_only` is released/searchable without a Run button; `needs_new_capability`
+marks executable content waiting for a reviewed station; `rejected` is an
+audited exclusion. The only writer is `cmd/qb-capability-release`, which is
+dry-run by default and creates an immutable active binding release. The live
+baseline is recorded in
+`docs/verification/G7-QUESTION-CAPABILITY-2026-08-25.md`.
 
 ### Topic registry proposal (review queue)
 

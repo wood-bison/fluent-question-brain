@@ -1,0 +1,23 @@
+{
+  "contract_version": "question-brain.capability-binding.v1",
+  "taxonomy_version": "question-brain.taxonomy.v1",
+  "workspace_key": "fluent-interview",
+  "question_release_id": "question-release-d00a14931e607336",
+  "capability_registry_release_id": "capability-registry-2026-08-24-v2",
+  "binding_release_id": "question-capability-release-1e9ce61471213390",
+  "generated_at": "2026-08-24T23:59:10.896406671Z",
+  "approved": true,
+  "blocked": false,
+  "published": 1591,
+  "manifest_entries": 1591,
+  "bound": 19,
+  "theory_only": 1572,
+  "needs_new_capability": 0,
+  "rejected": 0,
+  "bindings": 19,
+  "changed": 0,
+  "unchanged": 0,
+  "invalid": 0,
+  "missing_manifest": 0,
+  "extra_manifest": 0
+}
