@@ -559,6 +559,28 @@ func (p *Postgres) GetGraphRelease(ctx context.Context, graphReleaseID string) (
 	return release, nil
 }
 
+// CurrentGraphRelease returns the immutable active graph snapshot for a
+// workspace. Review clients use this together with the non-mutating release
+// dry-run to show an operator exactly which release is being replaced.
+func (p *Postgres) CurrentGraphRelease(ctx context.Context, workspaceKey string) (GraphRelease, error) {
+	workspaceKey = strings.TrimSpace(workspaceKey)
+	if workspaceKey == "" {
+		workspaceKey = "fluent-interview"
+	}
+	var releaseID string
+	if err := p.pool.QueryRow(ctx, `
+		select release.graph_release_id
+		from content.question_graph_release release
+		join content.workspace workspace on workspace.id = release.workspace_id
+		where workspace.stable_key = $1 and release.status = 'active'
+		order by release.created_at desc
+		limit 1
+	`, workspaceKey).Scan(&releaseID); err != nil {
+		return GraphRelease{}, fmt.Errorf("read current graph release: %w", err)
+	}
+	return p.GetGraphRelease(ctx, releaseID)
+}
+
 func (p *Postgres) GraphNeighborhood(ctx context.Context, stableKey, workspaceKey string) (GraphNeighborhood, error) {
 	stableKey = strings.TrimSpace(stableKey)
 	workspaceKey = strings.TrimSpace(workspaceKey)

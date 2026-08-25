@@ -45,6 +45,7 @@ type graphService interface {
 	ReleaseQuestionGraph(context.Context, store.GraphReleaseRequest) (store.GraphReleaseReport, error)
 	RollbackQuestionGraph(context.Context, string, string) (store.GraphRelease, error)
 	GetGraphRelease(context.Context, string) (store.GraphRelease, error)
+	CurrentGraphRelease(context.Context, string) (store.GraphRelease, error)
 	GraphNeighborhood(context.Context, string, string) (store.GraphNeighborhood, error)
 }
 
@@ -106,6 +107,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/graph/proposals", s.graphProposal)
 	mux.HandleFunc("POST /v1/graph/proposals/{proposalID}/decision", s.graphDecision)
 	mux.HandleFunc("POST /v1/graph/releases", s.graphRelease)
+	mux.HandleFunc("GET /v1/graph/releases/current", s.graphReleaseCurrent)
 	mux.HandleFunc("GET /v1/graph/releases/{releaseID}", s.graphReleaseGet)
 	mux.HandleFunc("POST /v1/graph/releases/{releaseID}/rollback", s.graphRollback)
 	mux.HandleFunc("GET /v1/graph/neighborhood/{stableKey}", s.graphNeighborhood)
@@ -632,6 +634,24 @@ func (s *Server) graphReleaseGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	release, err := backend.GetGraphRelease(r.Context(), r.PathValue("releaseID"))
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, release)
+}
+
+func (s *Server) graphReleaseCurrent(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.graphBackend()
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "graph_service_unavailable"})
+		return
+	}
+	workspace := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspace == "" {
+		workspace = "fluent-interview"
+	}
+	release, err := backend.CurrentGraphRelease(r.Context(), workspace)
 	if err != nil {
 		writeGraphError(w, err)
 		return

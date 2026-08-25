@@ -36,6 +36,7 @@ solutions:
 
 ```text
 GET  /v1/graph/proposals?workspace=fluent-interview&status=proposed
+GET  /v1/graph/releases/current?workspace=fluent-interview
 GET  /v1/graph/releases/{graphReleaseID}
 GET  /v1/graph/neighborhood/{questionStableKey}?workspace=fluent-interview
 GET  /v1/graph/prerequisites/{questionStableKey}?workspace=fluent-interview
@@ -58,6 +59,11 @@ projection. A blocked release returns HTTP 409 and lists stale endpoints or
 cycle reasons. An active release can be approved repeatedly without creating
 duplicate rows; a rolled-back deterministic release cannot be silently
 reused.
+
+`/v1/graph/releases/current` is a read-only operator projection of the active
+immutable release. It is paired with `POST /v1/graph/releases` using
+`{"approve": false}` to show a deterministic after-release ID before any
+approval. Neither route mutates learner state.
 
 ## CLI boundary
 
