@@ -1,0 +1,21 @@
+{
+  "contract_version": "question-brain.curriculum-mapping-canonicalization.v1",
+  "source_manifest": "curriculum-mapping-2026-08-24-editorial-approved.json",
+  "output_manifest": "curriculum-mapping-2026-08-25-canonical.json",
+  "generated_at": "2026-08-25",
+  "replaced": 13,
+  "aliases": {
+    "capability.runtime.node-event-loop-001": "capability.nodejs.event-loop-ordering",
+    "capability.runtime.node-cpu-bound-002": "capability.nodejs.cpu-bound-work",
+    "capability.runtime.node-streams-003": "capability.nodejs.streams-backpressure",
+    "capability.runtime.node-memory-004": "capability.nodejs.memory-retention",
+    "capability.runtime.node-concurrency-012": "capability.nodejs.bounded-concurrency",
+    "capability.runtime.dotnet-cancellation-001": "capability.dotnet.cancellation-boundary",
+    "capability.http-api.node-auth-015": "capability.http-api.authentication-authorization",
+    "capability.data-postgresql.pg-indexes-008": "capability.postgresql.query-planning",
+    "capability.data-postgresql.pg-locks-016": "capability.postgresql.row-locks",
+    "capability.distributed-systems.node-idempotency-013": "capability.distributed-systems.idempotent-delivery",
+    "capability.delivery-observability.node-cache-014": "capability.delivery-observability.cache-invalidation"
+  },
+  "policy": "new releases use canonical capability registry keys; historical approved manifest remains immutable"
+}
