@@ -32,7 +32,12 @@ func (s *httpSearchStub) Catalog(_ context.Context, request search.CatalogReques
 
 type duplicateReviewStub struct {
 	httpSearchStub
-	decision store.DuplicateDecision
+	decision   store.DuplicateDecision
+	candidates []store.DuplicateReviewCandidate
+}
+
+func (s *duplicateReviewStub) ListDuplicateReviewCandidates(context.Context, string, string) ([]store.DuplicateReviewCandidate, error) {
+	return s.candidates, nil
 }
 
 func (s *duplicateReviewStub) RecordDuplicateDecision(_ context.Context, decision store.DuplicateDecision) error {
@@ -228,6 +233,26 @@ func TestDuplicateDecisionReturnsAuditableContract(t *testing.T) {
 	}
 	if stub.decision.Actor != "sergey" || stub.decision.Rationale == "" || stub.decision.Decision != "not_duplicate" {
 		t.Fatalf("unexpected persisted decision: %#v", stub.decision)
+	}
+}
+
+func TestDuplicateReviewQueueReturnsDurableCandidates(t *testing.T) {
+	stub := &duplicateReviewStub{candidates: []store.DuplicateReviewCandidate{{
+		ID: "candidate-1", WorkspaceKey: "fluent-interview",
+		LeftStableKey: "question.a", LeftRevisionID: "revision-a",
+		RightStableKey: "question.b", RightRevisionID: "revision-b",
+		Decision: "open",
+	}}}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/v1/duplicates/review?workspace=fluent-interview&status=proposed", nil)
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body.String())
+	}
+	body := recorder.Body.String()
+	if !strings.Contains(body, `"contract_version":"question-brain.duplicate-review.v1"`) ||
+		!strings.Contains(body, `"candidates":[`) || !strings.Contains(body, `"candidate-1"`) {
+		t.Fatalf("durable duplicate queue contract missing: %s", body)
 	}
 }
 

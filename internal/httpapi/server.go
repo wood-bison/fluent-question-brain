@@ -56,6 +56,7 @@ type importReviewService interface {
 }
 
 type duplicateReviewService interface {
+	ListDuplicateReviewCandidates(context.Context, string, string) ([]store.DuplicateReviewCandidate, error)
 	RecordDuplicateDecision(context.Context, store.DuplicateDecision) error
 }
 
@@ -106,6 +107,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/catalog", s.catalog)
 	mux.HandleFunc("GET /v1/release", s.release)
 	mux.HandleFunc("GET /v1/quality", s.quality)
+	mux.HandleFunc("GET /v1/duplicates/review", s.duplicateReview)
 	mux.HandleFunc("GET /v1/questions/{stableKey}", s.question)
 	mux.HandleFunc("POST /v1/questions/{stableKey}/rollback", s.rollback)
 	mux.HandleFunc("POST /v1/promote", s.promote)
@@ -875,6 +877,36 @@ func (s *Server) duplicateDecision(w http.ResponseWriter, r *http.Request) {
 		"decision":         body.Decision,
 		"actor":            graphActor(r, "question-brain-reviewer"),
 		"rationale":        body.Rationale,
+	})
+}
+
+// duplicateReview exposes durable duplicate candidates, including candidates
+// that were not produced by exact-prompt grouping. This keeps the operator
+// queue complete while the quality report remains a diagnostic summary.
+func (s *Server) duplicateReview(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.searchService.(duplicateReviewService)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "duplicate_review_service_unavailable"})
+		return
+	}
+	workspace := strings.TrimSpace(r.URL.Query().Get("workspace"))
+	if workspace == "" {
+		workspace = "fluent-interview"
+	}
+	status := strings.TrimSpace(r.URL.Query().Get("status"))
+	if status == "" {
+		status = "proposed"
+	}
+	candidates, err := backend.ListDuplicateReviewCandidates(r.Context(), workspace, status)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": store.DuplicateReviewContractVersion,
+		"workspace_key":    workspace,
+		"status":           status,
+		"candidates":       candidates,
 	})
 }
 
