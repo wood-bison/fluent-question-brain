@@ -1253,17 +1253,23 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 		join content.question q on q.workspace_id = w.id and q.status = 'published'
 		join content.question_revision qr on qr.id = q.current_revision_id
 		where w.stable_key = $1
-		  and ($3 or q.content_kind = 'production')
-		  and ($2 = '' or exists (
+		  and ($4 or q.content_kind = 'production')
+		  and exists (
+			select 1
+			from content.question_locale requested_locale
+			where requested_locale.revision_id = qr.id
+			  and requested_locale.locale = $2
+		  )
+		  and ($3 = '' or exists (
 			select 1
 			from content.question_topic qt
 			join content.topic t on t.id = qt.topic_id
-			where qt.question_id = q.id and t.stable_key = $2
+		  where qt.question_id = q.id and t.stable_key = $3
 		  ))
-		  and ($4 = '' or lower(coalesce(qr.normalized_payload->>'track', '')) = lower($4))
-		  and ($5 = '' or lower(coalesce(q.level, '')) = lower($5))
-		  and ($6 = '' or lower(coalesce(q.company, '')) = lower($6))
-	`, workspaceKey, topicKey, includeFixtures, track, level, company).Scan(&total); err != nil {
+		  and ($5 = '' or lower(coalesce(qr.normalized_payload->>'track', '')) = lower($5))
+		  and ($6 = '' or lower(coalesce(q.level, '')) = lower($6))
+		  and ($7 = '' or lower(coalesce(q.company, '')) = lower($7))
+	`, workspaceKey, locale, topicKey, includeFixtures, track, level, company).Scan(&total); err != nil {
 		return search.CatalogResponse{}, fmt.Errorf("count catalog questions: %w", err)
 	}
 	var excludedFixtures int
