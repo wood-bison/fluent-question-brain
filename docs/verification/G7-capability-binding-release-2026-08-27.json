@@ -1,0 +1,1690 @@
+{
+  "contract_version": "question-brain.capability-binding.v1",
+  "taxonomy_version": "question-brain.taxonomy.v1",
+  "workspace_key": "fluent-interview",
+  "question_release_id": "question-release-d00a14931e607336",
+  "capability_registry_release_id": "capability-registry-2026-08-25-v3",
+  "binding_release_id": "question-capability-release-e7d6f9ad743d4f43",
+  "generated_at": "2026-08-27T22:01:47.464149008Z",
+  "approved": true,
+  "blocked": false,
+  "published": 1591,
+  "manifest_entries": 1591,
+  "bound": 28,
+  "theory_only": 1563,
+  "needs_new_capability": 0,
+  "rejected": 0,
+  "bindings": 30,
+  "changed": 0,
+  "unchanged": 0,
+  "invalid": 0,
+  "missing_manifest": 0,
+  "extra_manifest": 0,
+  "coverage": [
+    {
+      "dimension": "capability",
+      "key": "capability.delivery-observability.cache-invalidation",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.distributed-systems.idempotent-delivery",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.distributed-systems.rate-limiter",
+      "cards": 2,
+      "bound": 2,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.dotnet.cancellation-boundary",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.http-api.authentication-authorization",
+      "cards": 2,
+      "bound": 2,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.http-api.rate-limiter",
+      "cards": 2,
+      "bound": 2,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.nodejs.bounded-concurrency",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.nodejs.cpu-bound-work",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.nodejs.event-loop-ordering",
+      "cards": 11,
+      "bound": 11,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.nodejs.memory-retention",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.nodejs.streams-backpressure",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.postgresql.query-planning",
+      "cards": 2,
+      "bound": 2,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.postgresql.row-locks",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.runtime.deferred",
+      "cards": 2,
+      "bound": 2,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "capability",
+      "key": "capability.runtime.fluent-calculator",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "About Me",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Algorithms Practice",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Behavioral",
+      "cards": 69,
+      "bound": 0,
+      "theory_only": 69,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Code Review",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Common Questions",
+      "cards": 1231,
+      "bound": 27,
+      "theory_only": 1204,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Languages \u0026 Runtimes",
+      "cards": 3,
+      "bound": 0,
+      "theory_only": 3,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Live Coding",
+      "cards": 3,
+      "bound": 0,
+      "theory_only": 3,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Live Coding \u0026 SQL Tasks",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "PL/SQL",
+      "cards": 3,
+      "bound": 0,
+      "theory_only": 3,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "PL/SQL / Oracle",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "PL/SQL / Performance",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Practical Tasks",
+      "cards": 126,
+      "bound": 0,
+      "theory_only": 126,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Project Questions",
+      "cards": 3,
+      "bound": 0,
+      "theory_only": 3,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Reliability Fundamentals",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "System Design",
+      "cards": 80,
+      "bound": 0,
+      "theory_only": 80,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "System Design Screening",
+      "cards": 8,
+      "bound": 0,
+      "theory_only": 8,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "Troubleshooting",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "card_kind",
+      "key": "unknown",
+      "cards": 54,
+      "bound": 1,
+      "theory_only": 53,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "domain",
+      "key": "domain.algorithms",
+      "cards": 52,
+      "bound": 0,
+      "theory_only": 52,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "domain",
+      "key": "domain.behavioral",
+      "cards": 103,
+      "bound": 0,
+      "theory_only": 103,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "domain",
+      "key": "domain.data-postgresql",
+      "cards": 171,
+      "bound": 3,
+      "theory_only": 168,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "domain",
+      "key": "domain.delivery-observability",
+      "cards": 62,
+      "bound": 1,
+      "theory_only": 61,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "domain",
+      "key": "domain.distributed-systems",
+      "cards": 275,
+      "bound": 3,
+      "theory_only": 272,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "domain",
+      "key": "domain.http-api",
+      "cards": 166,
+      "bound": 3,
+      "theory_only": 163,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "domain",
+      "key": "domain.os-networking",
+      "cards": 33,
+      "bound": 0,
+      "theory_only": 33,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "domain",
+      "key": "domain.runtime",
+      "cards": 681,
+      "bound": 18,
+      "theory_only": 663,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "domain",
+      "key": "domain.testing",
+      "cards": 48,
+      "bound": 0,
+      "theory_only": 48,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "locale",
+      "key": "en",
+      "cards": 1591,
+      "bound": 28,
+      "theory_only": 1563,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "locale",
+      "key": "ru",
+      "cards": 1591,
+      "bound": 28,
+      "theory_only": 1563,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "path",
+      "key": "path.algorithms",
+      "cards": 52,
+      "bound": 0,
+      "theory_only": 52,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "path",
+      "key": "path.behavioral",
+      "cards": 103,
+      "bound": 0,
+      "theory_only": 103,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "path",
+      "key": "path.dotnet-csharp",
+      "cards": 75,
+      "bound": 1,
+      "theory_only": 74,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "path",
+      "key": "path.frontend",
+      "cards": 161,
+      "bound": 0,
+      "theory_only": 161,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "path",
+      "key": "path.go",
+      "cards": 130,
+      "bound": 0,
+      "theory_only": 130,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "path",
+      "key": "path.java-spring",
+      "cards": 191,
+      "bound": 0,
+      "theory_only": 191,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "path",
+      "key": "path.nodejs-typescript",
+      "cards": 294,
+      "bound": 21,
+      "theory_only": 273,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "path",
+      "key": "path.python",
+      "cards": 17,
+      "bound": 0,
+      "theory_only": 17,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "path",
+      "key": "path.system-design",
+      "cards": 568,
+      "bound": 6,
+      "theory_only": 562,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": ".NET / ASP.NET Core",
+      "cards": 7,
+      "bound": 0,
+      "theory_only": 7,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": ".NET / Async \u0026 Concurrency",
+      "cards": 12,
+      "bound": 1,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": ".NET / C# Language \u0026 Type System",
+      "cards": 24,
+      "bound": 0,
+      "theory_only": 24,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": ".NET / CLR \u0026 GC",
+      "cards": 13,
+      "bound": 0,
+      "theory_only": 13,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": ".NET / DI \u0026 Lifetimes",
+      "cards": 4,
+      "bound": 0,
+      "theory_only": 4,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": ".NET / EF Core",
+      "cards": 12,
+      "bound": 0,
+      "theory_only": 12,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": ".NET / LINQ \u0026 Collections",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": ".NET / Performance \u0026 Diagnostics",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "AI / RAG / Search",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "AI-assisted Development",
+      "cards": 14,
+      "bound": 0,
+      "theory_only": 14,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "API Design",
+      "cards": 41,
+      "bound": 2,
+      "theory_only": 39,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms",
+      "cards": 43,
+      "bound": 0,
+      "theory_only": 43,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms / Binary Search",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms / Design",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms / Graph",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms / Greedy",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms / Hash Table",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms / Sliding Window",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms / Stack",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms / Two Pointers",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Algorithms / Union-Find",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Architecture",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Build \u0026 Tooling",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Change Detection",
+      "cards": 6,
+      "bound": 0,
+      "theory_only": 6,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Change Detection \u0026 Lifecycle",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Code Review",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Components",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Components \u0026 DI",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Components \u0026 Templates",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Content Projection",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / DI \u0026 RxJS",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / DI scopes",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Dependency Injection",
+      "cards": 4,
+      "bound": 0,
+      "theory_only": 4,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Directives",
+      "cards": 3,
+      "bound": 0,
+      "theory_only": 3,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Forms",
+      "cards": 5,
+      "bound": 0,
+      "theory_only": 5,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Forms \u0026 DI",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / HttpClient",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Ivy",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Lifecycle",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Migration",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / NgRx",
+      "cards": 5,
+      "bound": 0,
+      "theory_only": 5,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Pipes",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Pipes \u0026 CD",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Routing",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / RxJS",
+      "cards": 5,
+      "bound": 0,
+      "theory_only": 5,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Services \u0026 DI",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Signals",
+      "cards": 3,
+      "bound": 0,
+      "theory_only": 3,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Signals \u0026 Pipes",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Templates",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / Testing",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Angular / zone.js",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Answer Technique",
+      "cards": 24,
+      "bound": 0,
+      "theory_only": 24,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Architecture \u0026 Design Patterns",
+      "cards": 69,
+      "bound": 0,
+      "theory_only": 69,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Auth \u0026 Backend Security",
+      "cards": 38,
+      "bound": 2,
+      "theory_only": 36,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Behavioral",
+      "cards": 6,
+      "bound": 0,
+      "theory_only": 6,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Behavioral / Competency",
+      "cards": 3,
+      "bound": 0,
+      "theory_only": 3,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Behavioral / Conflict \u0026 Teamwork",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Behavioral / Leadership Principles",
+      "cards": 12,
+      "bound": 0,
+      "theory_only": 12,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Behavioral / Project Deep Dive",
+      "cards": 30,
+      "bound": 0,
+      "theory_only": 30,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Behavioral / Recruiter Screen",
+      "cards": 21,
+      "bound": 0,
+      "theory_only": 21,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Behavioral / Self \u0026 Motivation",
+      "cards": 5,
+      "bound": 0,
+      "theory_only": 5,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Caching",
+      "cards": 13,
+      "bound": 1,
+      "theory_only": 12,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Databases \u0026 Data Modeling",
+      "cards": 78,
+      "bound": 3,
+      "theory_only": 75,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Delivery, Observability \u0026 Cloud",
+      "cards": 43,
+      "bound": 0,
+      "theory_only": 43,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Distributed Systems \u0026 Resilience",
+      "cards": 22,
+      "bound": 0,
+      "theory_only": 22,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Frontend / Styling",
+      "cards": 4,
+      "bound": 0,
+      "theory_only": 4,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Frontend Performance",
+      "cards": 16,
+      "bound": 0,
+      "theory_only": 16,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Frontend Security / Accessibility",
+      "cards": 11,
+      "bound": 0,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Frontend System Design",
+      "cards": 15,
+      "bound": 0,
+      "theory_only": 15,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Git / Tooling",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Channels \u0026 select",
+      "cards": 13,
+      "bound": 0,
+      "theory_only": 13,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Errors \u0026 defer \u0026 panic",
+      "cards": 11,
+      "bound": 0,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Goroutines \u0026 Scheduler",
+      "cards": 14,
+      "bound": 0,
+      "theory_only": 14,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Graceful Shutdown",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Interfaces \u0026 Generics",
+      "cards": 12,
+      "bound": 0,
+      "theory_only": 12,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Memory \u0026 GC",
+      "cards": 13,
+      "bound": 0,
+      "theory_only": 13,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Package API Design",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Runtime \u0026 Language",
+      "cards": 50,
+      "bound": 0,
+      "theory_only": 50,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Sync \u0026 Patterns",
+      "cards": 12,
+      "bound": 0,
+      "theory_only": 12,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Go / Tooling \u0026 Testing",
+      "cards": 3,
+      "bound": 0,
+      "theory_only": 3,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "JS Async Internals",
+      "cards": 1,
+      "bound": 1,
+      "theory_only": 0,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Java / Concurrency \u0026 Async",
+      "cards": 27,
+      "bound": 0,
+      "theory_only": 27,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Java / Core Language",
+      "cards": 115,
+      "bound": 0,
+      "theory_only": 115,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Java / JVM \u0026 GC",
+      "cards": 13,
+      "bound": 0,
+      "theory_only": 13,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Java / Spring \u0026 Spring Boot",
+      "cards": 36,
+      "bound": 0,
+      "theory_only": 36,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "JavaScript / DOM Events",
+      "cards": 7,
+      "bound": 0,
+      "theory_only": 7,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Messaging \u0026 Event Streaming",
+      "cards": 35,
+      "bound": 0,
+      "theory_only": 35,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Networking / Browser",
+      "cards": 4,
+      "bound": 0,
+      "theory_only": 4,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / Async \u0026 Promises",
+      "cards": 21,
+      "bound": 3,
+      "theory_only": 18,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / Bun",
+      "cards": 13,
+      "bound": 0,
+      "theory_only": 13,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / Event Loop \u0026 Scheduling",
+      "cards": 26,
+      "bound": 9,
+      "theory_only": 17,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / JS Fundamentals",
+      "cards": 40,
+      "bound": 0,
+      "theory_only": 40,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / Modules \u0026 Packaging",
+      "cards": 11,
+      "bound": 0,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / NestJS / Auth \u0026 Security",
+      "cards": 11,
+      "bound": 0,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / NestJS / DI \u0026 Architecture",
+      "cards": 10,
+      "bound": 0,
+      "theory_only": 10,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / NestJS / Data \u0026 TypeORM",
+      "cards": 11,
+      "bound": 0,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / NestJS / Performance \u0026 Realtime",
+      "cards": 24,
+      "bound": 0,
+      "theory_only": 24,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / NestJS / Request Pipeline",
+      "cards": 7,
+      "bound": 0,
+      "theory_only": 7,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / NestJS / Testing \u0026 Production",
+      "cards": 11,
+      "bound": 0,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / NestJS / Validation \u0026 Errors",
+      "cards": 11,
+      "bound": 0,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / Runtime Ops \u0026 Debugging",
+      "cards": 14,
+      "bound": 1,
+      "theory_only": 13,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / Streams \u0026 Backpressure",
+      "cards": 11,
+      "bound": 1,
+      "theory_only": 10,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / TS Applied",
+      "cards": 12,
+      "bound": 1,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / TS Tooling",
+      "cards": 11,
+      "bound": 0,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / TS Type System",
+      "cards": 13,
+      "bound": 0,
+      "theory_only": 13,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / V8 \u0026 GC",
+      "cards": 12,
+      "bound": 1,
+      "theory_only": 11,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node / Workers",
+      "cards": 12,
+      "bound": 0,
+      "theory_only": 12,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Node Runtime \u0026 Streams",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "ORM \u0026 Persistence Performance",
+      "cards": 49,
+      "bound": 0,
+      "theory_only": 49,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "OS, Networking \u0026 Concurrency Fundamentals",
+      "cards": 33,
+      "bound": 0,
+      "theory_only": 33,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Oracle / SQL Craft \u0026 Analytics",
+      "cards": 19,
+      "bound": 0,
+      "theory_only": 19,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Python / Concurrency \u0026 GIL",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Python / Iterators \u0026 Generators",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Python / Metaprogramming",
+      "cards": 4,
+      "bound": 0,
+      "theory_only": 4,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Python / OOP \u0026 Data Model",
+      "cards": 9,
+      "bound": 0,
+      "theory_only": 9,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "React Rendering / Hooks",
+      "cards": 38,
+      "bound": 0,
+      "theory_only": 38,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Caching",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Combination",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Completion",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Custom Operators",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Error Handling",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Higher-order Mapping",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Hot vs Cold",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Multicasting",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Observable Creation",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "RxJS / Subjects",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "SQL / Joins \u0026 Aggregation",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "State Management",
+      "cards": 2,
+      "bound": 0,
+      "theory_only": 2,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "System Design",
+      "cards": 59,
+      "bound": 2,
+      "theory_only": 57,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "System Design / Product Cases",
+      "cards": 38,
+      "bound": 0,
+      "theory_only": 38,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Testing",
+      "cards": 15,
+      "bound": 0,
+      "theory_only": 15,
+      "needs_new_capability": 0,
+      "rejected": 0
+    },
+    {
+      "dimension": "topic",
+      "key": "Web Architecture / Browser Storage",
+      "cards": 1,
+      "bound": 0,
+      "theory_only": 1,
+      "needs_new_capability": 0,
+      "rejected": 0
+    }
+  ]
+}
