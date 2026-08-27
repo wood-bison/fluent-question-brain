@@ -216,12 +216,17 @@ func (p *Postgres) GenerateCapabilityBindingManifest(ctx context.Context, worksp
 	}
 	defer rows.Close()
 	entries := make([]capabilitybinding.Entry, 0)
+	current := make(map[string]currentCapabilityRevision)
 	for rows.Next() {
 		var stableKey, revisionID, contentHash, pathKey, domainKey string
 		var legacyCapability *string
 		var executable bool
 		if err := rows.Scan(&stableKey, &revisionID, &contentHash, &pathKey, &domainKey, &legacyCapability, &executable); err != nil {
 			return capabilitybinding.Manifest{}, fmt.Errorf("scan current capability review queue: %w", err)
+		}
+		current[stableKey] = currentCapabilityRevision{
+			StableKey: stableKey, RevisionID: revisionID, Hash: contentHash,
+			PathKey: pathKey, DomainKey: domainKey,
 		}
 		entry := capabilitybinding.Entry{
 			StableKey: stableKey, RevisionID: revisionID, ContentHash: contentHash,
@@ -251,6 +256,23 @@ func (p *Postgres) GenerateCapabilityBindingManifest(ctx context.Context, worksp
 	}
 	if err := rows.Err(); err != nil {
 		return capabilitybinding.Manifest{}, fmt.Errorf("iterate current capability review queue: %w", err)
+	}
+	rows.Close()
+	// A proposal is release input only after an explicit review decision. The
+	// semantic-neighbor stage writes `proposed`, which is intentionally ignored
+	// here; accepting a proposal and regenerating this manifest is the required
+	// promotion step. This keeps embeddings advisory and the release auditable.
+	var workspaceID string
+	if err := p.pool.QueryRow(ctx, `select id::text from content.workspace where stable_key = $1`, workspaceKey).Scan(&workspaceID); err != nil {
+		return capabilitybinding.Manifest{}, fmt.Errorf("read capability proposal workspace: %w", err)
+	}
+	accepted, err := p.listAcceptedCapabilityProposals(ctx, workspaceID, release.ReleaseID, registryReleaseID)
+	if err != nil {
+		return capabilitybinding.Manifest{}, err
+	}
+	entries, err = mergeAcceptedCapabilityProposals(entries, accepted, current)
+	if err != nil {
+		return capabilitybinding.Manifest{}, err
 	}
 	return capabilitybinding.Manifest{
 		ContractVersion:             capabilitybinding.ContractVersion,
@@ -282,6 +304,125 @@ type CapabilityNeighborProposalReport struct {
 	Targets         int     `json:"targets"`
 	Candidates      int     `json:"candidates"`
 	Unchanged       int     `json:"unchanged"`
+}
+
+// acceptedCapabilityProposal is deliberately answer-free.  The proposal
+// queue stores only review metadata and release pins; localized question
+// bodies stay behind the normal question read boundary.
+type acceptedCapabilityProposal struct {
+	ID                          string
+	StableKey                   string
+	RevisionID                  string
+	PathKey                     string
+	CapabilityKey               string
+	Role                        string
+	Provenance                  string
+	Confidence                  *float64
+	Evidence                    json.RawMessage
+	QuestionReleaseID           string
+	CapabilityRegistryReleaseID string
+	Rationale                   string
+}
+
+// mergeAcceptedCapabilityProposals applies only explicit, already accepted
+// proposals for the current question and capability releases.  It is kept as
+// a pure helper so the release compiler can be tested without a live database.
+// A stale proposal is ignored (it cannot join a current release); a path
+// mismatch is an error because accepting it would leak a foreign path into a
+// learner projection.
+func mergeAcceptedCapabilityProposals(
+	entries []capabilitybinding.Entry,
+	proposals []acceptedCapabilityProposal,
+	current map[string]currentCapabilityRevision,
+) ([]capabilitybinding.Entry, error) {
+	byStableKey := make(map[string]int, len(entries))
+	result := make([]capabilitybinding.Entry, len(entries))
+	copy(result, entries)
+	for i := range result {
+		result[i].Bindings = append([]capabilitybinding.Binding(nil), result[i].Bindings...)
+		byStableKey[result[i].StableKey] = i
+	}
+	for _, proposal := range proposals {
+		index, ok := byStableKey[proposal.StableKey]
+		row, currentOK := current[proposal.StableKey]
+		if !ok || !currentOK || proposal.RevisionID != row.RevisionID {
+			// The complete manifest is built from current revisions. An accepted
+			// proposal for an old revision remains audit history, not release input.
+			continue
+		}
+		if strings.TrimSpace(proposal.PathKey) == "" || proposal.PathKey != row.PathKey {
+			return nil, fmt.Errorf("accepted capability proposal %s for %s has path %q, current path is %q", proposal.ID, proposal.StableKey, proposal.PathKey, row.PathKey)
+		}
+		entry := &result[index]
+		if entry.Disposition != "bound" {
+			entry.Disposition = "bound"
+			entry.Rationale = fmt.Sprintf("Accepted reviewed capability proposal %s: %s", proposal.ID, strings.TrimSpace(proposal.Rationale))
+		}
+		duplicate := false
+		for _, binding := range entry.Bindings {
+			if binding.PathKey == proposal.PathKey && binding.CapabilityKey == proposal.CapabilityKey && binding.Role == proposal.Role {
+				duplicate = true
+				break
+			}
+		}
+		if duplicate {
+			continue
+		}
+		var evidence any
+		if len(proposal.Evidence) > 0 {
+			if err := json.Unmarshal(proposal.Evidence, &evidence); err != nil {
+				return nil, fmt.Errorf("decode evidence for accepted capability proposal %s: %w", proposal.ID, err)
+			}
+		}
+		entry.Bindings = append(entry.Bindings, capabilitybinding.Binding{
+			PathKey: proposal.PathKey, CapabilityKey: proposal.CapabilityKey,
+			Role: proposal.Role, Provenance: proposal.Provenance,
+			Confidence: proposal.Confidence, Evidence: evidence,
+		})
+	}
+	return result, nil
+}
+
+func (p *Postgres) listAcceptedCapabilityProposals(ctx context.Context, workspaceID, questionReleaseID, registryReleaseID string) ([]acceptedCapabilityProposal, error) {
+	rows, err := p.pool.Query(ctx, `
+		select proposal.id::text, question.stable_key, proposal.revision_id::text,
+		       proposal.path_key, proposal.capability_key, proposal.role,
+		       proposal.provenance, proposal.confidence::float8, proposal.evidence,
+		       proposal.question_release_id, proposal.capability_registry_release_id,
+		       proposal.rationale
+		from content.question_capability_binding_proposal proposal
+		join content.question_revision revision on revision.id = proposal.revision_id
+		join content.question question on question.id = revision.question_id
+		where proposal.workspace_id = $1::uuid
+		  and proposal.status = 'accepted'
+		  and proposal.question_release_id = $2
+		  and proposal.capability_registry_release_id = $3
+		  and question.status = 'published'
+		  and question.content_kind = 'production'
+		  and question.current_revision_id = revision.id
+		order by question.stable_key, proposal.path_key, proposal.capability_key, proposal.role, proposal.id
+	`, workspaceID, questionReleaseID, registryReleaseID)
+	if err != nil {
+		return nil, fmt.Errorf("query accepted capability proposals: %w", err)
+	}
+	defer rows.Close()
+	proposals := make([]acceptedCapabilityProposal, 0)
+	for rows.Next() {
+		var proposal acceptedCapabilityProposal
+		if err := rows.Scan(
+			&proposal.ID, &proposal.StableKey, &proposal.RevisionID, &proposal.PathKey,
+			&proposal.CapabilityKey, &proposal.Role, &proposal.Provenance,
+			&proposal.Confidence, &proposal.Evidence, &proposal.QuestionReleaseID,
+			&proposal.CapabilityRegistryReleaseID, &proposal.Rationale,
+		); err != nil {
+			return nil, fmt.Errorf("scan accepted capability proposal: %w", err)
+		}
+		proposals = append(proposals, proposal)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate accepted capability proposals: %w", err)
+	}
+	return proposals, nil
 }
 
 // StageCapabilityNeighborProposals creates review-only candidates from
