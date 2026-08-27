@@ -38,6 +38,42 @@ type duplicateReviewStub struct {
 	candidates []store.DuplicateReviewCandidate
 }
 
+type capabilityBindingReviewStub struct {
+	httpSearchStub
+	proposal store.CapabilityBindingProposal
+	revoked  struct {
+		proposalID string
+		actor      string
+		rationale  string
+	}
+}
+
+func (s *capabilityBindingReviewStub) ListCapabilityBindingProposals(context.Context, string, string) ([]store.CapabilityBindingProposal, error) {
+	if s.proposal.ID == "" {
+		return []store.CapabilityBindingProposal{}, nil
+	}
+	return []store.CapabilityBindingProposal{s.proposal}, nil
+}
+
+func (s *capabilityBindingReviewStub) DecideCapabilityBindingProposal(_ context.Context, proposalID, decision, actor, rationale string) (store.CapabilityBindingProposal, error) {
+	s.proposal.ID = proposalID
+	s.proposal.Status = decision
+	s.proposal.DecidedBy = actor
+	s.proposal.Rationale = rationale
+	return s.proposal, nil
+}
+
+func (s *capabilityBindingReviewStub) RevokeCapabilityBindingProposal(_ context.Context, proposalID, actor, rationale string) (store.CapabilityBindingProposal, error) {
+	s.revoked.proposalID = proposalID
+	s.revoked.actor = actor
+	s.revoked.rationale = rationale
+	s.proposal.ID = proposalID
+	s.proposal.Status = "rejected"
+	s.proposal.DecidedBy = actor
+	s.proposal.Rationale = rationale
+	return s.proposal, nil
+}
+
 type qualityStub struct {
 	httpSearchStub
 	mu      sync.Mutex
@@ -362,5 +398,51 @@ func TestCapabilityAliasReviewDecisionReturnsVersionedContract(t *testing.T) {
 	}
 	if stub.decision.actor != "sergey" || stub.decision.decision != "accepted" || stub.decision.rationale == "" {
 		t.Fatalf("unexpected alias decision: %#v", stub.decision)
+	}
+}
+
+func TestCapabilityBindingRevocationRequiresInternalToken(t *testing.T) {
+	t.Setenv("QUESTION_BRAIN_INTERNAL_TOKEN", "review-token")
+	stub := &capabilityBindingReviewStub{}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/v1/capability-bindings/review/proposal-1/revoke", bytes.NewBufferString(`{"rationale":"invalid path"}`))
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", recorder.Code)
+	}
+}
+
+func TestCapabilityBindingRevocationRequiresRationale(t *testing.T) {
+	t.Setenv("QUESTION_BRAIN_INTERNAL_TOKEN", "review-token")
+	stub := &capabilityBindingReviewStub{}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/v1/capability-bindings/review/proposal-1/revoke", bytes.NewBufferString(`{}`))
+	request.Header.Set("X-Question-Brain-Token", "review-token")
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400", recorder.Code)
+	}
+	if stub.revoked.proposalID != "" {
+		t.Fatal("invalid revocation reached the write service")
+	}
+}
+
+func TestCapabilityBindingRevocationReturnsVersionedContract(t *testing.T) {
+	t.Setenv("QUESTION_BRAIN_INTERNAL_TOKEN", "review-token")
+	stub := &capabilityBindingReviewStub{}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/v1/capability-bindings/review/proposal-1/revoke", bytes.NewBufferString(`{"rationale":"path/revision mismatch discovered by release compiler"}`))
+	request.Header.Set("X-Question-Brain-Token", "review-token")
+	request.Header.Set("X-Question-Brain-Actor", "sergey-integrity")
+	New("postgres://user:pass@localhost:5432/db", stub).Handler().ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body.String())
+	}
+	if !strings.Contains(recorder.Body.String(), `"contract_version":"question-brain.capability-binding-revocation.v1"`) ||
+		!strings.Contains(recorder.Body.String(), `"release_required":true`) {
+		t.Fatalf("revocation contract missing: %s", recorder.Body.String())
+	}
+	if stub.revoked.actor != "sergey-integrity" || stub.revoked.rationale == "" || stub.revoked.proposalID != "proposal-1" {
+		t.Fatalf("unexpected revocation: %#v", stub.revoked)
 	}
 }

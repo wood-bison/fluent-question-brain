@@ -64,6 +64,7 @@ type duplicateReviewService interface {
 type capabilityBindingReviewService interface {
 	ListCapabilityBindingProposals(context.Context, string, string) ([]store.CapabilityBindingProposal, error)
 	DecideCapabilityBindingProposal(context.Context, string, string, string, string) (store.CapabilityBindingProposal, error)
+	RevokeCapabilityBindingProposal(context.Context, string, string, string) (store.CapabilityBindingProposal, error)
 }
 
 type capabilityAliasSupersessionReviewService interface {
@@ -158,6 +159,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/duplicates/decision", s.duplicateDecision)
 	mux.HandleFunc("GET /v1/capability-bindings/review", s.capabilityBindingReview)
 	mux.HandleFunc("POST /v1/capability-bindings/review/{proposalID}/decision", s.capabilityBindingDecision)
+	mux.HandleFunc("POST /v1/capability-bindings/review/{proposalID}/revoke", s.capabilityBindingRevocation)
 	mux.HandleFunc("GET /v1/capability-aliases/review", s.capabilityAliasSupersessionReview)
 	mux.HandleFunc("POST /v1/capability-aliases/review", s.capabilityAliasSupersessionProposal)
 	mux.HandleFunc("POST /v1/capability-aliases/review/{proposalID}/decision", s.capabilityAliasSupersessionDecision)
@@ -1140,6 +1142,45 @@ func (s *Server) capabilityBindingDecision(w http.ResponseWriter, r *http.Reques
 		"proposal":         proposal,
 		"actor":            graphActor(r, "question-brain-reviewer"),
 		"idempotent":       true,
+	})
+}
+
+// capabilityBindingRevocation is deliberately separate from normal review:
+// it is an integrity-remediation action for an already accepted proposal and
+// never mutates an immutable learner release in place.
+func (s *Server) capabilityBindingRevocation(w http.ResponseWriter, r *http.Request) {
+	backend, ok := s.searchService.(capabilityBindingReviewService)
+	if !ok {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "capability_binding_review_service_unavailable"})
+		return
+	}
+	if !s.authorizedInternalRequest(r) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid_internal_token"})
+		return
+	}
+	var body struct {
+		Rationale string `json:"rationale"`
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 64<<10)).Decode(&body); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid_capability_binding_revocation_request"})
+		return
+	}
+	body.Rationale = strings.TrimSpace(body.Rationale)
+	if body.Rationale == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "capability_binding_revocation_requires_rationale"})
+		return
+	}
+	proposal, err := backend.RevokeCapabilityBindingProposal(r.Context(), r.PathValue("proposalID"), graphActor(r, "question-brain-integrity-remediator"), body.Rationale)
+	if err != nil {
+		writeGraphError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"contract_version": "question-brain.capability-binding-revocation.v1",
+		"proposal":         proposal,
+		"actor":            graphActor(r, "question-brain-integrity-remediator"),
+		"idempotent":       true,
+		"release_required": true,
 	})
 }
 

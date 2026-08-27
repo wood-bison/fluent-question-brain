@@ -153,3 +153,105 @@ func (p *Postgres) DecideCapabilityBindingProposal(ctx context.Context, proposal
 	}
 	return proposal, nil
 }
+
+// RevokeCapabilityBindingProposal is the integrity-remediation path for an
+// already accepted proposal. Normal review is intentionally compare-and-set
+// from proposed -> accepted/rejected; this separate operation makes it
+// impossible to silently rewrite an accepted decision while still allowing an
+// operator to remove a demonstrably invalid placement from the next release.
+// The immutable release snapshot is not changed. A subsequent validated
+// binding release is required before the learner projection can change.
+func (p *Postgres) RevokeCapabilityBindingProposal(ctx context.Context, proposalID, actor, rationale string) (CapabilityBindingProposal, error) {
+	proposalID = strings.TrimSpace(proposalID)
+	actor = strings.TrimSpace(actor)
+	rationale = strings.TrimSpace(rationale)
+	if proposalID == "" || actor == "" || rationale == "" {
+		return CapabilityBindingProposal{}, fmt.Errorf("proposal id, actor, and rationale are required")
+	}
+
+	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return CapabilityBindingProposal{}, fmt.Errorf("begin capability binding revocation: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var workspaceID string
+	var proposal CapabilityBindingProposal
+	err = tx.QueryRow(ctx, `
+		update content.question_capability_binding_proposal proposal
+		set status = 'rejected', rationale = $2, decided_by = $3, decided_at = now()
+		where proposal.id = $1::uuid and proposal.status = 'accepted'
+		returning proposal.workspace_id::text, proposal.id::text,
+		  (select question.stable_key from content.question_revision revision join content.question question on question.id = revision.question_id where revision.id = proposal.revision_id),
+		  proposal.revision_id::text, proposal.path_key, proposal.capability_key, proposal.role,
+		  proposal.provenance, proposal.confidence::float8, proposal.evidence,
+		  proposal.question_release_id, proposal.capability_registry_release_id,
+		  proposal.status, proposal.rationale, proposal.source, proposal.decided_by, proposal.decided_at::text
+	`, proposalID, rationale, actor).Scan(
+		&workspaceID, &proposal.ID, &proposal.StableKey, &proposal.RevisionID, &proposal.PathKey,
+		&proposal.CapabilityKey, &proposal.Role, &proposal.Provenance, &proposal.Confidence,
+		&proposal.Evidence, &proposal.QuestionReleaseID, &proposal.CapabilityRegistryReleaseID,
+		&proposal.Status, &proposal.Rationale, &proposal.Source, &proposal.DecidedBy, &proposal.DecidedAt,
+	)
+	if err == pgx.ErrNoRows {
+		var currentStatus string
+		if statusErr := tx.QueryRow(ctx, `
+			select status from content.question_capability_binding_proposal where id = $1::uuid
+		`, proposalID).Scan(&currentStatus); statusErr != nil {
+			return CapabilityBindingProposal{}, fmt.Errorf("read capability binding proposal after revocation compare-and-set: %w", statusErr)
+		}
+		if currentStatus == "rejected" {
+			if err := tx.QueryRow(ctx, `
+				select proposal.id::text,
+				  (select question.stable_key from content.question_revision revision join content.question question on question.id = revision.question_id where revision.id = proposal.revision_id),
+				  proposal.revision_id::text, proposal.path_key, proposal.capability_key, proposal.role,
+				  proposal.provenance, proposal.confidence::float8, proposal.evidence,
+				  proposal.question_release_id, proposal.capability_registry_release_id,
+				  proposal.status, proposal.rationale, proposal.source, coalesce(proposal.decided_by, ''), proposal.decided_at::text
+				from content.question_capability_binding_proposal proposal
+				where proposal.id = $1::uuid
+			`, proposalID).Scan(
+				&proposal.ID, &proposal.StableKey, &proposal.RevisionID, &proposal.PathKey,
+				&proposal.CapabilityKey, &proposal.Role, &proposal.Provenance, &proposal.Confidence,
+				&proposal.Evidence, &proposal.QuestionReleaseID, &proposal.CapabilityRegistryReleaseID,
+				&proposal.Status, &proposal.Rationale, &proposal.Source, &proposal.DecidedBy, &proposal.DecidedAt,
+			); err != nil {
+				return CapabilityBindingProposal{}, fmt.Errorf("read already revoked capability binding proposal: %w", err)
+			}
+			if len(proposal.Evidence) == 0 {
+				proposal.Evidence = json.RawMessage(`{}`)
+			}
+			if err := tx.Commit(ctx); err != nil {
+				return CapabilityBindingProposal{}, fmt.Errorf("commit idempotent capability binding revocation: %w", err)
+			}
+			return proposal, nil
+		}
+		return CapabilityBindingProposal{}, fmt.Errorf("%w: current status is %q, revocation requires accepted", ErrReviewConflict, currentStatus)
+	}
+	if err != nil {
+		return CapabilityBindingProposal{}, fmt.Errorf("revoke capability binding proposal: %w", err)
+	}
+	if len(proposal.Evidence) == 0 {
+		proposal.Evidence = json.RawMessage(`{}`)
+	}
+	metadata, err := json.Marshal(map[string]string{
+		"proposal_id":     proposal.ID,
+		"stable_key":      proposal.StableKey,
+		"previous_status": "accepted",
+		"status":          "rejected",
+		"rationale":       rationale,
+	})
+	if err != nil {
+		return CapabilityBindingProposal{}, fmt.Errorf("encode capability binding revocation audit: %w", err)
+	}
+	if _, err := tx.Exec(ctx, `
+		insert into content.audit_event (workspace_id, aggregate_type, aggregate_id, event_type, actor, metadata)
+		values ($1::uuid, 'question_capability_binding_proposal', $2::uuid, 'question.capability.binding.proposal.revoked', $3, $4::jsonb)
+	`, workspaceID, proposal.ID, actor, metadata); err != nil {
+		return CapabilityBindingProposal{}, fmt.Errorf("write capability binding revocation audit: %w", err)
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return CapabilityBindingProposal{}, fmt.Errorf("commit capability binding revocation: %w", err)
+	}
+	return proposal, nil
+}

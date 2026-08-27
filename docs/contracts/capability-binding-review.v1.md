@@ -22,3 +22,15 @@ requires a rationale. `X-Question-Brain-Actor` is recorded in `decided_by` and
 the audit event. The compare-and-set is idempotent for the same decision and
 returns conflict for a competing decision. Acceptance alone does not alter the
 learner projection: a validated binding release must still be published.
+
+## Integrity remediation
+
+`POST /v1/capability-bindings/review/{proposalID}/revoke` is reserved for an
+already `accepted` proposal that is proven to be invalid (for example, a
+path/revision mismatch discovered by the release compiler). It requires
+`X-Question-Brain-Token`, records `X-Question-Brain-Actor`, and requires a
+non-empty `rationale`. The operation is compare-and-set from `accepted` to
+`rejected`, writes `question.capability.binding.proposal.revoked` to the audit
+log, and is idempotent when the proposal is already rejected. It never rewrites
+an immutable binding release; generate and validate a new release before the
+learner projection changes.
