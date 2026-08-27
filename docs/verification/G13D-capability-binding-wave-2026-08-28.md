@@ -1,4 +1,4 @@
-# G13D capability binding wave — Node orchestration depth
+# G13D capability binding wave — Node orchestration and Nest integration
 
 Date: 2026-08-28  
 Owner: Question Brain editorial release  
@@ -10,10 +10,11 @@ G13D is the next bounded Node.js/runtime wave after G13C. It covers the
 orchestration boundary that learners meet in production Node/Nest services:
 offloading slow work to BullMQ, choosing NestJS microservice transport and
 message-pattern semantics, health/readiness, graceful shutdown, SSE and
-in-process events, and compression/keep-alive trade-offs. The release keeps the
-distinction between a supporting question and a runnable activity: a bound card
-is searchable evidence for a capability, not an implicit lab or completion
-checkpoint.
+in-process events, compression/keep-alive trade-offs, async error boundaries,
+Nest request guards and Passport/JWT authentication, and stream resource
+cleanup. The release keeps the distinction between a supporting question and a
+runnable activity: a bound card is searchable evidence for a capability, not an
+implicit lab or completion checkpoint.
 
 Generation and approval used the immutable question release
 `question-release-d00a14931e607336` and registry
@@ -37,6 +38,23 @@ provenance.
 | `question.q1030` | `ce7c329b-2a34-4deb-b052-679bc1d6b51a` | `capability.nodejs.event-loop-ordering` | EventEmitter2/`@OnEvent` in-process scheduling and the boundary where a broker is required |
 | `question.q1031` | `0e247aa8-527a-4851-b19e-b9cdb435fab3` | `capability.nodejs.cpu-bound-work` | gzip/brotli compression and keep-alive CPU/throughput trade-offs |
 
+## Extended Node/Nest review batch
+
+The same G13D staging source received a second bounded review after the
+orchestration batch. These seven additional cards have canonical
+`path.nodejs-typescript` metadata and direct evidence for their target
+capability; they were accepted with actor `question-brain-g13e-node-nest-review`.
+
+| Stable key | Proposal ID | Capability | Review note |
+| --- | --- | --- | --- |
+| `question.q313` | `222294fe-29ed-4a41-be43-bbbd050a40ba` | `capability.runtime.deferred` | Async error-boundary propagation and floating-promise handling |
+| `question.q042` | `5ea265da-a7cf-4131-a49d-a59b1634f476` | `capability.http-api.authentication-authorization` | NestJS middleware versus guards at the request authorization boundary |
+| `question.q971` | `43bc0d9a-a3d0-43de-a664-c258960c83f2` | `capability.http-api.authentication-authorization` | Passport/JWT strategy and role metadata composition |
+| `question.q993` | `cd3a224a-e487-4791-a6b3-ae4aca8c9b14` | `capability.http-api.authentication-authorization` | LocalStrategy, JwtStrategy, validate, and AuthGuard request identity |
+| `question.q995` | `37d24cca-71f7-4b41-a4aa-795cebb4d0c0` | `capability.http-api.authentication-authorization` | Access/refresh token lifecycle and cookie versus Authorization transport |
+| `question.q998` | `2f1ad351-4a47-4ead-bdc5-b5e4b7ce316a` | `capability.http-api.authentication-authorization` | Roles metadata, Reflector, and JWT authorization guard |
+| `question.q791` | `551077f1-dcfc-4030-8584-514c6dbc3172` | `capability.nodejs.streams-backpressure` | `pipeline()` versus `pipe()`/`for-await-of` error and resource cleanup |
+
 The reviewed `q768` poll-phase and `q770` kernel-async-I/O proposals were
 already represented by valid released cards; the compiler deduplicated the
 card identity while preserving the valid binding provenance. They therefore do
@@ -55,13 +73,13 @@ reclassified.
 
 - Manifest: `G13D-capability-binding-manifest-2026-08-28.json`
 - Approved report: `G13D-capability-binding-release-2026-08-28.json`
-- Binding release: `question-capability-release-3798fba18a422181`
+- Binding release: `question-capability-release-4f78374bc4ccffc1`
 - Question release: `question-release-d00a14931e607336`
 - Capability registry: `capability-registry-2026-08-25-v3`
 - Manifest entries: 1,591
-- Bound cards: 85 (G13C: 78; +7)
-- Binding rows: 111 (G13C: 102)
-- Theory-only cards: 1,506
+- Bound cards: 92 (G13C: 78; +14)
+- Binding rows: 118 (G13C: 102)
+- Theory-only cards: 1,499
 - Invalid/stale/missing/extra entries: 0/0/0/0
 - `blocked=false`, `approved=true`
 

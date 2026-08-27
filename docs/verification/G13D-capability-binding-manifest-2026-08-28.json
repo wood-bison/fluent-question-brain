@@ -263,7 +263,7 @@
       "revision_id": "a7ea6049-e6fa-48b6-a035-e5385a30d70a",
       "content_hash": "864c71eaa69ff382f112146172398140a99fdea2f7f9c2755ee6d942e19f6c7a",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: G12 reviewed: direct runtime exercise to predict console ordering across event-loop phases and microtasks; canonical path matches path.nodejs-typescript and it is a practice-ready deferred execution prompt.",
+      "rationale": "Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: Accepted reviewed capability proposal 9bfc0565-f8e9-445e-98e7-23a670a54488: G12 reviewed: direct runtime exercise to predict console ordering across event-loop phases and microtasks; canonical path matches path.nodejs-typescript and it is a practice-ready deferred execution prompt.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -1628,7 +1628,7 @@
       "revision_id": "7ea8261a-55d4-4a65-805b-ae3781f9add3",
       "content_hash": "cec52ce030e11927dbaafe38ef47e79a6bd5f1f545b3a7986f00d4bb8fe8c4ed",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 0175f76f-821f-48a4-adb2-a826f20d21ef: Accepted reviewed capability proposal 0175f76f-821f-48a4-adb2-a826f20d21ef: Accepted reviewed capability proposal 0175f76f-821f-48a4-adb2-a826f20d21ef: G13C semantic review: libuv scheduling is a direct Node.js runtime foundation; retain as CPU-bound execution evidence for how work leaves and returns to the event loop.",
+      "rationale": "Accepted reviewed capability proposal 0175f76f-821f-48a4-adb2-a826f20d21ef: Accepted reviewed capability proposal 0175f76f-821f-48a4-adb2-a826f20d21ef: Accepted reviewed capability proposal 0175f76f-821f-48a4-adb2-a826f20d21ef: Accepted reviewed capability proposal 0175f76f-821f-48a4-adb2-a826f20d21ef: G13C semantic review: libuv scheduling is a direct Node.js runtime foundation; retain as CPU-bound execution evidence for how work leaves and returns to the event loop.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -1672,7 +1672,7 @@
       "revision_id": "e09b2a3e-ae35-49d1-b710-dd7d04e78ec4",
       "content_hash": "870e5fa66edc0d8ab6088e846f120dcb622c8b2c8d96c365bcfee5a74ce32902",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Direct memory-bounded data movement through Node streams; canonical supporting evidence for streams backpressure.",
+      "rationale": "Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Accepted reviewed capability proposal 003917e8-601a-4e70-a34e-4627341710cf: Direct memory-bounded data movement through Node streams; canonical supporting evidence for streams backpressure.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -1695,7 +1695,7 @@
       "revision_id": "a1e417da-9e3a-41d3-8f8a-b844c101bfae",
       "content_hash": "68023c9204e87055281fd9638549a4af7624a959293e633011391a05bda25561",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Direct Node parallel execution choices across worker_threads, cluster, and child_process; canonical supporting evidence for CPU-bound work.",
+      "rationale": "Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Accepted reviewed capability proposal 8f25509a-a143-4c7b-8159-ee2205803acd: Direct Node parallel execution choices across worker_threads, cluster, and child_process; canonical supporting evidence for CPU-bound work.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -3438,15 +3438,31 @@
       "stable_key": "question.q042",
       "revision_id": "6cf75e64-61e9-4a7a-a842-fa8ccc53c1a9",
       "content_hash": "38d53d6362537a563a2288928221f13c801a648e4cb913ded6c8a18ce36017a2",
-      "disposition": "theory_only",
-      "rationale": "No reviewed learner station is attached; keep the card released and searchable without manufacturing a capability."
+      "disposition": "bound",
+      "rationale": "Accepted reviewed capability proposal 5ea265da-a7cf-4131-a49d-a59b1634f476: G13E reviewed NestJS request-pipeline card: middleware versus guards is direct authentication/authorization boundary evidence.",
+      "bindings": [
+        {
+          "path_key": "path.nodejs-typescript",
+          "capability_key": "capability.http-api.authentication-authorization",
+          "role": "supporting_evidence",
+          "provenance": "semantic-neighbor-v1",
+          "confidence": 0.68822,
+          "evidence": {
+            "exemplar_revision_id": "61db31c9-42f2-40f5-880e-26207e5f071d",
+            "method": "pgvector-semantic-neighbor",
+            "profile_key": "semantic-neighbor-v1",
+            "profile_revision": "g7-capability-neighbor-baseline-2026-08-25",
+            "similarity": 0.6882217750813888
+          }
+        }
+      ]
     },
     {
       "stable_key": "question.q044",
       "revision_id": "b7619b44-19c1-4838-bac4-e35b431ee05d",
       "content_hash": "e30200f64de3c092df981bf080fd4657cbefb18d2968ef589e4c8318b9be5ede",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 862285ed-4300-43d5-9e92-ec31eade6bd3: Accepted reviewed capability proposal 862285ed-4300-43d5-9e92-ec31eade6bd3: Accepted reviewed capability proposal 862285ed-4300-43d5-9e92-ec31eade6bd3: G13C semantic review: this directly identifies synchronous CPU and blocking APIs that stall every Node.js request, with concrete profiling and perf_hooks diagnostics; retain as CPU-bound event-loop evidence.",
+      "rationale": "Accepted reviewed capability proposal 862285ed-4300-43d5-9e92-ec31eade6bd3: Accepted reviewed capability proposal 862285ed-4300-43d5-9e92-ec31eade6bd3: Accepted reviewed capability proposal 862285ed-4300-43d5-9e92-ec31eade6bd3: Accepted reviewed capability proposal 862285ed-4300-43d5-9e92-ec31eade6bd3: G13C semantic review: this directly identifies synchronous CPU and blocking APIs that stall every Node.js request, with concrete profiling and perf_hooks diagnostics; retain as CPU-bound event-loop evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -3483,7 +3499,7 @@
       "revision_id": "e87967fa-fc86-4940-ae51-e3099206abd5",
       "content_hash": "d749034d1f8e5e0ce0e0219399239ddecd07a8a1eba7712d75d184665e728124",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Direct Node/NestJS load-concurrency behavior under many requests; canonical supporting evidence for bounded concurrency.",
+      "rationale": "Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Accepted reviewed capability proposal 1cf6513e-53d5-4d09-90c1-e2c0a23503d2: Direct Node/NestJS load-concurrency behavior under many requests; canonical supporting evidence for bounded concurrency.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -3520,7 +3536,7 @@
       "revision_id": "9a42d597-d3d7-4e07-8531-9b3d8a7a1ebf",
       "content_hash": "6c7c70895c83e50992ea8f21ae192e6f89f7e8e10ceb435dd0767ba751aea084",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Direct sequential versus Promise.all tradeoff; canonical supporting evidence for bounded Node concurrency.",
+      "rationale": "Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Accepted reviewed capability proposal fb749508-953c-4d1d-8fa2-9c56507e9dd1: Direct sequential versus Promise.all tradeoff; canonical supporting evidence for bounded Node concurrency.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -3843,7 +3859,7 @@
       "revision_id": "895e9af2-a203-4c4d-877a-84c1cf1eb264",
       "content_hash": "9949674ecad86b15e4b60dcb71e3ff5feeaba7b8082213c4f8e4ac7be004c307",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
+      "rationale": "Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Accepted reviewed capability proposal 358dad7e-5b7a-485e-b8e6-8cdd3ebd4e84: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -3880,7 +3896,7 @@
       "revision_id": "a1c9454e-bbd3-404e-9a63-fc98d2a4ee69",
       "content_hash": "51e8d3366fcf59fd0494e0422ba5dcfd259ec9f76ed712ef040f81e1d0b47431",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Direct NestJS memory-leak causes and prevention; canonical supporting evidence for Node memory retention.",
+      "rationale": "Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Accepted reviewed capability proposal 5c2a8e84-2495-420f-8b21-7baac4699745: Direct NestJS memory-leak causes and prevention; canonical supporting evidence for Node memory retention.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -4043,7 +4059,7 @@
       "revision_id": "1332f0e1-f26e-4747-8e72-516fbcd83d25",
       "content_hash": "e05e170d1700736d6f09238285ddd901120f7c3b350803a3db6e8a0d6c1c1bc7",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal d607e46c-46bd-4a17-9f68-eed8b41e7483: G13E semantic review: NestJS Terminus liveness/readiness checks execute at the Node service boundary and define safe orchestration behavior.",
+      "rationale": "Accepted reviewed capability proposal d607e46c-46bd-4a17-9f68-eed8b41e7483: Accepted reviewed capability proposal d607e46c-46bd-4a17-9f68-eed8b41e7483: G13E semantic review: NestJS Terminus liveness/readiness checks execute at the Node service boundary and define safe orchestration behavior.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -4087,7 +4103,7 @@
       "revision_id": "2f052140-532b-45ca-b6ba-6253d6526ab7",
       "content_hash": "822714069a94249b1da4a2d285879a365107c7fcff1135ed1f13f3839f473953",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal cc86c827-69bd-4f70-b53c-51c961f7ea32: G13E semantic review: multi-stage NestJS container startup and graceful shutdown coordinate the Node event loop, in-flight requests, and database cleanup.",
+      "rationale": "Accepted reviewed capability proposal cc86c827-69bd-4f70-b53c-51c961f7ea32: Accepted reviewed capability proposal cc86c827-69bd-4f70-b53c-51c961f7ea32: G13E semantic review: multi-stage NestJS container startup and graceful shutdown coordinate the Node event loop, in-flight requests, and database cleanup.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -4110,7 +4126,7 @@
       "revision_id": "a58d2a06-8c43-4c3d-80c2-cda0f2ebbe19",
       "content_hash": "a0aec75c4d10da607870ae8774727c8f704cf5f09ce3acc5c047a0e9463683fc",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Direct shared Redis cache wiring and invalidation on writes in NestJS; canonical supporting evidence for cache invalidation.",
+      "rationale": "Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Accepted reviewed capability proposal 1371b7d0-191b-4d02-a2b1-634967c1e368: Direct shared Redis cache wiring and invalidation on writes in NestJS; canonical supporting evidence for cache invalidation.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -4133,7 +4149,7 @@
       "revision_id": "ffcbcfb8-1b78-43e0-9046-1001a17c4214",
       "content_hash": "f3cc68c264cdddb5596753af14d277597ed3505891e4024be767e0e6773ba4ec",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 999c11ad-9414-4560-b16f-dba837c8fc53: Accepted reviewed capability proposal 999c11ad-9414-4560-b16f-dba837c8fc53: G13D semantic review: BullMQ offloads slow NestJS work and retry processing from the request event loop; direct Node scheduling and bounded worker evidence.",
+      "rationale": "Accepted reviewed capability proposal 999c11ad-9414-4560-b16f-dba837c8fc53: Accepted reviewed capability proposal 999c11ad-9414-4560-b16f-dba837c8fc53: Accepted reviewed capability proposal 999c11ad-9414-4560-b16f-dba837c8fc53: G13D semantic review: BullMQ offloads slow NestJS work and retry processing from the request event loop; direct Node scheduling and bounded worker evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -4156,7 +4172,7 @@
       "revision_id": "71138f8b-d3c9-4802-9cb1-5421d52fc8c0",
       "content_hash": "d7cd7c50461004905b18402a7481729dbb86b33014fe8f9a1640cd64ca0acc73",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 74512017-4657-4c76-a3d8-3315cd0e19af: Accepted reviewed capability proposal 74512017-4657-4c76-a3d8-3315cd0e19af: Accepted reviewed capability proposal 74512017-4657-4c76-a3d8-3315cd0e19af: G13C semantic review: NestJS @Cron/@Interval/@Timeout scheduling and multi-instance timer traps are direct Node.js timer/event-loop evidence.",
+      "rationale": "Accepted reviewed capability proposal 74512017-4657-4c76-a3d8-3315cd0e19af: Accepted reviewed capability proposal 74512017-4657-4c76-a3d8-3315cd0e19af: Accepted reviewed capability proposal 74512017-4657-4c76-a3d8-3315cd0e19af: Accepted reviewed capability proposal 74512017-4657-4c76-a3d8-3315cd0e19af: G13C semantic review: NestJS @Cron/@Interval/@Timeout scheduling and multi-instance timer traps are direct Node.js timer/event-loop evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -4186,7 +4202,7 @@
       "revision_id": "62597c77-5525-4c03-91be-c32c12f01ca6",
       "content_hash": "d21df463428ae3e07f22c1cc149b8b18d645c9c6e7a0eba48d8b977299cc6f83",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 07756cd4-26e4-421f-a0ee-62da8847c4ce: G13E semantic review: NestJS SSE and RxJS Observable scheduling is direct Node event-loop streaming evidence.",
+      "rationale": "Accepted reviewed capability proposal 07756cd4-26e4-421f-a0ee-62da8847c4ce: Accepted reviewed capability proposal 07756cd4-26e4-421f-a0ee-62da8847c4ce: G13E semantic review: NestJS SSE and RxJS Observable scheduling is direct Node event-loop streaming evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -4216,7 +4232,7 @@
       "revision_id": "0428c6e7-56ab-4969-b077-673b246ae6bc",
       "content_hash": "5d0563bccead1b07411f3024eda28d3ba963d1e1f497117804a3e12a5dd243dd",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 922ec906-d3b6-4623-b205-bf7653b69feb: Accepted reviewed capability proposal 922ec906-d3b6-4623-b205-bf7653b69feb: G13D semantic review: NestJS transport and pattern semantics define how Node microservices schedule request/event handlers, acknowledgements, and retries.",
+      "rationale": "Accepted reviewed capability proposal 922ec906-d3b6-4623-b205-bf7653b69feb: Accepted reviewed capability proposal 922ec906-d3b6-4623-b205-bf7653b69feb: Accepted reviewed capability proposal 922ec906-d3b6-4623-b205-bf7653b69feb: G13D semantic review: NestJS transport and pattern semantics define how Node microservices schedule request/event handlers, acknowledgements, and retries.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -4246,7 +4262,7 @@
       "revision_id": "93b8e680-e6be-4145-b82f-c7edb4f44a6e",
       "content_hash": "241b8eb047c035d05f965e9023d231288732afa700c14c3584096e40f003693d",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal ce7c329b-2a34-4deb-b052-679bc1d6b51a: G13E semantic review: EventEmitter2 and @OnEvent expose in-process Node scheduling boundaries and their limits versus a broker.",
+      "rationale": "Accepted reviewed capability proposal ce7c329b-2a34-4deb-b052-679bc1d6b51a: Accepted reviewed capability proposal ce7c329b-2a34-4deb-b052-679bc1d6b51a: G13E semantic review: EventEmitter2 and @OnEvent expose in-process Node scheduling boundaries and their limits versus a broker.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -4269,7 +4285,7 @@
       "revision_id": "25a6ea52-6999-4c93-b652-144f99a68b30",
       "content_hash": "787a539a33a6127aab7a2e9be616db7ec11a62578f3895cb2959005391c3c0dc",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 0e247aa8-527a-4851-b19e-b9cdb435fab3: G13E semantic review: gzip/brotli compression and keep-alive trade CPU work against Node request throughput; direct runtime performance evidence.",
+      "rationale": "Accepted reviewed capability proposal 0e247aa8-527a-4851-b19e-b9cdb435fab3: Accepted reviewed capability proposal 0e247aa8-527a-4851-b19e-b9cdb435fab3: G13E semantic review: gzip/brotli compression and keep-alive trade CPU work against Node request throughput; direct runtime performance evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -5719,7 +5735,7 @@
       "revision_id": "18cbdf37-2e2d-4275-a408-1cf5b9197fe2",
       "content_hash": "6e2be720c4b7328dda128b6580c03c69f935d6e780b099d4cb99514d6ee7c608",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: G12 reviewed: direct Node.js runtime question on browser promises, microtasks, and macrotasks; canonical path is path.nodejs-typescript and it provides supporting event-loop evidence.",
+      "rationale": "Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: Accepted reviewed capability proposal fe4d7878-0675-451d-8968-365cec81b385: G12 reviewed: direct Node.js runtime question on browser promises, microtasks, and macrotasks; canonical path is path.nodejs-typescript and it provides supporting event-loop evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -6139,7 +6155,7 @@
       "revision_id": "98a4f297-68db-4abf-8e0a-cd0f426cdbfb",
       "content_hash": "3deef9b99d27f70888e0bbb9c1adc8f8b30934c710c5929bf0d3d3cf2a150596",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: G12 reviewed: direct Node.js runtime question on nextTick, Promise microtasks, and setImmediate; proposal path matches current canonical path.nodejs-typescript and adds supporting evidence for event-loop ordering.",
+      "rationale": "Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: Accepted reviewed capability proposal d9221d97-1ef1-44e9-a0d4-115dfc2d1cb9: G12 reviewed: direct Node.js runtime question on nextTick, Promise microtasks, and setImmediate; proposal path matches current canonical path.nodejs-typescript and adds supporting evidence for event-loop ordering.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -6176,7 +6192,7 @@
       "revision_id": "82276abc-da71-4beb-9746-ff72d6e5b238",
       "content_hash": "dfc004a3893c202984cbc8b59c2d02c853e6caf18480af41afd5659cbe17f29c",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Direct Node.js streams and backpressure question; canonical supporting evidence for the capability.",
+      "rationale": "Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Accepted reviewed capability proposal 39b8a5df-6519-4611-a190-1006139a98e1: Direct Node.js streams and backpressure question; canonical supporting evidence for the capability.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -6199,7 +6215,7 @@
       "revision_id": "872b5bef-11a6-4475-a817-df54363c892b",
       "content_hash": "7c43822b4376d943fd6b4bb12a48f6d3cc0f95cc8180b8d31666bfb904f6276c",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Direct Node worker_threads use case; canonical supporting evidence for CPU-bound work.",
+      "rationale": "Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Accepted reviewed capability proposal ec2792c5-5622-43ed-a9a8-be5a8ee2754f: Direct Node worker_threads use case; canonical supporting evidence for CPU-bound work.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -6222,7 +6238,7 @@
       "revision_id": "fd0bf57f-3e10-4ca4-81f8-7e16a9350582",
       "content_hash": "f5fcb1ccd57189d76b160762d5746018ebbec3f06044f6c6155a0f6ec74f95cd",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Direct scaling of a Node.js service across CPU cores; canonical supporting evidence for CPU-bound work.",
+      "rationale": "Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Accepted reviewed capability proposal f862f21a-f261-4561-9ba5-8eb83fcb930b: Direct scaling of a Node.js service across CPU cores; canonical supporting evidence for CPU-bound work.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -6266,7 +6282,7 @@
       "revision_id": "9ec1f2c3-71d5-4417-879c-327a5c493b33",
       "content_hash": "c475dcc3665fdbabf92348a0881c57cb6694eaf44a6f8a692abbc8a9251206a0",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Direct Node high-memory debugging workflow; canonical supporting evidence for memory retention.",
+      "rationale": "Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Accepted reviewed capability proposal b18a5050-8b63-4624-926e-ac55bd260bd1: Direct Node high-memory debugging workflow; canonical supporting evidence for memory retention.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -6289,7 +6305,7 @@
       "revision_id": "d5f525af-9147-419d-a224-0027049393fc",
       "content_hash": "f548a215ab5b49a5e8696217f2db6cf139a84923c5e07f2fc342525d295376d9",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Direct synchronous file/JSON blocking impact on Node API throughput; canonical supporting evidence for CPU-bound work.",
+      "rationale": "Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Accepted reviewed capability proposal b986dc44-bdd0-4b61-b37f-4824d53d9882: Direct synchronous file/JSON blocking impact on Node API throughput; canonical supporting evidence for CPU-bound work.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -6648,7 +6664,7 @@
       "revision_id": "60ecbf30-b174-46d4-9d5b-405153d6a114",
       "content_hash": "031c2796583f4169861f68c011b9af6ce758c760153159948c50e6d29ad0623d",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal fca314e1-5623-4d7e-801f-296617433187: Accepted reviewed capability proposal fca314e1-5623-4d7e-801f-296617433187: Accepted reviewed capability proposal fca314e1-5623-4d7e-801f-296617433187: G13C semantic review: this directly diagnoses Node.js event-loop blocking in production p99 incidents; retain as CPU-bound work evidence.",
+      "rationale": "Accepted reviewed capability proposal fca314e1-5623-4d7e-801f-296617433187: Accepted reviewed capability proposal fca314e1-5623-4d7e-801f-296617433187: Accepted reviewed capability proposal fca314e1-5623-4d7e-801f-296617433187: Accepted reviewed capability proposal fca314e1-5623-4d7e-801f-296617433187: G13C semantic review: this directly diagnoses Node.js event-loop blocking in production p99 incidents; retain as CPU-bound work evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -6930,7 +6946,7 @@
       "revision_id": "220388a6-bcc8-43cd-ab62-e81ce4cd7263",
       "content_hash": "5681d37cf0874cff4c906e5a5355d8b8b324bdcae01d8fb1e1f70cb98a08bada",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Direct database connection pool concurrency bottleneck; canonical supporting evidence for bounded concurrency.",
+      "rationale": "Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Accepted reviewed capability proposal 84b43551-4895-4b1a-8854-1905269e435d: Direct database connection pool concurrency bottleneck; canonical supporting evidence for bounded concurrency.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -6952,8 +6968,24 @@
       "stable_key": "question.q313",
       "revision_id": "05d287eb-3edc-4ba1-9b03-edb1dfb0e41b",
       "content_hash": "e8a3627fd2743af3f4e5efd1b8ebd39465239e95af35bd7701a64aa6f3bb4217",
-      "disposition": "theory_only",
-      "rationale": "No reviewed learner station is attached; keep the card released and searchable without manufacturing a capability."
+      "disposition": "bound",
+      "rationale": "Accepted reviewed capability proposal 222294fe-29ed-4a41-be43-bbbd050a40ba: G13E reviewed Node runtime card: async error-boundary propagation and floating promise handling are direct runtime.deferred evidence.",
+      "bindings": [
+        {
+          "path_key": "path.nodejs-typescript",
+          "capability_key": "capability.runtime.deferred",
+          "role": "supporting_evidence",
+          "provenance": "semantic-neighbor-v1",
+          "confidence": 0.68931,
+          "evidence": {
+            "exemplar_revision_id": "fd1d92b4-a115-4ffd-a049-8880f045acb9",
+            "method": "pgvector-semantic-neighbor",
+            "profile_key": "semantic-neighbor-v1",
+            "profile_revision": "g7-capability-neighbor-baseline-2026-08-25",
+            "similarity": 0.6893084850702123
+          }
+        }
+      ]
     },
     {
       "stable_key": "question.q314",
@@ -7299,7 +7331,7 @@
       "revision_id": "f7b5eb92-652e-4389-a7c1-ede3b2c97098",
       "content_hash": "e5a5eab6fb8d8a59683a90ad77fb5e9bbe76b7cb3477eb5059f23aa4d56d31e2",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 1f880041-6074-4801-9315-dbfce512e3c1: Accepted reviewed capability proposal 1f880041-6074-4801-9315-dbfce512e3c1: Accepted reviewed capability proposal 1f880041-6074-4801-9315-dbfce512e3c1: G13C semantic review: a Node.js p99 regression at 5K RPS is a direct CPU-bound/event-loop diagnostic scenario; retain as CPU-bound work evidence.",
+      "rationale": "Accepted reviewed capability proposal 1f880041-6074-4801-9315-dbfce512e3c1: Accepted reviewed capability proposal 1f880041-6074-4801-9315-dbfce512e3c1: Accepted reviewed capability proposal 1f880041-6074-4801-9315-dbfce512e3c1: Accepted reviewed capability proposal 1f880041-6074-4801-9315-dbfce512e3c1: G13C semantic review: a Node.js p99 regression at 5K RPS is a direct CPU-bound/event-loop diagnostic scenario; retain as CPU-bound work evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -7329,7 +7361,7 @@
       "revision_id": "37e8c4c2-253a-4bca-ab04-0c51ed9ec942",
       "content_hash": "5908aa476f551f2aca1328c59367b01bbd14697983e2a228c410455b3a4ef1c2",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Direct production response to connection-pool exhaustion; canonical supporting evidence for bounded concurrency.",
+      "rationale": "Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Accepted reviewed capability proposal 92d3c4ad-86f1-457e-8f32-98f424bff20e: Direct production response to connection-pool exhaustion; canonical supporting evidence for bounded concurrency.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -8001,7 +8033,7 @@
       "revision_id": "8bd7d153-ca04-47fe-82ff-53d0a614b384",
       "content_hash": "4f198ac0634fbf75abc808aec3cfdc1caf2341283f747f1040e8f04e59d625bb",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: G12 reviewed: direct browser event-loop/rendering interleave question; canonical path matches path.nodejs-typescript and it provides a useful cross-runtime deferred execution comparison.",
+      "rationale": "Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: Accepted reviewed capability proposal a273145c-b0a5-4c12-a4f8-06ad77fced0c: G12 reviewed: direct browser event-loop/rendering interleave question; canonical path matches path.nodejs-typescript and it provides a useful cross-runtime deferred execution comparison.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10261,7 +10293,7 @@
       "revision_id": "2e65389c-43cb-4c57-823f-f7c84f3361b8",
       "content_hash": "9cdec8cbe9f282a37d072da3ec93445edfbaa8514a24e54f8044db01122cd7e6",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
+      "rationale": "Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Accepted reviewed capability proposal bd5745b1-4adc-4f8d-9842-6e660ffb862e: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10298,7 +10330,7 @@
       "revision_id": "54c7611e-3148-49d4-901a-e2516e55004b",
       "content_hash": "77558beb1e64f2fcc4b163b78ba87b01ebe2d999248abf40d77c9f7c503881b2",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: G12 reviewed: direct Node.js poll-phase question; canonical path matches path.nodejs-typescript and it deepens phase-level runtime evidence.",
+      "rationale": "Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: Accepted reviewed capability proposal 69a10662-2df5-44e7-802a-f76784f48643: G12 reviewed: direct Node.js poll-phase question; canonical path matches path.nodejs-typescript and it deepens phase-level runtime evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10335,7 +10367,7 @@
       "revision_id": "faacf807-5a82-470b-bf2d-e1a309e342c4",
       "content_hash": "2677de59f1dfa81317960498e2003cc8706a57d9ca38215bef3264f5eeede02b",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Direct libuv thread-pool capacity and performance degradation; canonical supporting evidence for CPU-bound work.",
+      "rationale": "Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Accepted reviewed capability proposal 1a25bbca-5765-4427-9f91-04b163c3f76c: Direct libuv thread-pool capacity and performance degradation; canonical supporting evidence for CPU-bound work.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10372,7 +10404,7 @@
       "revision_id": "9b718b10-235a-4286-87fd-9fa39be49b48",
       "content_hash": "3cd9ac6d9910eb7bd4dac64023fc73f8ebf49557860987e6d05d04478cea27cb",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal bdb2fd00-08ed-42ab-b837-7e1d287e6196: Accepted reviewed capability proposal bdb2fd00-08ed-42ab-b837-7e1d287e6196: G13D semantic review: Node servers rely on kernel epoll/kqueue/IOCP rather than a thread per socket; direct runtime scaling and CPU/I/O boundary evidence.",
+      "rationale": "Accepted reviewed capability proposal bdb2fd00-08ed-42ab-b837-7e1d287e6196: Accepted reviewed capability proposal bdb2fd00-08ed-42ab-b837-7e1d287e6196: Accepted reviewed capability proposal bdb2fd00-08ed-42ab-b837-7e1d287e6196: G13D semantic review: Node servers rely on kernel epoll/kqueue/IOCP rather than a thread per socket; direct runtime scaling and CPU/I/O boundary evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10409,7 +10441,7 @@
       "revision_id": "98c70375-1d8a-45bd-a6f9-9ce45207abcc",
       "content_hash": "96ed7d8f9538d8356414795c09e12bd5b506087d82d1b827647180c022d84920",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
+      "rationale": "Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Accepted reviewed capability proposal 20dbcdfe-8dfa-4f2a-b0bb-bef971f32915: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10446,7 +10478,7 @@
       "revision_id": "8685787f-5ea8-4f85-a4df-658b14085e9d",
       "content_hash": "0796d11bdaddcf4b326a844f965649f1e24ce380789215ecdfec20108ab51b12",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 13c0773a-aa01-4081-ba6f-61d26f7b3ddb: Accepted reviewed capability proposal 13c0773a-aa01-4081-ba6f-61d26f7b3ddb: Accepted reviewed capability proposal 13c0773a-aa01-4081-ba6f-61d26f7b3ddb: Accepted reviewed capability proposal 13c0773a-aa01-4081-ba6f-61d26f7b3ddb: Reviewed G13B: direct Node timer semantics question; zero-delay timers and drift are event-loop ordering evidence, not a runnable task.",
+      "rationale": "Accepted reviewed capability proposal 13c0773a-aa01-4081-ba6f-61d26f7b3ddb: Accepted reviewed capability proposal 13c0773a-aa01-4081-ba6f-61d26f7b3ddb: Accepted reviewed capability proposal 13c0773a-aa01-4081-ba6f-61d26f7b3ddb: Accepted reviewed capability proposal 13c0773a-aa01-4081-ba6f-61d26f7b3ddb: Accepted reviewed capability proposal 13c0773a-aa01-4081-ba6f-61d26f7b3ddb: Reviewed G13B: direct Node timer semantics question; zero-delay timers and drift are event-loop ordering evidence, not a runnable task.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10483,7 +10515,7 @@
       "revision_id": "456eea2f-e312-4ae1-959f-d5f6d0d9cb5a",
       "content_hash": "693e44a6614a6a587b5a59e4a55b8aca272f83cf29b2052f960cbc75a66427d1",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
+      "rationale": "Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Accepted reviewed capability proposal 3fa10475-0fdf-4f80-8d06-aa36e4707918: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10561,7 +10593,7 @@
       "revision_id": "0d86cc32-9582-4776-8de7-eeab37b1b26f",
       "content_hash": "9a4a50cc583183833921a67168c737c10349aac1de1e135d1e33fb5b9f9cb20c",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Direct libuv thread-pool exhaustion under concurrent file/crypto work; canonical supporting evidence for CPU-bound work.",
+      "rationale": "Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Accepted reviewed capability proposal 4a078a72-39fa-4504-89b8-16479d1759fc: Direct libuv thread-pool exhaustion under concurrent file/crypto work; canonical supporting evidence for CPU-bound work.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10618,7 +10650,7 @@
       "revision_id": "c940d592-9d0e-4a59-a342-32a0a34d26a1",
       "content_hash": "dc5d11f6bf7772f4dd817bcb819e35cf637052d7bf05f95c2afc9e94a9812c78",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: G12 reviewed: direct Node.js async-await scheduling question; canonical path matches path.nodejs-typescript and it explains non-blocking runtime semantics.",
+      "rationale": "Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: Accepted reviewed capability proposal 37fa1053-e403-47bc-bf7a-f4bfbdd21f66: G12 reviewed: direct Node.js async-await scheduling question; canonical path matches path.nodejs-typescript and it explains non-blocking runtime semantics.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10655,7 +10687,7 @@
       "revision_id": "3e8600b6-77f8-4004-9927-4dafd6296024",
       "content_hash": "6bfcac559d3da620211cf54d5b207c241194550c4495c07a761fe8ea47891a27",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Direct Promise combinator concurrency/failure choices; canonical supporting evidence for bounded concurrency.",
+      "rationale": "Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Accepted reviewed capability proposal 37f931b2-7c5d-4c59-816a-7f4cccdc1d81: Direct Promise combinator concurrency/failure choices; canonical supporting evidence for bounded concurrency.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10678,7 +10710,7 @@
       "revision_id": "c76a2656-62f3-4566-8c44-9ced68cc575e",
       "content_hash": "2bfc55d7fa7cce074e08f4145369cb3ee1b2037d71fc404b55fc716e7ce76edf",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 4ba570a4-b19d-44b7-9586-b980b151c464: Accepted reviewed capability proposal 4ba570a4-b19d-44b7-9586-b980b151c464: Accepted reviewed capability proposal 4ba570a4-b19d-44b7-9586-b980b151c464: Accepted reviewed capability proposal 4ba570a4-b19d-44b7-9586-b980b151c464: Reviewed G13B: direct async/await failure-propagation question; missing await and floating promises are canonical deferred-execution hazards in the Node path.",
+      "rationale": "Accepted reviewed capability proposal 4ba570a4-b19d-44b7-9586-b980b151c464: Accepted reviewed capability proposal 4ba570a4-b19d-44b7-9586-b980b151c464: Accepted reviewed capability proposal 4ba570a4-b19d-44b7-9586-b980b151c464: Accepted reviewed capability proposal 4ba570a4-b19d-44b7-9586-b980b151c464: Accepted reviewed capability proposal 4ba570a4-b19d-44b7-9586-b980b151c464: Reviewed G13B: direct async/await failure-propagation question; missing await and floating promises are canonical deferred-execution hazards in the Node path.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10701,7 +10733,7 @@
       "revision_id": "14906a9a-a3ea-4477-9ca7-9762d1d12109",
       "content_hash": "9a6260207c032c932d76686dd250190f2d9e9af9b878d998b9bf77c127b0d57d",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: G12 reviewed: direct Node.js unhandled rejection and uncaught exception question; canonical path matches path.nodejs-typescript and it covers async failure handling.",
+      "rationale": "Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: Accepted reviewed capability proposal 1bf5b057-7026-48d8-b898-734a26febe1c: G12 reviewed: direct Node.js unhandled rejection and uncaught exception question; canonical path matches path.nodejs-typescript and it covers async failure handling.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10752,7 +10784,7 @@
       "revision_id": "07512461-b863-4d9a-821e-cd57d10025c2",
       "content_hash": "faf256194d0a45e5feadbeec59fe0bf8249a95ef870bed2e0f099d641424c037",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal c329fd84-8a78-42a2-8912-4a0446081ec1: Accepted reviewed capability proposal c329fd84-8a78-42a2-8912-4a0446081ec1: Accepted reviewed capability proposal c329fd84-8a78-42a2-8912-4a0446081ec1: G13C semantic review: AbortController cancellation wired through Node.js streams is direct stream lifecycle/backpressure evidence.",
+      "rationale": "Accepted reviewed capability proposal c329fd84-8a78-42a2-8912-4a0446081ec1: Accepted reviewed capability proposal c329fd84-8a78-42a2-8912-4a0446081ec1: Accepted reviewed capability proposal c329fd84-8a78-42a2-8912-4a0446081ec1: Accepted reviewed capability proposal c329fd84-8a78-42a2-8912-4a0446081ec1: G13C semantic review: AbortController cancellation wired through Node.js streams is direct stream lifecycle/backpressure evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10775,7 +10807,7 @@
       "revision_id": "a849aaf7-f5b3-4ec1-a9a5-79bd5bb01ebc",
       "content_hash": "09bf70d87af249e43f7b656f9f9449fecdee4dc65269a1831462e719b5f8534a",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
+      "rationale": "Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Accepted reviewed capability proposal 94b741f7-aac1-4a38-ae03-c823fb32c1ca: Manual semantic review: the question directly tests Node.js event-loop scheduling and is appropriate as supporting evidence for the canonical capability; retain the exact path, revision, and proposal provenance.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10812,7 +10844,7 @@
       "revision_id": "9ca35fa1-4731-474f-bea5-41e8ce967beb",
       "content_hash": "75153fdbdbb56b3c068d9b3d6f7359193dc46d133ae6c6c6aed5be788b8006e2",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: G12 reviewed: direct Node.js util.promisify and callbackify question; canonical path matches path.nodejs-typescript and it covers callback/Promise boundary semantics.",
+      "rationale": "Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: Accepted reviewed capability proposal d13a9df8-b9ce-42dd-928f-d5adf250415f: G12 reviewed: direct Node.js util.promisify and callbackify question; canonical path matches path.nodejs-typescript and it covers callback/Promise boundary semantics.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10835,7 +10867,7 @@
       "revision_id": "c780d558-a251-401b-b989-39cadf250b2d",
       "content_hash": "4d55a17ec31d8b969d82891dd2a8a702adfe7babea5b3c6bfa770fc5265c0079",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: G12 reviewed: direct async debugging question covering truncated stacks, unhandled rejections, and timing across awaits; canonical path matches path.nodejs-typescript.",
+      "rationale": "Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: Accepted reviewed capability proposal 24dcf48d-36f8-45bf-badd-e78743dcd050: G12 reviewed: direct async debugging question covering truncated stacks, unhandled rejections, and timing across awaits; canonical path matches path.nodejs-typescript.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10858,7 +10890,7 @@
       "revision_id": "f4ed4cc4-4022-4a46-a9de-4038961776e8",
       "content_hash": "171a467cc3b2296bb32883ef3da483d912b9be7bb0e9fb1bb1941c88c9a97fd7",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Direct four Node stream types and data-flow differences; canonical supporting evidence for streams backpressure.",
+      "rationale": "Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Accepted reviewed capability proposal 2f062c6a-7e06-45b4-beb0-d08fef104347: Direct four Node stream types and data-flow differences; canonical supporting evidence for streams backpressure.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10881,7 +10913,7 @@
       "revision_id": "69c484ca-4f95-4a98-a641-b88017c6939c",
       "content_hash": "7206bbbf27455a59ca31db2edf4e4003a80065b3b3014baa97dec495b24d2462",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Direct Readable paused/flowing mode and read/data semantics; canonical supporting evidence for streams backpressure.",
+      "rationale": "Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Accepted reviewed capability proposal 43fe06c9-6af9-44ec-9150-0076c22f4cf6: Direct Readable paused/flowing mode and read/data semantics; canonical supporting evidence for streams backpressure.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10904,7 +10936,7 @@
       "revision_id": "b0090e26-9257-4204-bddc-4385ec2c97e5",
       "content_hash": "2f09d6fd3c420968fe2a339e3e93c94abd23d4d2c6339be043fc952b4ae5972c",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Direct highWaterMark and write false/drain semantics; canonical supporting evidence for Node streams backpressure.",
+      "rationale": "Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Accepted reviewed capability proposal 846b90c2-93d2-4dec-8717-dd9d882faf7f: Direct highWaterMark and write false/drain semantics; canonical supporting evidence for Node streams backpressure.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10926,8 +10958,24 @@
       "stable_key": "question.q791",
       "revision_id": "82fb98fb-31ad-4c5b-989f-3f2b876b89d1",
       "content_hash": "f5cdec1a2cce64e88b2f5768f8b2b7acf8b902ef7cb57c0d0eaff5296991f123",
-      "disposition": "theory_only",
-      "rationale": "No reviewed learner station is attached; keep the card released and searchable without manufacturing a capability."
+      "disposition": "bound",
+      "rationale": "Accepted reviewed capability proposal 551077f1-dcfc-4030-8584-514c6dbc3172: G13E reviewed Node streams card: pipeline versus pipe and for-await-of resource/error cleanup are direct streams-backpressure evidence.",
+      "bindings": [
+        {
+          "path_key": "path.nodejs-typescript",
+          "capability_key": "capability.nodejs.streams-backpressure",
+          "role": "supporting_evidence",
+          "provenance": "semantic-neighbor-v1",
+          "confidence": 0.68108,
+          "evidence": {
+            "exemplar_revision_id": "1116a9a5-43dd-4758-a96c-651cb705b32c",
+            "method": "pgvector-semantic-neighbor",
+            "profile_key": "semantic-neighbor-v1",
+            "profile_revision": "g7-capability-neighbor-baseline-2026-08-25",
+            "similarity": 0.6810824262128337
+          }
+        }
+      ]
     },
     {
       "stable_key": "question.q792",
@@ -10954,7 +11002,7 @@
       "revision_id": "8084030b-7260-4e42-922f-fc19c23e2013",
       "content_hash": "5d5ace6232167f45a6fb321b1f8ab5ccd56de3a1f69e1028df365c2d4805bff8",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Direct object mode and highWaterMark semantics; canonical supporting evidence for streams backpressure.",
+      "rationale": "Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Accepted reviewed capability proposal 7180084e-26a5-4b91-96a0-d5f415cd121a: Direct object mode and highWaterMark semantics; canonical supporting evidence for streams backpressure.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -10977,7 +11025,7 @@
       "revision_id": "19c0d45d-0f5e-41ef-85ed-79819b9cf2c5",
       "content_hash": "6f1eb372441be177b585cc598a4f07ecbcb9012834fb8ed2408da84f71579c84",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal fc0a266b-7d66-4ce0-a8e5-cce7be78b03d: Accepted reviewed capability proposal fc0a266b-7d66-4ce0-a8e5-cce7be78b03d: Accepted reviewed capability proposal fc0a266b-7d66-4ce0-a8e5-cce7be78b03d: Accepted reviewed capability proposal fc0a266b-7d66-4ce0-a8e5-cce7be78b03d: Reviewed G13B: direct Node stream cleanup question; error listeners, destroy, half-open sockets, finished, and pipeline are canonical stream/backpressure safety evidence.",
+      "rationale": "Accepted reviewed capability proposal fc0a266b-7d66-4ce0-a8e5-cce7be78b03d: Accepted reviewed capability proposal fc0a266b-7d66-4ce0-a8e5-cce7be78b03d: Accepted reviewed capability proposal fc0a266b-7d66-4ce0-a8e5-cce7be78b03d: Accepted reviewed capability proposal fc0a266b-7d66-4ce0-a8e5-cce7be78b03d: Accepted reviewed capability proposal fc0a266b-7d66-4ce0-a8e5-cce7be78b03d: Reviewed G13B: direct Node stream cleanup question; error listeners, destroy, half-open sockets, finished, and pipeline are canonical stream/backpressure safety evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11000,7 +11048,7 @@
       "revision_id": "cc3da5b1-76a3-4cf5-9701-dae3e0d4674d",
       "content_hash": "610bbf9c93c7d6754e3252cc8e13d8f5d5935d1bc8b3650627d5457d7da10748",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Direct async iteration over Readable streams and tradeoffs with pipe/on data; canonical supporting evidence for streams backpressure.",
+      "rationale": "Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Accepted reviewed capability proposal f43bfbba-445b-432c-a411-0a2a07b5cdf4: Direct async iteration over Readable streams and tradeoffs with pipe/on data; canonical supporting evidence for streams backpressure.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11030,7 +11078,7 @@
       "revision_id": "8952b1f1-0bce-4e6b-bfdc-ace3ee0fbe60",
       "content_hash": "862b0efc5774b85cc03b1ea4f94061b4a1caf7a5a96ca0dc89e52a5b5b1c90b6",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Direct Node stream production patterns: proxying, chunked uploads, compression, cursors, event sourcing, and failure gotchas are supporting evidence for streams backpressure.",
+      "rationale": "Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Accepted reviewed capability proposal 1e665ef1-b1a0-4bd3-8754-9f801753eaea: Direct Node stream production patterns: proxying, chunked uploads, compression, cursors, event sourcing, and failure gotchas are supporting evidence for streams backpressure.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11053,7 +11101,7 @@
       "revision_id": "5a34085d-22c3-4b3a-ab4c-31a4a3920f22",
       "content_hash": "4c51df8a5e2b0b80fdda8b1913a03e655a8c87ee2d9eaaeb070927712524feb6",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Direct Node worker_threads versus cluster versus child_process tradeoff; canonical supporting evidence for CPU-bound work.",
+      "rationale": "Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Accepted reviewed capability proposal 60ad7164-6432-41d1-9374-c7463dfbc872: Direct Node worker_threads versus cluster versus child_process tradeoff; canonical supporting evidence for CPU-bound work.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11076,7 +11124,7 @@
       "revision_id": "f1520060-1f40-42af-bdee-0845827e6814",
       "content_hash": "09dc8c25dfdf2a67cb718bfaaea888425b3ec3ad0cfa5eda7ad54ce27c23db7f",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 1d799d3b-bdf1-4062-862e-db89eeecae59: Accepted reviewed capability proposal 1d799d3b-bdf1-4062-862e-db89eeecae59: Accepted reviewed capability proposal 1d799d3b-bdf1-4062-862e-db89eeecae59: Accepted reviewed capability proposal 1d799d3b-bdf1-4062-862e-db89eeecae59: Reviewed G13B: direct worker_threads lifecycle question; worker creation, messaging, termination, and error handling are CPU-bound execution evidence.",
+      "rationale": "Accepted reviewed capability proposal 1d799d3b-bdf1-4062-862e-db89eeecae59: Accepted reviewed capability proposal 1d799d3b-bdf1-4062-862e-db89eeecae59: Accepted reviewed capability proposal 1d799d3b-bdf1-4062-862e-db89eeecae59: Accepted reviewed capability proposal 1d799d3b-bdf1-4062-862e-db89eeecae59: Accepted reviewed capability proposal 1d799d3b-bdf1-4062-862e-db89eeecae59: Reviewed G13B: direct worker_threads lifecycle question; worker creation, messaging, termination, and error handling are CPU-bound execution evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11099,7 +11147,7 @@
       "revision_id": "c6878687-0dbc-4482-9315-a22df377023c",
       "content_hash": "10e12e0f57c3308a33e8ea258803f87aaeaf19c165591545a5716976f5a72453",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal c25b9b86-5a56-4c3d-b674-29ef52b59f8d: Accepted reviewed capability proposal c25b9b86-5a56-4c3d-b674-29ef52b59f8d: Accepted reviewed capability proposal c25b9b86-5a56-4c3d-b674-29ef52b59f8d: G13C semantic review: worker_threads postMessage cloning and transfer lists are direct Node.js CPU-bound execution evidence.",
+      "rationale": "Accepted reviewed capability proposal c25b9b86-5a56-4c3d-b674-29ef52b59f8d: Accepted reviewed capability proposal c25b9b86-5a56-4c3d-b674-29ef52b59f8d: Accepted reviewed capability proposal c25b9b86-5a56-4c3d-b674-29ef52b59f8d: Accepted reviewed capability proposal c25b9b86-5a56-4c3d-b674-29ef52b59f8d: G13C semantic review: worker_threads postMessage cloning and transfer lists are direct Node.js CPU-bound execution evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11129,7 +11177,7 @@
       "revision_id": "e04dcbab-6ccc-46f6-8938-f4d7ee341384",
       "content_hash": "d94ec8bc9497b33dd0c2be6b636edc883f88b872bf1ec83a1cc3e0e299d7bcd8",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Direct SharedArrayBuffer and Atomics tradeoffs for true shared CPU work and races; canonical supporting evidence for CPU-bound work.",
+      "rationale": "Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Accepted reviewed capability proposal e989be1c-bfe4-422c-8731-3a32e950a37c: Direct SharedArrayBuffer and Atomics tradeoffs for true shared CPU work and races; canonical supporting evidence for CPU-bound work.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11152,7 +11200,7 @@
       "revision_id": "b1123ab7-93dc-4f63-8176-fe90108353fd",
       "content_hash": "e1d053eb6e7da208b4f9ddff8dc5623a29cecebfe481f207cca7b4fef567be64",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 380d3de0-6a89-4f8e-a6e6-6e916381d09b: Accepted reviewed capability proposal 380d3de0-6a89-4f8e-a6e6-6e916381d09b: Accepted reviewed capability proposal 380d3de0-6a89-4f8e-a6e6-6e916381d09b: G13C semantic review: a reusable worker pool and piscina sizing are direct Node.js CPU-bound work evidence.",
+      "rationale": "Accepted reviewed capability proposal 380d3de0-6a89-4f8e-a6e6-6e916381d09b: Accepted reviewed capability proposal 380d3de0-6a89-4f8e-a6e6-6e916381d09b: Accepted reviewed capability proposal 380d3de0-6a89-4f8e-a6e6-6e916381d09b: Accepted reviewed capability proposal 380d3de0-6a89-4f8e-a6e6-6e916381d09b: G13C semantic review: a reusable worker pool and piscina sizing are direct Node.js CPU-bound work evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11175,7 +11223,7 @@
       "revision_id": "08a1bdc3-add9-4102-a461-19a05e1c6564",
       "content_hash": "765d575a4ff4054fe847c36b3633ee837a883e841d91812aea637f3ae6cc51e7",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Direct Node cluster behavior and CPU-core load balancing; canonical supporting evidence for CPU-bound work.",
+      "rationale": "Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Accepted reviewed capability proposal 160bc599-73da-4a20-b2aa-2d7ace3d810b: Direct Node cluster behavior and CPU-core load balancing; canonical supporting evidence for CPU-bound work.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11219,7 +11267,7 @@
       "revision_id": "8abdfc24-52ae-44e1-9250-6e8b441d2c5e",
       "content_hash": "eae7e97476d9fb74e2a55dd68080a18811de3ea7e80bb0d8b84cbe6390294910",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Direct worker_threads decision boundary for CPU-bound versus I/O-bound work; canonical supporting evidence for Node CPU-bound execution.",
+      "rationale": "Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Accepted reviewed capability proposal 96937470-ed6a-41b4-8b05-b1668191cb70: Direct worker_threads decision boundary for CPU-bound versus I/O-bound work; canonical supporting evidence for Node CPU-bound execution.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11263,7 +11311,7 @@
       "revision_id": "65b44598-bfd6-4c90-a7d5-c2ce03b83ad2",
       "content_hash": "4b556dc60a8c40571a9b69bb0b03cb7e382e5ce68e36593edac255fae2e34ee8",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 8ae93dd7-ee73-4be5-b537-461b94ce5d06: Accepted reviewed capability proposal 8ae93dd7-ee73-4be5-b537-461b94ce5d06: Accepted reviewed capability proposal 8ae93dd7-ee73-4be5-b537-461b94ce5d06: G13C semantic review: monitoring worker-pool performance, memory leaks, and queue buildup is direct Node.js CPU-bound execution evidence.",
+      "rationale": "Accepted reviewed capability proposal 8ae93dd7-ee73-4be5-b537-461b94ce5d06: Accepted reviewed capability proposal 8ae93dd7-ee73-4be5-b537-461b94ce5d06: Accepted reviewed capability proposal 8ae93dd7-ee73-4be5-b537-461b94ce5d06: Accepted reviewed capability proposal 8ae93dd7-ee73-4be5-b537-461b94ce5d06: G13C semantic review: monitoring worker-pool performance, memory leaks, and queue buildup is direct Node.js CPU-bound execution evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11342,7 +11390,7 @@
       "revision_id": "d0f2e2fc-994e-4b3e-ae3d-0ddea7b8c07c",
       "content_hash": "4def01818c5b371a7edd55bac01d062f330d44efde95cfa71d2546dd3047b0c0",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Direct V8 heap-size tuning and tradeoffs; canonical supporting evidence for Node memory retention.",
+      "rationale": "Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Accepted reviewed capability proposal a792e8b2-8ad9-40fc-a6ad-a18cc2e42da6: Direct V8 heap-size tuning and tradeoffs; canonical supporting evidence for Node memory retention.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11385,7 +11433,7 @@
       "revision_id": "017ee2da-0e5f-4c0e-aa8e-027661d936c2",
       "content_hash": "09c8a49965fff7721fe40cf6ee49e0e7031f494c03032ad67ad5d22f74894a7a",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Direct Node memory-leak patterns across caches, timers, listeners, closures, and globals; canonical supporting evidence for memory retention.",
+      "rationale": "Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Accepted reviewed capability proposal 78f1daff-8f8d-4ccd-b5d2-4c52f4f8166b: Direct Node memory-leak patterns across caches, timers, listeners, closures, and globals; canonical supporting evidence for memory retention.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -11408,7 +11456,7 @@
       "revision_id": "255f8ab2-d1fe-4800-a22f-320744f153fc",
       "content_hash": "17084e7cae8ca6440188b2add535e1de2f61366090133e94c1293dcdd817dca2",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Direct V8 Buffer/external-memory accounting and leak-safe references; canonical supporting evidence for Node memory retention.",
+      "rationale": "Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Accepted reviewed capability proposal 3e40d94c-c9cb-4229-afc2-0a7dc6ab10a2: Direct V8 Buffer/external-memory accounting and leak-safe references; canonical supporting evidence for Node memory retention.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -12459,7 +12507,7 @@
       "revision_id": "2c4b9c08-6e7c-4389-a494-1c60a8bc71c1",
       "content_hash": "1ec26c764e4f634ab7b31ff07dfbc72a76fb0c43e563f192a4953dfe8ef07807",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal e1ebe5d2-8447-4c80-96ee-5685de48bf30: Accepted reviewed capability proposal e1ebe5d2-8447-4c80-96ee-5685de48bf30: Accepted reviewed capability proposal e1ebe5d2-8447-4c80-96ee-5685de48bf30: G13C semantic review: NestJS lifecycle and shutdown hooks execute on the Node.js runtime boundary; retain as event-loop/lifecycle evidence.",
+      "rationale": "Accepted reviewed capability proposal e1ebe5d2-8447-4c80-96ee-5685de48bf30: Accepted reviewed capability proposal e1ebe5d2-8447-4c80-96ee-5685de48bf30: Accepted reviewed capability proposal e1ebe5d2-8447-4c80-96ee-5685de48bf30: Accepted reviewed capability proposal e1ebe5d2-8447-4c80-96ee-5685de48bf30: G13C semantic review: NestJS lifecycle and shutdown hooks execute on the Node.js runtime boundary; retain as event-loop/lifecycle evidence.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -12510,7 +12558,7 @@
       "revision_id": "0b41921b-2fde-470b-98f5-b0f284cce683",
       "content_hash": "baa3ec5b68a2f2ac77e952052b64967e650a7903738e7e106a92122b5bb91436",
       "disposition": "bound",
-      "rationale": "Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Direct NestJS CacheModule, interceptor, and Redis store behavior; canonical supporting evidence for cache invalidation.",
+      "rationale": "Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Accepted reviewed capability proposal b3e1fa33-6bcc-4a8b-b92e-af6fbc35cf15: Direct NestJS CacheModule, interceptor, and Redis store behavior; canonical supporting evidence for cache invalidation.",
       "bindings": [
         {
           "path_key": "path.nodejs-typescript",
@@ -12539,8 +12587,24 @@
       "stable_key": "question.q971",
       "revision_id": "78cdd0f9-114e-4e7a-886c-58d8532b1b60",
       "content_hash": "21e0454936292df5b5f8d1e8e1c1b70db37d371940abd7f0bdcb774e9f4a9f9a",
-      "disposition": "theory_only",
-      "rationale": "No reviewed learner station is attached; keep the card released and searchable without manufacturing a capability."
+      "disposition": "bound",
+      "rationale": "Accepted reviewed capability proposal 43bc0d9a-a3d0-43de-a664-c258960c83f2: G13E reviewed NestJS auth card: Passport/JWT/roles integration is direct authentication/authorization evidence.",
+      "bindings": [
+        {
+          "path_key": "path.nodejs-typescript",
+          "capability_key": "capability.http-api.authentication-authorization",
+          "role": "supporting_evidence",
+          "provenance": "semantic-neighbor-v1",
+          "confidence": 0.69806,
+          "evidence": {
+            "exemplar_revision_id": "61db31c9-42f2-40f5-880e-26207e5f071d",
+            "method": "pgvector-semantic-neighbor",
+            "profile_key": "semantic-neighbor-v1",
+            "profile_revision": "g7-capability-neighbor-baseline-2026-08-25",
+            "similarity": 0.698062148285964
+          }
+        }
+      ]
     },
     {
       "stable_key": "question.q972",
@@ -12706,8 +12770,24 @@
       "stable_key": "question.q993",
       "revision_id": "4149d354-00a9-4985-927e-a6b2f3c30a8a",
       "content_hash": "b9967f424e5e6b54c80a1daf91bc35eb0eef232c4380320a3b4a65a19da85cf5",
-      "disposition": "theory_only",
-      "rationale": "No reviewed learner station is attached; keep the card released and searchable without manufacturing a capability."
+      "disposition": "bound",
+      "rationale": "Accepted reviewed capability proposal cd3a224a-e487-4791-a6b3-ae4aca8c9b14: G13E reviewed NestJS auth card: LocalStrategy, JwtStrategy, validate, and AuthGuard request identity are direct authentication/authorization evidence.",
+      "bindings": [
+        {
+          "path_key": "path.nodejs-typescript",
+          "capability_key": "capability.http-api.authentication-authorization",
+          "role": "supporting_evidence",
+          "provenance": "semantic-neighbor-v1",
+          "confidence": 0.69691,
+          "evidence": {
+            "exemplar_revision_id": "61db31c9-42f2-40f5-880e-26207e5f071d",
+            "method": "pgvector-semantic-neighbor",
+            "profile_key": "semantic-neighbor-v1",
+            "profile_revision": "g7-capability-neighbor-baseline-2026-08-25",
+            "similarity": 0.6969060175194831
+          }
+        }
+      ]
     },
     {
       "stable_key": "question.q994",
@@ -12720,8 +12800,24 @@
       "stable_key": "question.q995",
       "revision_id": "e9b09c09-fadc-4e87-8c42-165ebc393904",
       "content_hash": "0f2396c98bfdc1821e2450e99bebba6d7f627435487b0fc490947b70a40492c8",
-      "disposition": "theory_only",
-      "rationale": "No reviewed learner station is attached; keep the card released and searchable without manufacturing a capability."
+      "disposition": "bound",
+      "rationale": "Accepted reviewed capability proposal 37d24cca-71f7-4b41-a4aa-795cebb4d0c0: G13E reviewed NestJS auth card: access/refresh token separation and cookie versus Authorization transport are direct authentication/authorization evidence.",
+      "bindings": [
+        {
+          "path_key": "path.nodejs-typescript",
+          "capability_key": "capability.http-api.authentication-authorization",
+          "role": "supporting_evidence",
+          "provenance": "semantic-neighbor-v1",
+          "confidence": 0.70324,
+          "evidence": {
+            "exemplar_revision_id": "61db31c9-42f2-40f5-880e-26207e5f071d",
+            "method": "pgvector-semantic-neighbor",
+            "profile_key": "semantic-neighbor-v1",
+            "profile_revision": "g7-capability-neighbor-baseline-2026-08-25",
+            "similarity": 0.7032438935783158
+          }
+        }
+      ]
     },
     {
       "stable_key": "question.q996",
@@ -12741,8 +12837,24 @@
       "stable_key": "question.q998",
       "revision_id": "8de8fd30-f071-4c95-9260-3f154688f28b",
       "content_hash": "e870c8281526ab2ded6b7381e20a8496a2ea2782ded00d452f4a7d0b7fea7c34",
-      "disposition": "theory_only",
-      "rationale": "No reviewed learner station is attached; keep the card released and searchable without manufacturing a capability."
+      "disposition": "bound",
+      "rationale": "Accepted reviewed capability proposal 2f1ad351-4a47-4ead-bdc5-b5e4b7ce316a: G13E reviewed NestJS authorization card: metadata, Reflector, roles, and JWT composition are direct authentication/authorization evidence.",
+      "bindings": [
+        {
+          "path_key": "path.nodejs-typescript",
+          "capability_key": "capability.http-api.authentication-authorization",
+          "role": "supporting_evidence",
+          "provenance": "semantic-neighbor-v1",
+          "confidence": 0.72642,
+          "evidence": {
+            "exemplar_revision_id": "61db31c9-42f2-40f5-880e-26207e5f071d",
+            "method": "pgvector-semantic-neighbor",
+            "profile_key": "semantic-neighbor-v1",
+            "profile_revision": "g7-capability-neighbor-baseline-2026-08-25",
+            "similarity": 0.7264160676947232
+          }
+        }
+      ]
     },
     {
       "stable_key": "question.q999",
