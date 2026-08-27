@@ -1413,6 +1413,12 @@ func (p *Postgres) Catalog(ctx context.Context, request search.CatalogRequest) (
 			return search.CatalogResponse{}, fmt.Errorf("decode catalog metadata: %w", err)
 		}
 		item.Metadata = catalogMetadata(normalized)
+		item.LearningLayers = catalogLearningLayers(
+			normalized,
+			item.AvailableLocales,
+			item.ShortAnswer,
+			item.Explanation,
+		)
 		if hasCurriculumMapping {
 			item.Metadata.ProgramKey = mappingProgramKey
 			item.Metadata.PathKey = mappingPathKey

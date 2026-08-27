@@ -84,6 +84,14 @@ topics unmapped. The workspace launcher applies the accepted path/domain
 release; capability/station bindings remain a separate reviewed release and are
 never manufactured from topic names.
 
+The current development stack additionally applies the immutable
+`releases/curriculum-mapping-2026-08-27-domain-separated.json` mapping release.
+It keeps the shared-domain crosswalk intact while placing Algorithms and
+Behavioral on dedicated domains. The migration is idempotent and can be
+replayed with `scripts/apply-domain-separation-migration.sh`; the previous
+canonical manifest is the rollback source. The release boundary is dry-run by
+default (`/qb-map-release` requires `--approve` for a write).
+
 See:
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — system boundaries and performance rules

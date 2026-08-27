@@ -9,8 +9,8 @@ func TestRegistryHasExpectedLabShapeAndLegacySnapshot(t *testing.T) {
 	if len(Paths()) != 9 {
 		t.Fatalf("path registry length = %d, want 9", len(Paths()))
 	}
-	if len(Domains()) != 7 {
-		t.Fatalf("domain registry length = %d, want 7", len(Domains()))
+	if len(Domains()) != 9 {
+		t.Fatalf("domain registry length = %d, want 9", len(Domains()))
 	}
 	topics := LegacyTopics()
 	if len(topics) != 133 {
@@ -105,5 +105,39 @@ func TestCanonicalTechnologyCapabilityRequiresReviewedDomain(t *testing.T) {
 	}
 	if _, err := ResolvePlacement("", "Node.js", "HTTP/API", "capability.nodejs.event-loop-ordering", "accepted"); err == nil {
 		t.Fatal("technology capability was accepted in an unrelated domain")
+	}
+}
+
+func TestAlgorithmsAndBehavioralUseDedicatedDomains(t *testing.T) {
+	algorithms, err := ResolvePlacement("", "Algorithms", "Algorithms", "", "accepted")
+	if err != nil {
+		t.Fatalf("algorithms placement rejected: %v", err)
+	}
+	if algorithms.PathKey != "path.algorithms" || algorithms.DomainKey != "domain.algorithms" {
+		t.Fatalf("algorithms placement = %#v", algorithms)
+	}
+	behavioral, err := ResolvePlacement("", "Behavioral", "Behavioral/English", "", "accepted")
+	if err != nil {
+		t.Fatalf("behavioral placement rejected: %v", err)
+	}
+	if behavioral.PathKey != "path.behavioral" || behavioral.DomainKey != "domain.behavioral" {
+		t.Fatalf("behavioral placement = %#v", behavioral)
+	}
+}
+
+func TestPathDomainShapeRejectsDedicatedLaneLeakage(t *testing.T) {
+	cases := []struct {
+		name, path, domain string
+	}{
+		{name: "algorithms into runtime", path: "Algorithms", domain: "Runtime"},
+		{name: "behavioral into testing", path: "Behavioral", domain: "Testing"},
+		{name: "shared algorithms domain on node", path: "Node.js", domain: "Algorithms"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := ResolvePlacement("", tc.path, tc.domain, "", "accepted"); err == nil {
+				t.Fatalf("ResolvePlacement(%q, %q) unexpectedly accepted dedicated lane leakage", tc.path, tc.domain)
+			}
+		})
 	}
 }

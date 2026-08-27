@@ -72,19 +72,36 @@ type CatalogRequest struct {
 }
 
 type CatalogItem struct {
-	QuestionID       string          `json:"question_id"`
-	RevisionID       string          `json:"revision_id"`
-	StableKey        string          `json:"stable_key"`
-	Slug             string          `json:"slug"`
-	Status           string          `json:"status"`
-	ContentHash      string          `json:"content_hash"`
-	Locale           string          `json:"locale"`
-	AvailableLocales []string        `json:"available_locales"`
-	Prompt           string          `json:"prompt"`
-	ShortAnswer      string          `json:"short_answer,omitempty"`
-	Explanation      string          `json:"explanation,omitempty"`
-	Metadata         CatalogMetadata `json:"metadata"`
-	Topics           []Topic         `json:"topics"`
+	QuestionID       string   `json:"question_id"`
+	RevisionID       string   `json:"revision_id"`
+	StableKey        string   `json:"stable_key"`
+	Slug             string   `json:"slug"`
+	Status           string   `json:"status"`
+	ContentHash      string   `json:"content_hash"`
+	Locale           string   `json:"locale"`
+	AvailableLocales []string `json:"available_locales"`
+	Prompt           string   `json:"prompt"`
+	ShortAnswer      string   `json:"short_answer,omitempty"`
+	Explanation      string   `json:"explanation,omitempty"`
+	// LearningLayers is an answer-free, release-pinned completeness summary.
+	// Full authored bodies remain behind GET /v1/questions/:stableKey; this
+	// summary lets learner indexes expose existing layers without fetching
+	// every card body or inventing readiness from short_answer alone.
+	LearningLayers CatalogLearningLayers `json:"learning_layers"`
+	Metadata       CatalogMetadata       `json:"metadata"`
+	Topics         []Topic               `json:"topics"`
+}
+
+type CatalogLearningLayers struct {
+	ShortAnswer     bool `json:"short_answer"`
+	Mechanism       bool `json:"mechanism"`
+	RussianLayer    bool `json:"russian_layer"`
+	FollowUps       bool `json:"follow_ups"`
+	Traps           bool `json:"traps"`
+	Terms           bool `json:"terms"`
+	Practice        bool `json:"practice"`
+	ProjectEvidence bool `json:"project_evidence"`
+	Task            bool `json:"task"`
 }
 
 // CatalogMetadata is the normalized, non-answer metadata imported from the

@@ -15,9 +15,57 @@ import (
 
 const QuestionGraphContractVersion = "question-brain.graph-edge.v1"
 
-var questionGraphEdgeKinds = map[string]struct{}{
-	"prerequisite": {}, "related": {}, "contrast": {}, "follow_up": {},
-	"variant": {}, "duplicate": {}, "supersedes": {},
+// GraphEdgeKindPolicy is the single semantic registry for question-to-question
+// relations.  The registry is deliberately small and explicit: only
+// prerequisite edges affect unlock order, while the other relations are
+// explanatory navigation and never grant learner progress by themselves.
+type GraphEdgeKindPolicy struct {
+	Kind            string
+	Description     string
+	LearnerEffect   string
+	RequiresAcyclic bool
+}
+
+var questionGraphEdgePolicies = map[string]GraphEdgeKindPolicy{
+	"prerequisite": {
+		Kind: "prerequisite", Description: "The target concept must be understood first.",
+		LearnerEffect: "gates-recommendation", RequiresAcyclic: true,
+	},
+	"related": {
+		Kind: "related", Description: "The target is useful adjacent context.",
+		LearnerEffect: "context-only",
+	},
+	"contrast": {
+		Kind: "contrast", Description: "The target is a meaningful alternative or boundary case.",
+		LearnerEffect: "comparison-only",
+	},
+	"follow_up": {
+		Kind: "follow_up", Description: "The target deepens the same interview concept.",
+		LearnerEffect: "suggests-next",
+	},
+	"variant": {
+		Kind: "variant", Description: "The target is another valid formulation or implementation variant.",
+		LearnerEffect: "alternative-only",
+	},
+	"duplicate": {
+		Kind: "duplicate", Description: "The target is materially equivalent and must not be double-counted.",
+		LearnerEffect: "deduplicates",
+	},
+	"supersedes": {
+		Kind: "supersedes", Description: "The target replaces an older card or formulation.",
+		LearnerEffect: "historical-replacement",
+	},
+}
+
+// QuestionGraphEdgeKindRegistry returns a deterministic copy for contract and
+// audit tooling.  Callers cannot mutate the internal policy map.
+func QuestionGraphEdgeKindRegistry() []GraphEdgeKindPolicy {
+	result := make([]GraphEdgeKindPolicy, 0, len(questionGraphEdgePolicies))
+	for _, policy := range questionGraphEdgePolicies {
+		result = append(result, policy)
+	}
+	sort.Slice(result, func(i, j int) bool { return result[i].Kind < result[j].Kind })
+	return result
 }
 
 type EdgeProposalRequest struct {
@@ -94,6 +142,10 @@ type GraphReleaseReport struct {
 	Released          int       `json:"released"`
 	Stale             int       `json:"stale"`
 	Cycles            int       `json:"cycles"`
+	InvalidTargets    int       `json:"invalid_targets"`
+	ArchivedTargets   int       `json:"archived_targets"`
+	EvidenceGaps      int       `json:"evidence_gaps"`
+	TestProvenance    int       `json:"test_provenance"`
 	BlockedReasons    []string  `json:"blocked_reasons,omitempty"`
 }
 
@@ -120,13 +172,36 @@ func normalizeGraphRequest(request EdgeProposalRequest) (EdgeProposalRequest, er
 	if request.FromStableKey == "" || request.ToStableKey == "" || request.FromStableKey == request.ToStableKey {
 		return EdgeProposalRequest{}, fmt.Errorf("distinct from_stable_key and to_stable_key are required")
 	}
-	if _, ok := questionGraphEdgeKinds[request.Kind]; !ok {
+	if _, ok := questionGraphEdgePolicies[request.Kind]; !ok {
 		return EdgeProposalRequest{}, fmt.Errorf("unsupported graph edge kind %q", request.Kind)
 	}
 	if request.Confidence != nil && (*request.Confidence < 0 || *request.Confidence > 1) {
 		return EdgeProposalRequest{}, fmt.Errorf("confidence must be between 0 and 1")
 	}
+	if err := validateGraphEvidence(request.Kind, request.Confidence, request.Rationale, request.Source); err != nil {
+		return EdgeProposalRequest{}, err
+	}
 	return request, nil
+}
+
+func validateGraphEvidence(kind string, confidence *float64, rationale, source string) error {
+	if _, ok := questionGraphEdgePolicies[kind]; !ok {
+		return fmt.Errorf("unsupported graph edge kind %q", kind)
+	}
+	if confidence != nil && *confidence == 1 {
+		if strings.TrimSpace(rationale) == "" || strings.TrimSpace(source) == "" {
+			return fmt.Errorf("confidence 1.0 requires non-empty rationale and provenance source")
+		}
+	}
+	return nil
+}
+
+func isTestProvenance(value string) bool {
+	value = strings.ToLower(strings.TrimSpace(value))
+	return strings.Contains(value, "fixture") ||
+		strings.Contains(value, "smoke") ||
+		strings.Contains(value, "synthetic") ||
+		strings.Contains(value, "test")
 }
 
 // CreateEdgeProposal stores an explicit, workspace-safe proposal. A repeated
@@ -140,6 +215,9 @@ func (p *Postgres) CreateEdgeProposal(ctx context.Context, request EdgeProposalR
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
 		actor = "question-brain-editorial"
+	}
+	if request.WorkspaceKey == "fluent-interview" && (isTestProvenance(request.Source) || isTestProvenance(actor)) {
+		return EdgeProposal{}, fmt.Errorf("test provenance must use an isolated graph workspace")
 	}
 	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -279,10 +357,13 @@ func (p *Postgres) DecideEdgeProposal(ctx context.Context, proposalID, decision,
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 	var workspaceID, fromRevisionID, toRevisionID, kind, status string
+	var confidence *float64
+	var existingRationale, source string
 	if err := tx.QueryRow(ctx, `
-		select workspace_id::text, from_revision_id::text, to_revision_id::text, kind, status
+		select workspace_id::text, from_revision_id::text, to_revision_id::text, kind, status,
+			confidence, rationale, source
 		from content.question_edge_proposal where id = $1::uuid for update
-	`, proposalID).Scan(&workspaceID, &fromRevisionID, &toRevisionID, &kind, &status); err != nil {
+	`, proposalID).Scan(&workspaceID, &fromRevisionID, &toRevisionID, &kind, &status, &confidence, &existingRationale, &source); err != nil {
 		return EdgeProposal{}, err
 	}
 	if status == decision {
@@ -290,6 +371,18 @@ func (p *Postgres) DecideEdgeProposal(ctx context.Context, proposalID, decision,
 			return EdgeProposal{}, err
 		}
 		return p.readEdgeProposal(ctx, proposalID)
+	}
+	if decision == "accepted" {
+		effectiveRationale := strings.TrimSpace(rationale)
+		if effectiveRationale == "" {
+			effectiveRationale = strings.TrimSpace(existingRationale)
+		}
+		if effectiveRationale == "" {
+			return EdgeProposal{}, fmt.Errorf("accepted graph edge requires reviewer rationale")
+		}
+		if err := validateGraphEvidence(kind, confidence, effectiveRationale, source); err != nil {
+			return EdgeProposal{}, err
+		}
 	}
 	if decision == "accepted" && kind == "prerequisite" {
 		var cycle bool
@@ -355,6 +448,8 @@ func (p *Postgres) ReleaseQuestionGraph(ctx context.Context, request GraphReleas
 	rows, err := p.pool.Query(ctx, `
 		select proposal.id::text, proposal.from_revision_id::text, proposal.to_revision_id::text,
 		  proposal.kind, proposal.confidence, proposal.rationale,
+		  proposal.source, coalesce(proposal.decided_by, ''),
+		  from_q.status, to_q.status,
 		  (from_q.current_revision_id = proposal.from_revision_id and to_q.current_revision_id = proposal.to_revision_id) as current_revision
 		from content.question_edge_proposal proposal
 		join content.question_revision from_revision on from_revision.id = proposal.from_revision_id
@@ -370,6 +465,7 @@ func (p *Postgres) ReleaseQuestionGraph(ctx context.Context, request GraphReleas
 	defer rows.Close()
 	type acceptedEdge struct {
 		ProposalID, FromRevisionID, ToRevisionID, Kind, Rationale string
+		Source, DecidedBy, FromStatus, ToStatus                   string
 		Confidence                                                *float64
 		Current                                                   bool
 	}
@@ -377,12 +473,27 @@ func (p *Postgres) ReleaseQuestionGraph(ctx context.Context, request GraphReleas
 	report := GraphReleaseReport{ContractVersion: QuestionGraphContractVersion, WorkspaceKey: workspaceKey, QuestionReleaseID: questionRelease.ReleaseID, GeneratedAt: time.Now().UTC(), Approved: request.Approve, BlockedReasons: make([]string, 0)}
 	for rows.Next() {
 		var edge acceptedEdge
-		if err := rows.Scan(&edge.ProposalID, &edge.FromRevisionID, &edge.ToRevisionID, &edge.Kind, &edge.Confidence, &edge.Rationale, &edge.Current); err != nil {
+		if err := rows.Scan(&edge.ProposalID, &edge.FromRevisionID, &edge.ToRevisionID, &edge.Kind, &edge.Confidence, &edge.Rationale, &edge.Source, &edge.DecidedBy, &edge.FromStatus, &edge.ToStatus, &edge.Current); err != nil {
 			return GraphReleaseReport{}, err
 		}
 		report.Accepted++
 		if !edge.Current {
 			report.Stale++
+		}
+		if edge.FromStatus == "archived" || edge.ToStatus == "archived" {
+			report.ArchivedTargets++
+		}
+		if edge.FromStatus != "published" || edge.ToStatus != "published" {
+			report.InvalidTargets++
+		}
+		if strings.TrimSpace(edge.Rationale) == "" || strings.TrimSpace(edge.DecidedBy) == "" {
+			report.EvidenceGaps++
+		}
+		if err := validateGraphEvidence(edge.Kind, edge.Confidence, edge.Rationale, edge.Source); err != nil {
+			report.EvidenceGaps++
+		}
+		if isTestProvenance(edge.Source) || isTestProvenance(edge.DecidedBy) {
+			report.TestProvenance++
 		}
 		edges = append(edges, edge)
 	}
@@ -401,6 +512,22 @@ func (p *Postgres) ReleaseQuestionGraph(ctx context.Context, request GraphReleas
 	if report.Stale > 0 {
 		report.Blocked = true
 		report.BlockedReasons = append(report.BlockedReasons, "accepted edge references a non-current question revision")
+	}
+	if report.InvalidTargets > 0 {
+		report.Blocked = true
+		report.BlockedReasons = append(report.BlockedReasons, "accepted edge references a non-published question")
+	}
+	if report.ArchivedTargets > 0 {
+		report.Blocked = true
+		report.BlockedReasons = append(report.BlockedReasons, "accepted edge references an archived question")
+	}
+	if report.EvidenceGaps > 0 {
+		report.Blocked = true
+		report.BlockedReasons = append(report.BlockedReasons, "accepted edge is missing reviewer evidence")
+	}
+	if report.TestProvenance > 0 {
+		report.Blocked = true
+		report.BlockedReasons = append(report.BlockedReasons, "accepted edge contains test or fixture provenance")
 	}
 	if report.Cycles, err = p.countPrerequisiteCycles(ctx, workspaceID); err != nil {
 		return GraphReleaseReport{}, err

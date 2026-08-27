@@ -23,11 +23,25 @@ Supported relation kinds are:
 `prerequisite`, `related`, `contrast`, `follow_up`, `variant`, `duplicate`,
 and `supersedes`.
 
+The executable edge-kind registry is exposed by
+`QuestionGraphEdgeKindRegistry()` in `internal/store/question_graph.go` and is
+the only semantic source used by proposal validation. `prerequisite` is the
+sole kind that gates recommendation order and must remain acyclic. `related`,
+`contrast`, `follow_up`, and `variant` are explanatory navigation; `duplicate`
+deduplicates counting; `supersedes` records historical replacement. None of
+these non-prerequisite relations unlock a learner on their own.
+
 Every proposal records workspace, both stable keys and pinned revision IDs,
 kind, optional confidence, rationale, source, creation time, and deciding
 actor/time. Database triggers reject cross-workspace endpoints, missing
 revisions, and self-edges. A transactional recursive check rejects an accepted
 prerequisite that would create a cycle.
+
+Confidence `1.0` is never accepted without a non-empty rationale and source.
+An accepted edge always has a decision timestamp, reviewer actor, and rationale;
+the W07 migration enforces these invariants in both proposal and release tables.
+Test/fixture/synthetic provenance is only valid in an isolated workspace and is
+blocked from the production `fluent-interview` graph release.
 
 ## HTTP API
 

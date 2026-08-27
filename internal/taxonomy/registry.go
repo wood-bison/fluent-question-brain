@@ -63,6 +63,13 @@ var paths = []Path{
 }
 
 var domains = []Domain{
+	// Algorithms and behavioral practice are first-class curriculum domains.
+	// They are deliberately not folded into Runtime/Testing: that would make
+	// route filters and readiness counters claim a learner is studying an
+	// execution or test skill while the card is actually a problem-solving or
+	// communication exercise.
+	{Key: "domain.algorithms", Title: "Algorithms", Shared: true},
+	{Key: "domain.behavioral", Title: "Behavioral/English", Shared: true},
 	{Key: "domain.runtime", Title: "Runtime", Shared: true},
 	{Key: "domain.http-api", Title: "HTTP/API", Shared: true},
 	{Key: "domain.data-postgresql", Title: "Data/PostgreSQL", Shared: true},
@@ -331,6 +338,11 @@ func ResolvePlacement(program, path, domain, capability, state string) (Placemen
 		}
 		result.DomainKey = resolved.Key
 	}
+	if result.PathKey != "" && result.DomainKey != "" {
+		if err := validatePathDomainShape(result.PathKey, result.DomainKey); err != nil {
+			return Placement{}, err
+		}
+	}
 	if capability != "" {
 		if result.PathKey == "" || result.DomainKey == "" {
 			return Placement{}, fmt.Errorf("capability_key requires both path_key and domain_key")
@@ -354,6 +366,32 @@ func ResolvePlacement(program, path, domain, capability, state string) (Placemen
 		return Placement{}, fmt.Errorf("invalid mapping_state %q; use proposed, accepted, or rejected", state)
 	}
 	return result, nil
+}
+
+// validatePathDomainShape protects the two dedicated curriculum lanes from
+// accidental re-folding into a shared backend stage. Other path/domain pairs
+// intentionally remain open: shared modules (HTTP, data, distributed systems,
+// testing and delivery) are reusable across language paths and are reviewed
+// in the mapping manifest. Tightening those pairs belongs in a versioned
+// editorial release, not an implicit code-side heuristic.
+func validatePathDomainShape(pathKey, domainKey string) error {
+	switch domainKey {
+	case "domain.algorithms":
+		if pathKey != "path.algorithms" {
+			return fmt.Errorf("domain %q is reserved for path.algorithms, got %q", domainKey, pathKey)
+		}
+	case "domain.behavioral":
+		if pathKey != "path.behavioral" {
+			return fmt.Errorf("domain %q is reserved for path.behavioral, got %q", domainKey, pathKey)
+		}
+	}
+	if pathKey == "path.algorithms" && domainKey != "domain.algorithms" {
+		return fmt.Errorf("path.algorithms requires domain.algorithms, got %q", domainKey)
+	}
+	if pathKey == "path.behavioral" && domainKey != "domain.behavioral" {
+		return fmt.Errorf("path.behavioral requires domain.behavioral, got %q", domainKey)
+	}
+	return nil
 }
 
 func resolveProgram(input string) (Program, bool) {
@@ -389,6 +427,12 @@ var pathAliases = map[string]string{
 }
 
 var domainAliases = map[string]string{
+	"algorithms":                     "domain.algorithms",
+	"domain.algorithms":              "domain.algorithms",
+	"behavioral":                     "domain.behavioral",
+	"behavioral/english":             "domain.behavioral",
+	"behavioral / english":           "domain.behavioral",
+	"domain.behavioral":              "domain.behavioral",
 	"runtime":                       "domain.runtime",
 	"stage.runtime":                 "domain.runtime",
 	"domain.runtime":                "domain.runtime",

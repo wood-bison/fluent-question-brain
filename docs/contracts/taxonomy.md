@@ -27,6 +27,12 @@ The machine-readable key space is versioned as
 | Shared domain | `domain.<slug>` | `runtime`, `http-api`, `data-postgresql`, `distributed-systems`, `os-networking`, `testing`, `delivery-observability` |
 | Capability | `capability.<domain-slug>.<slug>` | reviewed Lab station; not generated from a Topic |
 
+The v1 registry also reserves two dedicated learning lanes. `path.algorithms`
+may only use `domain.algorithms`, and `path.behavioral` may only use
+`domain.behavioral`. This prevents a problem-solving or communication card
+from being counted as runtime/testing content. All other path/domain joins are
+shared-module joins and remain explicit manifest decisions.
+
 The optional canonical payload fields are `program_key`, `path_key`,
 `domain_key`, `capability_key`, `mapping_state`, and `mapping_version`.
 `mapping_state` is `proposed`, `accepted`, or `rejected`: when any v1 key is
@@ -166,6 +172,17 @@ release makes every card discoverable under a named path and shared domain; it
 does **not** create Lab stations, runtime buttons, mastery, or prerequisite
 edges. Those require a separate reviewed `capability_key` release. The prior
 19-station runtime crosswalk remains the rollback baseline.
+
+The domain-separated follow-up mapping release is
+`releases/curriculum-mapping-2026-08-27-domain-separated.json`. It is derived
+deterministically from the canonical 2026-08-25 manifest and changes only the
+explicit domain for the 52 `path.algorithms` cards and 103
+`path.behavioral` cards. Its source marker is
+`question-brain-editorial-topic-registry-v1/domain-separated-2026-08-27`; the
+generated mapping release fingerprint is
+`question-mapping-release-026566381561db3e`. The rollback target remains the
+2026-08-25 canonical manifest. Existing question revisions and the immutable
+question release are not rewritten.
 
 For an existing Compose PostgreSQL volume, initdb mounts are not replayed.
 Run `scripts/apply-curriculum-mapping-migration.sh` once, verify the migration

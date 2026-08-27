@@ -1,5 +1,9 @@
-FROM golang:1.24-bookworm AS build
+# Base images are index-digest pinned; the digest is part of the release
+# input, not a mutable tag lookup.
+FROM golang:1.24-bookworm@sha256:1a6d4452c65dea36aac2e2d606b01b4a029ec90cc1ae53890540ce6173ea77ac AS build
 WORKDIR /src
+ARG SOURCE_REVISION=unknown
+RUN printf '%s' "$SOURCE_REVISION" | grep -Eq '^[0-9a-f]{40}$' || (echo 'SOURCE_REVISION must be a 40-character Git SHA' >&2 && exit 1)
 COPY go.mod go.sum ./
 RUN go mod download
 COPY cmd ./cmd
@@ -9,7 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags='-s -w' -o /out/qb-map-
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags='-s -w' -o /out/qb-graph-edges ./cmd/qb-graph-edges
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags='-s -w' -o /out/qb-capability-release ./cmd/qb-capability-release
 
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:afa5c872c891853ca7fcf1f12c3edb23f7eeef36189728842dd51042ff57f7ab
 ARG SOURCE_REVISION=unknown
 LABEL org.opencontainers.image.revision="$SOURCE_REVISION"
 COPY --from=build /out/question-brain /question-brain

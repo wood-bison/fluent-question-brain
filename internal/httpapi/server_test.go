@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/wood-bison/fluent-question-brain/internal/search"
 	"github.com/wood-bison/fluent-question-brain/internal/store"
@@ -34,6 +36,33 @@ type duplicateReviewStub struct {
 	httpSearchStub
 	decision   store.DuplicateDecision
 	candidates []store.DuplicateReviewCandidate
+}
+
+type qualityStub struct {
+	httpSearchStub
+	mu      sync.Mutex
+	calls   int
+	started chan struct{}
+	release chan struct{}
+}
+
+func (s *qualityStub) Quality(_ context.Context, _ search.QualityRequest) (search.QualityResponse, error) {
+	s.mu.Lock()
+	s.calls++
+	if s.calls == 1 && s.started != nil {
+		close(s.started)
+	}
+	s.mu.Unlock()
+	if s.release != nil {
+		<-s.release
+	}
+	return search.QualityResponse{ContractVersion: "question-brain.quality.v1", WorkspaceKey: "fluent-interview"}, nil
+}
+
+func (s *qualityStub) callCount() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.calls
 }
 
 func (s *duplicateReviewStub) ListDuplicateReviewCandidates(context.Context, string, string) ([]store.DuplicateReviewCandidate, error) {
@@ -179,6 +208,39 @@ func TestQualityRequiresService(t *testing.T) {
 	New("postgres://user:pass@localhost:5432/db").Handler().ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/v1/quality", nil))
 	if recorder.Code != http.StatusServiceUnavailable {
 		t.Fatalf("status = %d, want 503", recorder.Code)
+	}
+}
+
+func TestQualityCoalescesConcurrentReadsAndCachesSnapshot(t *testing.T) {
+	stub := &qualityStub{started: make(chan struct{}), release: make(chan struct{})}
+	handler := New("postgres://user:pass@localhost:5432/db", stub).Handler()
+	const requests = 8
+	responses := make(chan int, requests)
+	var group sync.WaitGroup
+	group.Add(requests)
+	for i := 0; i < requests; i++ {
+		go func() {
+			defer group.Done()
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/v1/quality", nil))
+			responses <- recorder.Code
+		}()
+	}
+	select {
+	case <-stub.started:
+	case <-time.After(time.Second):
+		t.Fatal("quality read did not start")
+	}
+	close(stub.release)
+	group.Wait()
+	close(responses)
+	for status := range responses {
+		if status != http.StatusOK {
+			t.Fatalf("quality status = %d, want 200", status)
+		}
+	}
+	if got := stub.callCount(); got != 1 {
+		t.Fatalf("quality calls = %d, want one coalesced read", got)
 	}
 }
 

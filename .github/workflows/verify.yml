@@ -16,6 +16,7 @@ jobs:
           cache: true
       - run: test -z "$(gofmt -l ./cmd ./internal)"
       - run: go test ./...
+      - run: go vet ./...
 
   contract:
     runs-on: ubuntu-latest
@@ -24,6 +25,23 @@ jobs:
       - run: bash scripts/check-contract.sh
       - run: bash -n scripts/*.sh
       - run: docker compose -f deploy/compose/compose.yaml config --quiet
+      - name: Start isolated Postgres for backup/restore smoke
+        run: docker compose -p fluent-question-brain -f deploy/compose/compose.yaml up -d --build postgres
+      - name: Wait for Postgres health
+        run: |
+          for attempt in $(seq 1 30); do
+            if docker compose -p fluent-question-brain -f deploy/compose/compose.yaml ps --format json | grep -q '"Health":"healthy"'; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -p fluent-question-brain -f deploy/compose/compose.yaml ps
+          exit 1
+      - name: Run backup/restore smoke
+        run: bash scripts/backup-restore-smoke.sh
+      - name: Stop isolated Postgres (preserve volumes)
+        if: always()
+        run: docker compose -p fluent-question-brain -f deploy/compose/compose.yaml down
 
   cms:
     runs-on: ubuntu-latest

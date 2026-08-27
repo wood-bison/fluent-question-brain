@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -77,6 +78,33 @@ type Server struct {
 	promoter      cardPromoter
 	rollbacker    questionRollbacker
 	internalToken string
+
+	// Quality is an intentionally read-only but relatively expensive aggregate
+	// projection. The studio, audit workers, and Prometheus-backed checks can
+	// all ask for it at the same time. Coalesce identical in-flight reads and
+	// keep a very short cache so four concurrent requests cannot exhaust the
+	// small local Postgres pool and turn a healthy projection into a transient
+	// 400/500 response. The cache is process-local and bounded to one entry per
+	// workspace/fixture scope; writes are never served from it.
+	qualityMu       sync.Mutex
+	qualityCache    map[string]qualityCacheEntry
+	qualityInFlight map[string]*qualityCall
+}
+
+const (
+	qualityCacheTTL        = 2 * time.Second
+	maxQualityCacheEntries = 32
+)
+
+type qualityCacheEntry struct {
+	response  search.QualityResponse
+	expiresAt time.Time
+}
+
+type qualityCall struct {
+	done     chan struct{}
+	response search.QualityResponse
+	err      error
 }
 
 func New(databaseURL string, service ...search.Service) *Server {
@@ -89,11 +117,13 @@ func New(databaseURL string, service ...search.Service) *Server {
 		rollbacker, _ = service[0].(questionRollbacker)
 	}
 	return &Server{
-		databaseURL:   databaseURL,
-		searchService: searchService,
-		promoter:      promoter,
-		rollbacker:    rollbacker,
-		internalToken: strings.TrimSpace(os.Getenv("QUESTION_BRAIN_INTERNAL_TOKEN")),
+		databaseURL:     databaseURL,
+		searchService:   searchService,
+		promoter:        promoter,
+		rollbacker:      rollbacker,
+		internalToken:   strings.TrimSpace(os.Getenv("QUESTION_BRAIN_INTERNAL_TOKEN")),
+		qualityCache:    make(map[string]qualityCacheEntry),
+		qualityInFlight: make(map[string]*qualityCall),
 	}
 }
 
@@ -194,13 +224,18 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) live(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	response := s.buildIdentity()
+	response["status"] = "ok"
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 	parsed, err := url.Parse(s.databaseURL)
 	if err != nil || parsed.Hostname() == "" {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "not_ready", "reason": "invalid_database_url"})
+		response := s.buildIdentity()
+		response["status"] = "not_ready"
+		response["reason"] = "invalid_database_url"
+		writeJSON(w, http.StatusServiceUnavailable, response)
 		return
 	}
 	port := parsed.Port()
@@ -211,11 +246,63 @@ func (s *Server) ready(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	conn, err := (&net.Dialer{}).DialContext(ctx, "tcp", net.JoinHostPort(parsed.Hostname(), port))
 	if err != nil {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "not_ready", "reason": "database_unreachable"})
+		response := s.buildIdentity()
+		response["status"] = "not_ready"
+		response["reason"] = "database_unreachable"
+		writeJSON(w, http.StatusServiceUnavailable, response)
 		return
 	}
 	_ = conn.Close()
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ready", "database": "reachable", "migration": "compose-init"})
+	response := s.buildIdentity()
+	response["status"] = "ready"
+	response["database"] = "reachable"
+	response["migration"] = "compose-init"
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (s *Server) buildIdentity() map[string]string {
+	sourceRevision := strings.TrimSpace(os.Getenv("SOURCE_REVISION"))
+	if sourceRevision == "" {
+		sourceRevision = "unknown"
+	}
+	releaseID := strings.TrimSpace(os.Getenv("QUESTION_BRAIN_RELEASE_ID"))
+	if releaseID == "" {
+		releaseID = strings.TrimSpace(os.Getenv("FEL_RELEASE_ID"))
+	}
+	if releaseID == "" {
+		releaseID = "unreleased"
+	}
+	environment := strings.TrimSpace(os.Getenv("FEL_ENVIRONMENT"))
+	if environment == "" {
+		environment = strings.TrimSpace(os.Getenv("APP_ENV"))
+	}
+	if environment == "" {
+		environment = "unknown"
+	}
+	return map[string]string{
+		"sourceRevision": boundedIdentity(sourceRevision),
+		"releaseId":      boundedIdentity(releaseID),
+		"environment":    boundedIdentity(environment),
+	}
+}
+
+func boundedIdentity(value string) string {
+	var builder strings.Builder
+	for _, char := range value {
+		if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') ||
+			(char >= '0' && char <= '9') || strings.ContainsRune("._:/+-", char) {
+			builder.WriteRune(char)
+		} else {
+			builder.WriteByte('-')
+		}
+		if builder.Len() >= 79 {
+			break
+		}
+	}
+	if builder.Len() == 0 {
+		return "unknown"
+	}
+	return builder.String()
 }
 
 func (s *Server) search(w http.ResponseWriter, r *http.Request) {
@@ -337,15 +424,89 @@ func (s *Server) quality(w http.ResponseWriter, r *http.Request) {
 	if workspaceKey == "" {
 		workspaceKey = "fluent-interview"
 	}
-	response, err := reader.Quality(r.Context(), search.QualityRequest{
+	request := search.QualityRequest{
 		WorkspaceKey:    workspaceKey,
 		IncludeFixtures: parseBool(r.URL.Query().Get("include_fixtures")),
-	})
+	}
+	response, err := s.qualityResponse(r.Context(), reader, request)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 	writeJSON(w, http.StatusOK, response)
+}
+
+// qualityResponse protects the expensive aggregate read from a local thundering
+// herd. A short TTL is enough to make a page load and a background audit share
+// one snapshot without making the endpoint a stale content boundary. Callers
+// waiting for an in-flight computation still honour their own cancellation.
+func (s *Server) qualityResponse(ctx context.Context, reader qualityReader, request search.QualityRequest) (search.QualityResponse, error) {
+	key := strings.TrimSpace(request.WorkspaceKey)
+	if request.IncludeFixtures {
+		key += "|fixtures"
+	} else {
+		key += "|production"
+	}
+
+	for {
+		now := time.Now()
+		s.qualityMu.Lock()
+		// Keep the helper safe for focused tests and future constructors that
+		// may build a Server literal instead of going through New.
+		if s.qualityCache == nil {
+			s.qualityCache = make(map[string]qualityCacheEntry)
+		}
+		if s.qualityInFlight == nil {
+			s.qualityInFlight = make(map[string]*qualityCall)
+		}
+		if cached, ok := s.qualityCache[key]; ok && now.Before(cached.expiresAt) {
+			s.qualityMu.Unlock()
+			return cached.response, nil
+		}
+		if call, ok := s.qualityInFlight[key]; ok {
+			done := call.done
+			s.qualityMu.Unlock()
+			select {
+			case <-done:
+				return call.response, call.err
+			case <-ctx.Done():
+				return search.QualityResponse{}, ctx.Err()
+			}
+		}
+
+		call := &qualityCall{done: make(chan struct{})}
+		s.qualityInFlight[key] = call
+		s.qualityMu.Unlock()
+
+		response, err := reader.Quality(ctx, request)
+		s.qualityMu.Lock()
+		call.response = response
+		call.err = err
+		if err == nil {
+			// Workspace and fixture scope are caller-controlled query values. Keep
+			// the process-local cache bounded even if an operator probes many
+			// distinct workspace keys in one process lifetime.
+			if len(s.qualityCache) >= maxQualityCacheEntries {
+				for cacheKey, cached := range s.qualityCache {
+					if !time.Now().Before(cached.expiresAt) {
+						delete(s.qualityCache, cacheKey)
+						break
+					}
+				}
+			}
+			if len(s.qualityCache) >= maxQualityCacheEntries {
+				for cacheKey := range s.qualityCache {
+					delete(s.qualityCache, cacheKey)
+					break
+				}
+			}
+			s.qualityCache[key] = qualityCacheEntry{response: response, expiresAt: time.Now().Add(qualityCacheTTL)}
+		}
+		close(call.done)
+		delete(s.qualityInFlight, key)
+		s.qualityMu.Unlock()
+		return response, err
+	}
 }
 
 func parseBool(value string) bool {
