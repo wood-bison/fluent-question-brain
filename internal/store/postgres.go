@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -35,6 +36,31 @@ type Postgres struct {
 	// alone reaches minSemanticScore (one strong semantic match).
 	searchMinRankScore     float64
 	searchMinSemanticScore float64
+
+	// Query embeddings are immutable for a given text/profile, but local
+	// embedding providers can take seconds on a cold model. Keep a small,
+	// process-local cache and coalesce identical in-flight requests so a burst
+	// of the same search does not fan out to Ollama. This is only a latency
+	// optimization: the published profile and ranking query remain unchanged.
+	queryEmbeddingMu       sync.Mutex
+	queryEmbeddingCache    map[string]queryEmbeddingCacheEntry
+	queryEmbeddingInFlight map[string]*queryEmbeddingCall
+}
+
+const (
+	queryEmbeddingCacheTTL        = 5 * time.Minute
+	queryEmbeddingCacheMaxEntries = 256
+)
+
+type queryEmbeddingCacheEntry struct {
+	vector    []float32
+	expiresAt time.Time
+}
+
+type queryEmbeddingCall struct {
+	done   chan struct{}
+	vector []float32
+	err    error
 }
 
 // UseRelevanceThresholds overrides the default relevance cutoffs. It must be
@@ -385,6 +411,8 @@ func Open(ctx context.Context, databaseURL string) (*Postgres, error) {
 		embeddingProfile:       embedding.ProfileKey,
 		searchMinRankScore:     0.02,
 		searchMinSemanticScore: 0.55,
+		queryEmbeddingCache:    make(map[string]queryEmbeddingCacheEntry),
+		queryEmbeddingInFlight: make(map[string]*queryEmbeddingCall),
 	}, nil
 }
 
@@ -1011,6 +1039,74 @@ func (p *Postgres) MarkOutboxFailed(ctx context.Context, id, message string, att
 	return nil
 }
 
+// queryEmbedding returns a defensive copy of a query vector. The cache is
+// keyed by the active profile as well as the normalized query so switching
+// embedding generations can never reuse a vector from another profile.
+// Identical concurrent misses share one provider call; a waiting caller can
+// stop waiting on cancellation while the producer follows its own context.
+func (p *Postgres) queryEmbedding(ctx context.Context, query string) ([]float32, error) {
+	key := p.embeddingProfile + "\x00" + query
+	p.queryEmbeddingMu.Lock()
+	if p.queryEmbeddingCache == nil {
+		p.queryEmbeddingCache = make(map[string]queryEmbeddingCacheEntry)
+	}
+	if p.queryEmbeddingInFlight == nil {
+		p.queryEmbeddingInFlight = make(map[string]*queryEmbeddingCall)
+	}
+	now := time.Now()
+	if entry, ok := p.queryEmbeddingCache[key]; ok {
+		if now.Before(entry.expiresAt) {
+			vector := append([]float32(nil), entry.vector...)
+			p.queryEmbeddingMu.Unlock()
+			return vector, nil
+		}
+		delete(p.queryEmbeddingCache, key)
+	}
+	if call, ok := p.queryEmbeddingInFlight[key]; ok {
+		p.queryEmbeddingMu.Unlock()
+		select {
+		case <-call.done:
+			return append([]float32(nil), call.vector...), call.err
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+	call := &queryEmbeddingCall{done: make(chan struct{})}
+	p.queryEmbeddingInFlight[key] = call
+	p.queryEmbeddingMu.Unlock()
+
+	vector, err := p.embedder.Embed(ctx, query)
+	p.queryEmbeddingMu.Lock()
+	delete(p.queryEmbeddingInFlight, key)
+	call.vector = append([]float32(nil), vector...)
+	call.err = err
+	if err == nil {
+		p.queryEmbeddingCache[key] = queryEmbeddingCacheEntry{
+			vector:    append([]float32(nil), vector...),
+			expiresAt: time.Now().Add(queryEmbeddingCacheTTL),
+		}
+		if len(p.queryEmbeddingCache) > queryEmbeddingCacheMaxEntries {
+			// Remove expired entries first; if the cache is still full, remove
+			// one deterministic key. This keeps memory bounded without adding a
+			// second eviction data structure to the hot path.
+			for cachedKey, entry := range p.queryEmbeddingCache {
+				if !time.Now().Before(entry.expiresAt) {
+					delete(p.queryEmbeddingCache, cachedKey)
+				}
+			}
+			for len(p.queryEmbeddingCache) > queryEmbeddingCacheMaxEntries {
+				for cachedKey := range p.queryEmbeddingCache {
+					delete(p.queryEmbeddingCache, cachedKey)
+					break
+				}
+			}
+		}
+	}
+	close(call.done)
+	p.queryEmbeddingMu.Unlock()
+	return append([]float32(nil), vector...), err
+}
+
 func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search.Result, error) {
 	query := strings.TrimSpace(request.Query)
 	if query == "" {
@@ -1027,7 +1123,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 	if limit > 100 {
 		limit = 100
 	}
-	queryEmbedding, err := p.embedder.Embed(ctx, query)
+	queryEmbedding, err := p.queryEmbedding(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("embed search query: %w", err)
 	}
