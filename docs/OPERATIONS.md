@@ -14,6 +14,12 @@ older Lab runtime: API `48127`, Payload `48128`, Postgres `55437`, Jaeger UI
 `56686`, OTLP/gRPC `54317`, and OTLP/HTTP `54318`. Change them only through the `QB_*_PORT`
 variables and keep the values distinct.
 
+The local Jaeger all-in-one store is deliberately bounded to 5,000 traces via
+`QB_JAEGER_MAX_TRACES` (override only for a short forensic session). This keeps
+the query API responsive during repeated release-gate runs; the Compose health
+check probes `/api/services` so a saturated query process is visible in
+`docker compose ps`.
+
 ## Authoring and publish
 
 Open Payload at `http://localhost:48128/admin`. Drafts and versions are stored

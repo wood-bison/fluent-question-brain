@@ -163,12 +163,26 @@ services:
 
   jaeger:
     image: cr.jaegertracing.io/jaegertracing/jaeger:2.20.0@sha256:46a886260e04002d8f45e213fc39063fa11a50446048fdaa64786fc0840cb9f8
+    # Keep the local all-in-one store bounded. Jaeger 2's built-in memory
+    # backend otherwise retains up to 100k traces; a long release-gate run can
+    # exhaust the 512 MiB container and make the query API unresponsive. The
+    # latest trace remains available for identity checks while old disposable
+    # traces are evicted. Override only when a larger local forensic window is
+    # explicitly needed.
+    command:
+      - --set=extensions.jaeger_storage.backends.some_storage.memory.max_traces=${QB_JAEGER_MAX_TRACES:-5000}
     ports:
       # Jaeger all-in-one is local-only; the API uses jaeger:4317 internally.
       - "127.0.0.1:${QB_JAEGER_UI_PORT:-56686}:16686"
       - "127.0.0.1:${QB_OTLP_GRPC_PORT:-54317}:4317"
       - "127.0.0.1:${QB_OTLP_HTTP_PORT:-54318}:4318"
     logging: *json-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:16686/api/services"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
     mem_limit: 512m
     cpus: 1.0
