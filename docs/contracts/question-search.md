@@ -30,6 +30,17 @@ to a partial response. This keeps the Question Brain usable while the local
 advisory model is serving another request and does not change the released
 content or its ranking thresholds when embeddings are available.
 
+### Embedding latency budget
+
+Query-time embeddings have a 350 ms budget (`queryEmbeddingTimeout` in the
+Postgres store). This keeps the learner search within the 500 ms p95 target
+when a local Ollama model is cold or busy. A warm/cache hit still contributes
+semantic ranking; when the provider exceeds the budget, the request continues
+with exact, full-text, and trigram stages and reports no fabricated semantic
+match. The budget is intentionally separate from the provider's 60 s HTTP
+timeout, so a model outage cannot block or fail an otherwise useful lexical
+search.
+
 ## Relevance cutoff (QB-BUG-3)
 
 A candidate is returned only when at least one of these holds:

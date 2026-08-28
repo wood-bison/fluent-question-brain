@@ -55,7 +55,12 @@ const (
 	// never make exact/FTS/trigram search hang for the provider's full HTTP
 	// timeout. When this budget expires, Search deliberately runs the lexical
 	// stages with semantic scoring disabled.
-	queryEmbeddingTimeout = 900 * time.Millisecond
+	// Keep interactive search below the learner-facing 500 ms p95 budget when
+	// the local embedding model is cold or busy. A successful warm/cache hit
+	// still contributes semantic ranking; a slow provider degrades to the
+	// authoritative lexical stages instead of making the whole search feel
+	// blocked for nearly a second.
+	queryEmbeddingTimeout = 350 * time.Millisecond
 )
 
 type queryEmbeddingCacheEntry struct {
