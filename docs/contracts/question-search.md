@@ -20,6 +20,16 @@ Fusion is reciprocal rank fusion with `k = 60`; every stage that surfaced a
 candidate contributes `1 / (60 + rank)`. The merged value is reported as
 `rank_score`, and `match_stages` lists which stages produced each result.
 
+Semantic retrieval is best-effort for the interactive API. The query embedding
+call has a sub-second local budget so a cold or busy Ollama/bge-m3 process cannot
+block the learner's search. When that budget is exceeded (or the provider is
+temporarily unavailable), the request continues through exact, FTS and trigram
+stages with semantic scoring disabled; an exact or lexical result is still
+authoritative. A caller cancellation is propagated instead of being converted
+to a partial response. This keeps the Question Brain usable while the local
+advisory model is serving another request and does not change the released
+content or its ranking thresholds when embeddings are available.
+
 ## Relevance cutoff (QB-BUG-3)
 
 A candidate is returned only when at least one of these holds:

@@ -50,6 +50,12 @@ type Postgres struct {
 const (
 	queryEmbeddingCacheTTL        = 5 * time.Minute
 	queryEmbeddingCacheMaxEntries = 256
+	// Search is an interactive learner surface. A local embedding model may
+	// be cold or temporarily monopolised by the advisory LLM, but that must
+	// never make exact/FTS/trigram search hang for the provider's full HTTP
+	// timeout. When this budget expires, Search deliberately runs the lexical
+	// stages with semantic scoring disabled.
+	queryEmbeddingTimeout = 900 * time.Millisecond
 )
 
 type queryEmbeddingCacheEntry struct {
@@ -1123,10 +1129,24 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 	if limit > 100 {
 		limit = 100
 	}
-	queryEmbedding, err := p.queryEmbedding(ctx, query)
-	if err != nil {
-		return nil, fmt.Errorf("embed search query: %w", err)
+	// Embedding is an enhancement to the lexical pipeline, not a hard
+	// dependency for an interactive search. In local development Ollama can
+	// be serving the much larger advisory model at the same time as bge-m3;
+	// bound that call and keep exact/FTS/trigram retrieval available instead of
+	// returning a misleading 400 or holding the request for 60 seconds.
+	embedCtx, cancelEmbed := context.WithTimeout(ctx, queryEmbeddingTimeout)
+	queryEmbedding, embedErr := p.queryEmbedding(embedCtx, query)
+	cancelEmbed()
+	if embedErr != nil {
+		// Do not turn a caller cancellation/deadline into a successful partial
+		// response. Provider failures and the local budget timeout, however,
+		// are safe to degrade because the lexical stages remain authoritative.
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		queryEmbedding = make([]float32, embedding.Dimensions)
 	}
+	semanticEnabled := embedErr == nil
 	queryVector := embedding.VectorLiteral(queryEmbedding)
 	rows, err := p.pool.Query(ctx, `
 		with candidate as (
@@ -1167,7 +1187,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 			left join lateral (
 				select 1 - (qe.embedding <=> $4::vector) as semantic_score
 				from content.question_embedding qe
-				where qe.locale_id = ql.id and qe.profile_key = $5
+				where $12 and qe.locale_id = ql.id and qe.profile_key = $5
 				order by qe.embedding <=> $4::vector
 				limit 1
 			) semantic on true
@@ -1217,7 +1237,7 @@ func (p *Postgres) Search(ctx context.Context, request search.Request) ([]search
 			or semantic_score >= $9
 		order by rank_score desc, stable_key
 		limit $7
-	`, query, locale, request.WorkspaceKey, queryVector, p.embeddingProfile, strings.TrimSpace(request.TopicKey), limit, p.searchMinRankScore, p.searchMinSemanticScore, strings.TrimSpace(request.Level), strings.TrimSpace(request.Company))
+	`, query, locale, request.WorkspaceKey, queryVector, p.embeddingProfile, strings.TrimSpace(request.TopicKey), limit, p.searchMinRankScore, p.searchMinSemanticScore, strings.TrimSpace(request.Level), strings.TrimSpace(request.Company), semanticEnabled)
 	if err != nil {
 		return nil, fmt.Errorf("search candidates: %w", err)
 	}
